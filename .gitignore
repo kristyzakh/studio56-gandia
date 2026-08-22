@@ -1,0 +1,10 @@
+# Untouched camera originals — large, unused by the site, kept locally only
+images/_originals/
+
+# Reference material from other studios' sites, not ours to publish
+Website mockup reference_home page.pdf
+menu_mockup.pdf
+service_page.png
+
+# macOS
+.DS_Store

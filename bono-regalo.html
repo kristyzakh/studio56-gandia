@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bono regalo · Studio 56 Gandía</title>
+<meta name="description" content="Regala un bono de Studio 56 en Gandía: sesiones de Endospheres o depilación láser. Sin fecha de caducidad y canjeable por cualquier tratamiento del estudio.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet">
+
+<link rel="stylesheet" href="styles.css?v=202608221341">
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header>
+  <div class="bar">
+    <button class="icon-btn" id="menu-open" aria-label="Abrir menú" aria-expanded="false" aria-controls="drawer">
+      <svg width="22" height="14" viewBox="0 0 22 14" fill="none" aria-hidden="true">
+        <path d="M0 1h22M0 7h22M0 13h22" stroke="currentColor" stroke-width="1.5"/>
+      </svg>
+    </button>
+    <a class="logo" href="index.html" aria-label="Studio 56 — inicio">
+      <span class="logo-mark" aria-hidden="true">S</span>
+      <span class="logo-word">Studio 56</span>
+    </a>
+    <div class="lang" role="group" aria-label="Idioma">
+      <a href="index.html" aria-current="true">ES</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ MENU ============ -->
+<div class="drawer" id="drawer" data-open="false" role="dialog" aria-modal="true" aria-label="Menú">
+  <div class="drawer-inner">
+    <div class="drawer-top">
+      <a class="logo" href="index.html" aria-label="Studio 56 — inicio">
+        <span class="logo-mark" aria-hidden="true">S</span>
+        <span class="logo-word">Studio 56</span>
+      </a>
+      <button class="icon-btn" id="menu-close" aria-label="Cerrar menú">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <path d="M1 1l18 18M19 1L1 19" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+      </button>
+    </div>
+    <nav>
+      <a href="sobre-nosotras.html">Sobre nosotras</a>
+      <a href="index.html#tratamientos">Tratamientos</a>
+      <a href="precios.html">Precios</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <form class="drawer-search" role="search" method="get" action="buscar.html">
+      <label for="q" class="sr-only">Buscar en la web</label>
+      <input type="search" id="q" name="q" placeholder="Buscar…" autocomplete="off">
+      <button type="submit" aria-label="Buscar">
+        <svg width="19" height="19" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="6.25" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M13.2 13.2 18 18" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </form>
+    <a class="gift" href="bono-regalo.html">
+      <span>Regala<br>un bono</span>
+      <span class="heart" aria-hidden="true">&#9825;</span>
+    </a>
+    <div class="drawer-lang" role="group" aria-label="Idioma">
+      <a href="index.html" aria-current="true">ES</a>
+      <a href="ua/" >UA</a>
+      <a href="ru/" >RU</a>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <p class="breadcrumb"><a href="index.html">&larr; Inicio</a></p>
+    <div class="page-head">
+      <p class="eyebrow">Bono regalo</p>
+      <h1 class="display">Regala una sesión</h1>
+      <p class="lead">Un bono de Studio 56 para quien te apetezca. Eliges el tratamiento y las sesiones, escribes tu mensaje, y nosotras lo preparamos. Sin fecha de caducidad y canjeable por cualquier tratamiento del estudio.</p>
+    </div>
+  </div>
+
+  <!-- preview + fields share a scope so the sticky card releases at its end -->
+  <div class="gift-layout">
+
+  <!-- ============ LIVE PREVIEW ============ -->
+  <section class="gift-preview-wrap">
+    <div class="wrap">
+      <p class="gift-hint">Así lo recibirá</p>
+
+      <div class="gift-card" id="gift-card">
+        <div class="gift-card-inner">
+          <div class="gift-card-top">
+            <span class="logo-mark" aria-hidden="true">S</span>
+            <span class="gift-card-label">Bono regalo</span>
+          </div>
+
+          <p class="gift-card-occasion" id="gc-occasion">Porque sí</p>
+          <p class="gift-card-treatment display" id="gc-treatment">Endospheres</p>
+          <p class="gift-card-sessions" id="gc-sessions">4 sesiones</p>
+
+          <p class="gift-card-message" id="gc-message">Un rato para ti, que te lo has ganado.</p>
+
+          <div class="gift-card-foot">
+            <span><small>Para</small><b id="gc-to">—</b></span>
+            <span><small>De</small><b id="gc-from">—</b></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BUILDER ============ -->
+  <section class="gift-builder">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Paso a paso</p>
+        <h2 class="display">Móntalo a tu gusto</h2>
+      </div>
+
+      <fieldset class="gift-field">
+        <legend>Tratamiento</legend>
+        <div class="chips" data-group="treatment">
+          <button type="button" class="chip is-on" data-value="endospheres">Endospheres</button>
+          <button type="button" class="chip" data-value="laser">Depilación láser</button>
+        </div>
+        <p class="gift-note" id="gift-detail">Cuerpo, 60 min por sesión.</p>
+      </fieldset>
+
+      <fieldset class="gift-field">
+        <legend>Sesiones</legend>
+        <div class="chips" data-group="sessions">
+          <button type="button" class="chip" data-value="1">1</button>
+          <button type="button" class="chip is-on" data-value="4">4</button>
+          <button type="button" class="chip" data-value="8">8</button>
+        </div>
+        <p class="gift-note" id="gift-saving">Pagas 3 sesiones, regalas 4.</p>
+      </fieldset>
+
+      <fieldset class="gift-field">
+        <legend>Ocasión</legend>
+        <div class="chips" data-group="occasion">
+          <button type="button" class="chip is-on" data-value="Porque sí">Porque sí</button>
+          <button type="button" class="chip" data-value="Feliz cumpleaños">Cumpleaños</button>
+          <button type="button" class="chip" data-value="Feliz Navidad">Navidad</button>
+          <button type="button" class="chip" data-value="Feliz día, mamá">Día de la Madre</button>
+        </div>
+      </fieldset>
+
+      <div class="gift-field">
+        <label for="gift-to">Para</label>
+        <input type="text" id="gift-to" maxlength="24" autocomplete="off" placeholder="Nombre de quien lo recibe">
+      </div>
+
+      <div class="gift-field">
+        <label for="gift-from">De</label>
+        <input type="text" id="gift-from" maxlength="24" autocomplete="off" placeholder="Tu nombre">
+      </div>
+
+      <div class="gift-field">
+        <label for="gift-message">Mensaje</label>
+        <textarea id="gift-message" rows="3" maxlength="120" placeholder="Un rato para ti, que te lo has ganado."></textarea>
+        <p class="gift-note"><span id="gift-count">0</span>/120</p>
+      </div>
+
+    </div>
+  </section>
+  </div><!-- /gift-layout -->
+
+  <section class="gift-checkout">
+    <div class="wrap">
+      <div class="gift-total">
+        <span>Total</span>
+        <span class="price" id="gift-price">195 €</span>
+      </div>
+
+      <a class="btn btn-secondary btn-block" id="gift-preview" href="bono.html" target="_blank" rel="noopener">
+        Ver cómo lo recibirá
+      </a>
+      <a class="btn btn-whatsapp btn-block" id="gift-buy" href="https://wa.me/34621070775" rel="noopener">
+        Pedir este bono por WhatsApp
+      </a>
+      <p class="gift-note gift-note-center">Te confirmamos disponibilidad y forma de pago el mismo día.</p>
+    </div>
+  </section>
+
+  <!-- ============ HOW ============ -->
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Sin complicaciones</p>
+        <h2 class="display">Cómo funciona</h2>
+      </div>
+      <ol class="steps">
+        <li><b>Lo eliges y nos escribes.</b> Tratamiento, sesiones y tu mensaje.</li>
+        <li><b>Lo preparamos.</b> Te lo enviamos en digital para reenviar, o impreso para recogerlo en el estudio.</li>
+        <li><b>Se canjea cuando quiera.</b> Pide cita por WhatsApp indicando el código del bono.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Preguntas frecuentes</p>
+        <h2 class="display">Sobre el bono</h2>
+      </div>
+      <div class="acc">
+        <details>
+          <summary>¿Cuándo caduca?<span class="plus" aria-hidden="true"></span></summary>
+          <div class="acc-body">
+            <p>No caduca. Los bonos regalo de Studio 56 no llevan fecha límite: quien lo reciba lo usa cuando le venga bien.</p>
+          </div>
+        </details>
+        <details>
+          <summary>¿Y si prefiere otro tratamiento?<span class="plus" aria-hidden="true"></span></summary>
+          <div class="acc-body">
+            <p>Se puede cambiar. El bono vale por su importe en cualquier tratamiento del estudio, así que si la persona prefiere electrodepilación, cera o sugaring en lugar de lo que elegiste, no hay problema.</p>
+            <p>Esto importa más de lo que parece: la depilación láser no funciona en vello rubio o blanco, y hay situaciones — embarazo, ciertos medicamentos — en las que algunos tratamientos no se pueden hacer. Con el bono canjeable, eso nunca es un problema.</p>
+          </div>
+        </details>
+        <details>
+          <summary>¿Cómo se entrega?<span class="plus" aria-hidden="true"></span></summary>
+          <div class="acc-body">
+            <p>Como prefieras: en digital, para que se lo reenvíes por WhatsApp cuando llegue el momento, o impreso en tarjeta para recogerlo en el estudio y entregarlo en mano.</p>
+          </div>
+        </details>
+        <details>
+          <summary>¿Se puede usar en varias visitas?<span class="plus" aria-hidden="true"></span></summary>
+          <div class="acc-body">
+            <p>Sí. Si el bono es de varias sesiones, se van descontando visita a visita. No hace falta usarlas seguidas.</p>
+          </div>
+        </details>
+        <details>
+          <summary>¿Puedo regalarlo a alguien que no ha venido nunca?<span class="plus" aria-hidden="true"></span></summary>
+          <div class="acc-body">
+            <p>Es justo para lo que mejor funciona. En la primera visita valoramos su caso sin coste, explicamos el tratamiento y ajustamos lo que haga falta antes de empezar.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="logo footer-logo">
+      <span class="logo-mark" aria-hidden="true">S</span>
+      <span class="logo-word">Studio 56</span>
+    </div>
+    <div class="footer-block">
+      <h4>Dónde estamos</h4>
+      <p>Carrer de Selelles, 2</p>
+      <p>46701 Gandía, Valencia</p>
+      <p><a href="https://maps.google.com/?q=Carrer+de+Selelles+2,+46701+Gandia" rel="noopener">Ver en el mapa</a></p>
+    </div>
+    <div class="footer-block">
+      <h4>Contacto</h4>
+      <p><a href="https://wa.me/34621070775" rel="noopener">+34 621 070 775 · WhatsApp</a></p>
+    </div>
+    <div class="footer-block">
+      <h4>Tratamientos</h4>
+      <p><a href="endospheres.html">Endospheres</a></p>
+      <p><a href="depilacion-laser.html">Depilación láser</a></p>
+      <p><a href="electrodepilacion.html">Electrodepilación</a></p>
+      <p><a href="cera-y-sugaring.html">Cera y sugaring</a></p>
+      <p><a href="precios.html">Precios</a></p>
+    </div>
+    <p class="legal">© 2026 Studio 56 · Gandía · <a href="privacidad.html">Política de privacidad</a></p>
+  </div>
+</footer>
+
+<script src="app.js?v=202608221341" defer></script>
+
+</body>
+</html>

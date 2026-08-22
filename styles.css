@@ -1,0 +1,1130 @@
+:root{
+  --navy:#2C3C4B;
+  --cream:#FCF3EE;
+  --charcoal:#34302D;
+  --rose:#BA9CA4;
+
+  --cream-deep:#F5EBE4;
+  --hairline:rgba(44,60,75,0.16);
+
+  --display:"Playfair Display",Georgia,serif;
+  --body:"PT Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+
+  --radius:20px;
+  --radius-sm:12px;
+  --gutter:20px;
+  --maxw:520px;
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--cream);
+  color:var(--charcoal);
+  font-family:var(--body);
+  font-size:16px;
+  line-height:1.6;
+}
+img{max-width:100%;display:block;}
+a{color:inherit;}
+
+/* visible to screen readers only */
+.sr-only{
+  position:absolute;
+  width:1px;height:1px;
+  padding:0;margin:-1px;
+  overflow:hidden;
+  clip:rect(0 0 0 0);
+  white-space:nowrap;
+  border:0;
+}
+
+.wrap{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding-left:var(--gutter);
+  padding-right:var(--gutter);
+}
+
+/* ============ TYPE ROLES ============
+   Playfair: logo (Regular) + ONE large display line per section (Bold) + italic eyebrow.
+   PT Sans: everything else, INCLUDING all subheadings.
+   Playfair never appears below display size — Cyrillic goes heavy and wide.
+====================================== */
+.display{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:34px;
+  line-height:1.14;
+  letter-spacing:-0.01em;
+  color:var(--navy);
+  margin:0;
+  text-wrap:balance;
+}
+.eyebrow{
+  font-family:var(--display);
+  font-style:italic;
+  font-weight:400;
+  font-size:17px;
+  color:var(--rose);
+  margin:0 0 10px;
+}
+h3,h4{
+  font-family:var(--body);
+  font-weight:700;
+  color:var(--navy);
+  margin:0;
+}
+p{margin:0 0 14px;}
+
+/* ============ HEADER ============ */
+header{
+  position:sticky;
+  top:0;
+  z-index:60;
+  background:var(--cream);
+  border-bottom:1px solid var(--hairline);
+}
+.bar{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:12px var(--gutter);
+  display:grid;
+  grid-template-columns:44px 1fr 44px;
+  align-items:center;
+}
+.icon-btn{
+  width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:0;padding:0;cursor:pointer;color:var(--navy);
+  border-radius:50%;
+}
+.icon-btn:focus-visible{outline:2px solid var(--rose);outline-offset:2px;}
+
+/* horizontal lockup: mark and wordmark on one line, everywhere */
+.logo{
+  display:flex;
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  text-decoration:none;
+}
+.logo-mark{
+  width:34px;height:34px;
+  border-radius:50%;
+  background:var(--navy);
+  color:var(--cream);
+  font-family:var(--display);
+  font-weight:400;
+  font-size:19px;
+  line-height:34px;
+  text-align:center;
+}
+.logo-word{
+  font-family:var(--display);
+  font-weight:400;
+  font-size:11px;
+  letter-spacing:0.26em;
+  text-indent:0.26em;
+  color:var(--navy);
+  text-transform:uppercase;
+}
+
+/* language switcher */
+.lang{
+  display:flex;gap:2px;
+  background:var(--cream-deep);
+  border-radius:999px;
+  padding:3px;
+}
+.lang a{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  text-decoration:none;
+  color:var(--navy);
+  padding:4px 7px;
+  border-radius:999px;
+  opacity:.55;
+}
+.lang a[aria-current="true"]{background:var(--cream);opacity:1;}
+
+/* ============ MENU OVERLAY ============ */
+.drawer{
+  position:fixed;inset:0;
+  background:var(--cream);
+  color:var(--navy);
+  z-index:100;
+  display:none;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+.drawer[data-open="true"]{display:block;}
+.drawer-inner{
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:0 var(--gutter) 48px;
+  min-height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+/* top bar mirrors the site header so the logo doesn't jump on open */
+.drawer-top{
+  display:grid;
+  grid-template-columns:1fr 44px;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid var(--hairline);
+  margin-bottom:26px;
+}
+.drawer-top .logo{justify-content:flex-start;}
+
+/* close sits in a hairline circle */
+#menu-close{
+  border:1px solid var(--hairline);
+  border-radius:50%;
+  width:40px;height:40px;
+  justify-self:end;
+  transition:border-color .18s ease;
+}
+#menu-close:hover{border-color:var(--navy);}
+#menu-close svg{width:15px;height:15px;}
+
+/* Nav is PT Sans, not Playfair: the brand book reserves Playfair for one
+   display line + the italic eyebrow, because its Cyrillic goes heavy and
+   wide at mid sizes — which is exactly where the UA/RU menus will sit. */
+.drawer nav{display:flex;flex-direction:column;}
+.drawer nav a{
+  font-family:var(--body);
+  font-size:22px;
+  font-weight:700;
+  text-decoration:none;
+  padding:15px 0;
+  border-bottom:1px solid var(--hairline);
+}
+.drawer nav a:focus-visible{outline:2px solid var(--rose);outline-offset:3px;}
+
+/* search */
+.drawer-search{
+  position:relative;
+  margin:26px 0 34px;
+}
+.drawer-search input{
+  width:100%;
+  font-family:var(--body);
+  font-size:16px;
+  color:var(--charcoal);
+  background:transparent;
+  border:0;
+  border-bottom:1px solid var(--hairline);
+  border-radius:0;
+  padding:12px 40px 12px 0;
+  min-height:48px;
+  appearance:none;
+}
+.drawer-search input:focus{
+  outline:none;
+  border-bottom-color:var(--rose);
+}
+.drawer-search button{
+  position:absolute;
+  right:0;top:50%;
+  transform:translateY(-50%);
+  width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:0;padding:0;cursor:pointer;
+  color:var(--navy);
+}
+.drawer-search button:focus-visible{outline:2px solid var(--rose);outline-offset:2px;}
+
+/* gift-voucher badge — a circle, echoing the navy circle of the S mark.
+   Cream fill + rose hairline + navy label: the brand's "promotional" style.
+   Rose is never a fill here; a solid rose disc was already rejected once. */
+.gift{
+  align-self:flex-start;
+  width:154px;height:154px;
+  border-radius:50%;
+  border:1px solid var(--rose);
+  background:var(--cream);
+  color:var(--navy);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  text-align:center;
+  text-decoration:none;
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  line-height:1.45;
+  transition:border-color .18s ease;
+}
+.gift:hover{border-color:var(--navy);}
+.gift:focus-visible{outline:2px solid var(--rose);outline-offset:4px;}
+.gift .heart{font-size:13px;line-height:1;opacity:.75;}
+
+/* language switcher lives at the foot of the menu too — a trilingual site
+   needs it findable, not only tucked in the header */
+.drawer-lang{
+  display:flex;
+  gap:8px;
+  margin-top:auto;
+  padding-top:36px;
+}
+.drawer-lang a{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-decoration:none;
+  color:var(--navy);
+  border:1px solid var(--hairline);
+  border-radius:999px;
+  padding:8px 15px;
+  opacity:.6;
+}
+.drawer-lang a[aria-current="true"]{opacity:1;border-color:var(--navy);}
+
+/* ============ HERO ============ */
+.hero{position:relative;}
+.hero-media{
+  position:relative;
+  aspect-ratio:3/4;
+  background:var(--cream-deep);
+  overflow:hidden;
+}
+.hero-media img{width:100%;height:100%;object-fit:cover;}
+.hero-media::after{
+  content:"";
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(44,60,75,0.10) 0%,rgba(44,60,75,0.06) 38%,rgba(44,60,75,0.62) 100%);
+}
+.hero-copy{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  z-index:2;
+  padding:0 var(--gutter) 26px;
+  max-width:var(--maxw);
+  margin:0 auto;
+}
+.hero-copy .display{color:var(--cream);font-size:36px;}
+.hero-sub{
+  color:var(--cream);
+  font-size:15px;
+  opacity:.92;
+  margin:12px 0 20px;
+  max-width:30ch;
+}
+.hero-links{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  flex-wrap:wrap;
+  font-size:14px;
+}
+.hero-links a{
+  color:var(--cream);
+  text-decoration:none;
+  border-bottom:1px solid rgba(252,243,238,0.5);
+  padding-bottom:2px;
+}
+.hero-links span{color:rgba(252,243,238,0.45);}
+
+/* ============ SECTION RHYTHM ============ */
+section{padding:52px 0;}
+.section-head{margin-bottom:26px;}
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-family:var(--body);
+  font-size:15px;
+  font-weight:700;
+  text-decoration:none;
+  padding:15px 26px;
+  border-radius:999px;
+  border:1px solid transparent;
+  cursor:pointer;
+  min-height:50px;
+  transition:opacity .18s ease;
+}
+.btn:active{opacity:.85;}
+.btn:focus-visible{outline:2px solid var(--rose);outline-offset:3px;}
+.btn-primary{background:var(--navy);color:var(--cream);}
+.btn-secondary{background:var(--cream);color:var(--navy);border-color:var(--navy);}
+/* WhatsApp is the one rose button — navy label, because cream on rose is 2.51 and fails */
+.btn-whatsapp{background:var(--rose);color:var(--navy);border-color:var(--rose);}
+
+.btn-block{display:flex;width:100%;}
+
+/* ============ SERVICES ============ */
+.services{background:var(--cream-deep);}
+.cards{display:flex;flex-direction:column;gap:16px;}
+.card{
+  background:var(--cream);
+  border-radius:var(--radius);
+  overflow:hidden;
+  text-decoration:none;
+  color:inherit;
+  display:block;
+}
+.card-media{
+  aspect-ratio:4/3;
+  background:var(--cream-deep);
+  overflow:hidden;
+}
+.card-media img{width:100%;height:100%;object-fit:cover;}
+.card-body{padding:20px 22px 24px;}
+.card-body h3{font-size:19px;margin-bottom:7px;}
+.card-body p{font-size:14.5px;margin-bottom:14px;color:var(--charcoal);opacity:.85;}
+.card-meta{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  gap:12px;
+  padding-top:14px;
+  border-top:1px solid var(--hairline);
+}
+.price{
+  font-family:var(--display);
+  font-weight:700;
+  font-size:21px;
+  color:var(--navy);
+}
+.price small{
+  font-family:var(--body);
+  font-weight:400;
+  font-size:12.5px;
+  color:var(--charcoal);
+  opacity:.7;
+  margin-left:3px;
+}
+.card-link{font-size:14px;font-weight:700;color:var(--navy);}
+
+/* rose used ONLY as a hairline, never a fill */
+.tag{
+  display:inline-block;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  color:var(--navy);
+  border:1px solid var(--rose);
+  border-radius:999px;
+  padding:5px 11px;
+  margin-bottom:12px;
+}
+
+/* ============ SPECIALISTS ============ */
+.people{display:flex;flex-direction:column;gap:26px;}
+.person-media{
+  aspect-ratio:4/5;           /* portrait crop — the team shots are standing figures */
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:var(--cream-deep);
+  margin-bottom:16px;
+}
+.person-media img{width:100%;height:100%;object-fit:cover;}
+.person h3{font-size:19px;margin-bottom:3px;}
+.person .role{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--rose);
+  margin:0 0 10px;
+}
+.person p{font-size:14.5px;opacity:.85;margin:0;}
+
+/* ============ ABOUT / PRICES ============ */
+.about{background:var(--navy);color:var(--cream);}
+.about .display{color:var(--cream);}
+.about .eyebrow{color:var(--rose);}
+.about p{font-size:15.5px;opacity:.9;}
+.about-media{
+  aspect-ratio:4/5;           /* portrait — keeps both machines in frame */
+  border-radius:var(--radius);
+  overflow:hidden;
+  background:rgba(252,243,238,0.08);
+  margin-bottom:26px;
+}
+.about-media img{width:100%;height:100%;object-fit:cover;}
+.facts{
+  list-style:none;
+  padding:0;
+  margin:24px 0 28px;
+  border-top:1px solid rgba(252,243,238,0.2);
+}
+.facts li{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:16px;
+  padding:13px 0;
+  border-bottom:1px solid rgba(252,243,238,0.2);
+  font-size:14.5px;
+}
+.facts span:first-child{opacity:.72;}
+.facts span:last-child{font-weight:700;text-align:right;}
+.about .btn-secondary{background:transparent;color:var(--cream);border-color:var(--cream);}
+.about-actions{display:flex;flex-direction:column;gap:11px;}
+
+/* ============ BOOKING FORM ============ */
+.booking{background:var(--cream-deep);}
+.form{
+  background:var(--cream);
+  border-radius:var(--radius);
+  padding:26px 22px;
+}
+.field{margin-bottom:13px;}
+.field label{
+  display:block;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--navy);
+  margin-bottom:6px;
+}
+.field input,.field select{
+  width:100%;
+  font-family:var(--body);
+  font-size:16px; /* 16px prevents iOS zoom-on-focus */
+  color:var(--charcoal);
+  background:var(--cream);
+  border:1px solid var(--hairline);
+  border-radius:var(--radius-sm);
+  padding:14px 15px;
+  min-height:50px;
+  appearance:none;
+}
+.field select{
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%232C3C4B' stroke-width='1.6' d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;
+  background-position:right 16px center;
+  padding-right:40px;
+}
+.field input:focus,.field select:focus{
+  outline:none;
+  border-color:var(--rose);
+  box-shadow:0 0 0 3px rgba(186,156,164,0.25);
+}
+.consent{
+  display:flex;
+  gap:11px;
+  align-items:flex-start;
+  margin:18px 0 20px;
+  font-size:12.5px;
+  line-height:1.5;
+  opacity:.85;
+}
+.consent input{
+  width:20px;height:20px;
+  margin:1px 0 0;
+  flex:0 0 auto;
+  accent-color:var(--navy);
+}
+.form-note{
+  font-size:12.5px;
+  text-align:center;
+  opacity:.7;
+  margin:14px 0 0;
+}
+.divider{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin:24px 0;
+  font-size:12px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  opacity:.55;
+}
+.divider::before,.divider::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:var(--hairline);
+}
+
+/* ============ FOOTER ============ */
+footer{
+  background:var(--navy);
+  color:var(--cream);
+  padding:44px 0 34px;
+}
+.footer-logo{justify-content:flex-start;margin-bottom:24px;}
+.footer-logo .logo-mark{background:var(--cream);color:var(--navy);}
+.footer-logo .logo-word{color:var(--cream);}
+.footer-block{margin-bottom:24px;font-size:14.5px;}
+.footer-block h4{
+  font-size:11px;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--rose);
+  margin-bottom:9px;
+}
+.footer-block a{color:var(--cream);text-decoration:none;border-bottom:1px solid rgba(252,243,238,0.3);}
+.footer-block p{margin:0 0 4px;opacity:.88;}
+.legal{
+  border-top:1px solid rgba(252,243,238,0.2);
+  padding-top:18px;
+  margin-top:8px;
+  font-size:12px;
+  opacity:.6;
+}
+
+/* ============ STICKY WHATSAPP CTA ============ */
+.sticky-cta{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:70;
+  padding:10px var(--gutter) calc(10px + env(safe-area-inset-bottom));
+  background:linear-gradient(180deg,rgba(252,243,238,0) 0%,var(--cream) 34%);
+  pointer-events:none;
+}
+.sticky-cta .btn{
+  max-width:var(--maxw);
+  margin:0 auto;
+  pointer-events:auto;
+  box-shadow:0 6px 22px rgba(44,60,75,0.22);
+}
+/* Hidden once the booking form is on screen — otherwise it sits on top of
+   the form's own submit button and reads as two competing CTAs. */
+.sticky-cta[hidden]{display:none;}
+body{padding-bottom:82px;}
+
+/* ============ EMPTY IMAGE SLOTS ============
+   Placeholder styling so missing photos read as intentional slots,
+   not broken images. Remove once real photos are dropped in.
+================================================= */
+.slot{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--cream-deep);
+}
+.slot::after{
+  content:attr(data-slot);
+  font-family:var(--body);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--navy);
+  opacity:.42;
+  text-align:center;
+  padding:0 18px;
+  line-height:1.7;
+}
+.hero-media.slot{background:var(--navy);}
+.hero-media.slot::after{color:var(--cream);opacity:.4;}
+.about-media.slot::after{color:var(--cream);opacity:.45;}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important;}
+}
+
+/* ============ WIDER SCREENS ============
+   Mobile is the primary target; these keep it composed on tablet/desktop
+   without redesigning the layout.
+================================================= */
+@media (min-width:768px){
+  :root{--maxw:660px;--gutter:32px;}
+  .display{font-size:42px;}
+  .hero-copy .display{font-size:46px;}
+  .hero-media{aspect-ratio:4/3;}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .people{display:grid;grid-template-columns:1fr 1fr;gap:28px;}
+  .about-actions{flex-direction:row;}
+  .about-actions .btn{flex:1;}
+}
+
+/* ==========================================================================
+   SERVICE PAGES
+   Structure follows the Royal Clinic reference: title → lead → book CTA →
+   accordions (description / indications / contraindications / prices) →
+   full price list → FAQ → related treatments.
+   Accordions use native <details>, so the content stays in the DOM and
+   indexable — collapsed text still counts for search and AI answers.
+   ========================================================================== */
+
+.breadcrumb{
+  padding:18px 0 0;
+  font-size:14px;
+}
+.breadcrumb a{
+  color:var(--navy);
+  text-decoration:none;
+  border-bottom:1px solid var(--hairline);
+  padding-bottom:2px;
+}
+.breadcrumb a:hover{border-bottom-color:var(--navy);}
+
+.page-head{padding:22px 0 34px;}
+.page-head .display{font-size:34px;margin-bottom:16px;}
+.lead{
+  font-size:17px;
+  line-height:1.62;
+  color:var(--charcoal);
+  margin:0 0 24px;
+}
+.page-head .btn{margin-bottom:4px;}
+
+.page-media{
+  aspect-ratio:4/5;
+  overflow:hidden;
+  background:var(--cream-deep);
+  border-radius:var(--radius);
+  margin-bottom:8px;
+}
+.page-media img{width:100%;height:100%;object-fit:cover;}
+
+/* ---- accordions ---- */
+.acc{border-top:1px solid var(--hairline);}
+.acc details{border-bottom:1px solid var(--hairline);}
+.acc summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:19px 0;
+  cursor:pointer;
+  font-family:var(--body);
+  font-size:17px;
+  font-weight:700;
+  color:var(--navy);
+  list-style:none;
+}
+.acc summary::-webkit-details-marker{display:none;}
+.acc summary:focus-visible{outline:2px solid var(--rose);outline-offset:3px;}
+.acc .plus{
+  flex:0 0 auto;
+  width:30px;height:30px;
+  border:1px solid var(--hairline);
+  border-radius:50%;
+  position:relative;
+  transition:border-color .18s ease;
+}
+.acc summary:hover .plus{border-color:var(--navy);}
+.acc .plus::before,.acc .plus::after{
+  content:"";
+  position:absolute;
+  top:50%;left:50%;
+  background:var(--navy);
+  transform:translate(-50%,-50%);
+}
+.acc .plus::before{width:11px;height:1.4px;}
+.acc .plus::after{width:1.4px;height:11px;transition:opacity .18s ease;}
+.acc details[open] .plus::after{opacity:0;}
+.acc .acc-body{padding:0 0 22px;}
+.acc .acc-body p{font-size:15px;margin:0 0 12px;}
+.acc .acc-body p:last-child{margin-bottom:0;}
+.acc .acc-body ul{margin:0;padding-left:20px;}
+.acc .acc-body li{font-size:15px;margin-bottom:8px;}
+
+/* ---- price rows inside an accordion ---- */
+.rows{list-style:none;padding:0;margin:0;}
+.rows li{
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+  gap:16px;
+  padding:11px 0;
+  border-bottom:1px solid var(--hairline);
+  font-size:15px;
+}
+.rows li:last-child{border-bottom:0;}
+.rows .amount{
+  font-weight:700;
+  color:var(--navy);
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.rows .note{
+  display:block;
+  font-size:12.5px;
+  opacity:.7;
+  margin-top:2px;
+}
+
+.page-actions{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+  padding:26px 0 0;
+}
+
+/* ---- FAQ ---- */
+.faq{background:var(--cream-deep);}
+.faq .acc{border-top:0;}
+.faq details{border-bottom:1px solid var(--hairline);}
+.faq details:first-child{border-top:1px solid var(--hairline);}
+.faq summary{font-size:15.5px;}
+
+/* ---- related treatments: swipeable slider --------------------------------
+   The next card deliberately peeks past the right edge — that overhang is
+   what tells a thumb it can swipe.
+------------------------------------------------------------------------- */
+
+.related-track{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  /* bleed to the screen edges so the peek reads as "there is more" */
+  margin:0 calc(-1 * var(--gutter));
+  padding:0 var(--gutter) 4px;
+  scroll-padding-left:var(--gutter);
+}
+.related-track::-webkit-scrollbar{display:none;}
+
+.related-card{
+  flex:0 0 78%;
+  scroll-snap-align:start;
+  display:block;
+  text-decoration:none;
+  color:inherit;
+}
+.related-media{
+  position:relative;
+  aspect-ratio:4/5;
+  overflow:hidden;
+  border-radius:var(--radius);
+  background:var(--cream-deep);
+}
+.related-media img{width:100%;height:100%;object-fit:cover;}
+.related-card h3{font-size:18px;margin:13px 0 0;}
+
+@media (prefers-reduced-motion:reduce){
+  .related-track{scroll-behavior:auto;}
+}
+
+@media (min-width:768px){
+  .page-head .display{font-size:42px;}
+  .page-actions{flex-direction:row;}
+  .page-actions .btn{flex:1;}
+  .related-track{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    overflow:visible;
+    margin:0;
+    padding:0;
+  }
+  .related-card{flex:none;}
+  }
+
+/* ==========================================================================
+   PRICE LIST PAGE
+   ========================================================================== */
+
+.vat-note{
+  font-size:13px;
+  color:var(--charcoal);
+  opacity:.7;
+  margin:12px 0 0;
+}
+
+/* sticky in-page jump bar — four treatments is too many to scroll blindly */
+.price-jump{
+  position:sticky;
+  top:63px;
+  z-index:50;
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding-top:6px;
+  padding-bottom:14px;
+  background:var(--cream);
+}
+.price-jump::-webkit-scrollbar{display:none;}
+.price-jump a{
+  flex:0 0 auto;
+  font-size:13px;
+  font-weight:700;
+  text-decoration:none;
+  color:var(--navy);
+  border:1px solid var(--hairline);
+  border-radius:999px;
+  padding:9px 15px;
+  white-space:nowrap;
+}
+.price-jump a:hover{border-color:var(--navy);}
+.price-jump a:focus-visible{outline:2px solid var(--rose);outline-offset:2px;}
+
+.price-section{
+  padding:38px 0 44px;
+  scroll-margin-top:120px;
+}
+.price-section.alt{background:var(--cream-deep);}
+.price-section .display{font-size:28px;}
+.price-section .rows{margin-bottom:18px;}
+.price-section .btn{margin-top:20px;}
+.price-lead{font-size:15px;margin:20px 0 10px;}
+
+.pdf-download{
+  padding:34px 0 48px;
+  border-top:1px solid var(--hairline);
+}
+.pdf-download .vat-note{margin:0 0 16px;}
+
+/* ==========================================================================
+   ACTIVE SERVICE CARD
+   The card nearest the middle of the screen scales up to full size; the rest
+   rest slightly pulled back. Scroll-driven, so the emphasis travels with you.
+   ========================================================================== */
+
+.card{
+  position:relative;
+  transform:scale(.93);            /* resting state: pulled back */
+  transform-origin:center center;
+  transition:transform .55s cubic-bezier(.22,.61,.36,1);
+  will-change:transform;
+}
+
+.card.is-active{
+  transform:scale(1) translateY(-2px);   /* the active card comes forward */
+}
+
+@media (prefers-reduced-motion:reduce){
+  .card{transition:none;transform:none;}
+  .card.is-active{transform:none;}
+}
+
+/* ==========================================================================
+   BONO REGALO — live gift-card preview + builder
+   The card is navy (structure colour, not the rose accent) so it can carry
+   cream text at 10.35; rose appears only as a hairline and the sessions line.
+   ========================================================================== */
+
+.gift-preview-wrap{
+  background:var(--cream-deep);
+  padding:30px 0 38px;
+  position:sticky;
+  top:63px;
+  z-index:40;
+}
+.gift-hint{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.1em;
+  text-transform:uppercase;
+  color:var(--charcoal);
+  opacity:.55;
+  margin:0 0 12px;
+}
+
+.gift-card{
+  background:var(--navy);
+  color:var(--cream);
+  border-radius:var(--radius);
+  padding:7px;
+  transition:transform .4s cubic-bezier(.22,.61,.36,1);
+}
+.gift-card.is-changing{transform:scale(.985);}
+.gift-card-inner{
+  border:1px solid rgba(186,156,164,.55);   /* rose hairline */
+  border-radius:calc(var(--radius) - 6px);
+  padding:20px 20px 16px;
+}
+.gift-card-top{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:20px;
+}
+.gift-card .logo-mark{
+  background:var(--cream);
+  color:var(--navy);
+  width:30px;height:30px;
+  font-size:17px;line-height:30px;
+  flex:0 0 auto;
+}
+.gift-card-label{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  opacity:.75;
+}
+.gift-card-occasion{
+  font-size:12.5px;
+  font-weight:700;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--rose);
+  margin:0 0 6px;
+}
+.gift-card-treatment{
+  font-size:29px;
+  line-height:1.1;
+  color:var(--cream);
+  margin:0 0 4px;
+}
+.gift-card-sessions{
+  font-size:15px;
+  opacity:.8;
+  margin:0 0 18px;
+}
+.gift-card-message{
+  font-size:15px;
+  line-height:1.55;
+  min-height:2.6em;
+  margin:0 0 20px;
+  padding-top:16px;
+  border-top:1px solid rgba(252,243,238,0.18);
+}
+.gift-card-foot{
+  display:flex;
+  gap:26px;
+  font-size:14px;
+}
+.gift-card-foot small{
+  display:block;
+  font-size:10.5px;
+  letter-spacing:0.12em;
+  text-transform:uppercase;
+  opacity:.6;
+  margin-bottom:2px;
+}
+.gift-card-foot b{font-weight:700;}
+
+/* ---- builder ---- */
+.gift-builder{padding-top:38px;}
+.gift-field{
+  border:0;
+  padding:0;
+  margin:0 0 24px;
+}
+.gift-field legend,
+.gift-field label{
+  display:block;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  color:var(--navy);
+  margin-bottom:10px;
+  padding:0;
+}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  font-family:var(--body);
+  font-size:14px;
+  font-weight:700;
+  color:var(--navy);
+  background:var(--cream);
+  border:1px solid var(--hairline);
+  border-radius:999px;
+  padding:11px 17px;
+  min-height:44px;
+  cursor:pointer;
+  transition:background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+.chip:hover{border-color:var(--navy);}
+.chip:focus-visible{outline:2px solid var(--rose);outline-offset:2px;}
+.chip.is-on{
+  background:var(--navy);
+  color:var(--cream);
+  border-color:var(--navy);
+}
+.gift-field input,
+.gift-field textarea{
+  width:100%;
+  font-family:var(--body);
+  font-size:16px;                 /* 16px stops iOS zooming the page on focus */
+  color:var(--charcoal);
+  background:var(--cream);
+  border:1px solid var(--hairline);
+  border-radius:var(--radius-sm);
+  padding:13px 14px;
+  min-height:50px;
+  resize:vertical;
+}
+.gift-field input:focus,
+.gift-field textarea:focus{
+  outline:none;
+  border-color:var(--navy);
+}
+.gift-note{
+  font-size:13px;
+  color:var(--charcoal);
+  opacity:.7;
+  margin:9px 0 0;
+}
+.gift-note-center{text-align:center;}
+
+.gift-total{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  padding:18px 0;
+  margin-bottom:16px;
+  border-top:1px solid var(--rose);
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.09em;
+  text-transform:uppercase;
+  color:var(--navy);
+}
+
+/* ---- how it works ---- */
+.steps{
+  list-style:none;
+  counter-reset:step;
+  padding:0;
+  margin:0;
+}
+.steps li{
+  counter-increment:step;
+  position:relative;
+  padding:0 0 20px 44px;
+  font-size:15px;
+}
+.steps li::before{
+  content:counter(step);
+  position:absolute;
+  left:0;top:-2px;
+  width:30px;height:30px;
+  border:1px solid var(--rose);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;
+  color:var(--navy);
+}
+.steps b{display:block;color:var(--navy);}
+
+@media (prefers-reduced-motion:reduce){
+  .gift-card{transition:none;}
+}
+
+/* preview sticks only while the builder fields are on screen, then releases
+   so the total and the buy button are never hidden behind it */
+.gift-layout{position:relative;}
+.gift-checkout{padding-top:8px;}
+
+/* ---- contact details grid ---- */
+.contact-info .wrap{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:26px;
+}
+.info-block h3{font-size:16px;margin:0 0 8px;}
+.info-block p{font-size:15px;margin:0 0 6px;}
+.info-block a{color:var(--navy);}
+@media (min-width:600px){
+  .contact-info .wrap{grid-template-columns:1fr 1fr;gap:30px;}
+}
