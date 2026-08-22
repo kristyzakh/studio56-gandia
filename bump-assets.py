@@ -14,7 +14,7 @@ import hashlib
 import glob
 import re
 
-ASSETS = ['styles.css', 'app.js', 'bono.css', 'bono.js', 'cart.js']
+ASSETS = ['styles.css', 'app.js', 'bono.css', 'bono.js', 'cart.js', 'analytics.js']
 
 
 def content_hash(path):
