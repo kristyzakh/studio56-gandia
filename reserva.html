@@ -2,16 +2,16 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Contacto · Studio 56 Gandía</title>
-<meta name="description" content="Studio 56, Carrer de Selelles 2, Gandía. Solo con cita previa. Escríbenos por WhatsApp al +34 621 070 775. Hablamos español, ucraniano y ruso.">
+<title>Tu reserva · Studio 56 Gandía</title>
+<meta name="description" content="Revisa los servicios que has elegido y pide tu cita en Studio 56, Gandía.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet">
 
 <link rel="stylesheet" href="styles.css?v=142d9242b4">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BeautySalon", "name": "Studio 56", "description": "Estudio de estética en Gandía: Endospheres, depilación láser, electrodepilación y depilación con cera y sugaring.", "image": "https://kristyzakh.github.io/studio56-gandia/images/sala-de-tratamientos-gandia.jpg", "address": {"@type": "PostalAddress", "streetAddress": "Carrer de Selelles, 2", "postalCode": "46701", "addressLocality": "Gandía", "addressRegion": "Valencia", "addressCountry": "ES"}, "telephone": "+34621070775", "areaServed": {"@type": "City", "name": "Gandía"}, "availableLanguage": ["es", "uk", "ru"], "priceRange": "€€"}</script>
 </head>
 <body>
 
@@ -76,77 +76,49 @@
 </div>
 
 <main>
-
-  <!-- ============ HERO ============ -->
-  <div class="contact-hero">
-    <img src="images/sala-de-tratamientos-gandia.jpg"
-         alt="Sala de tratamientos de Studio 56 en Gandía, con camilla, espejo y armarios blancos"
-         width="1200" height="959" fetchpriority="high" decoding="async">
-  </div>
-
   <div class="wrap">
-    <div class="page-head contact-head">
-      <p class="eyebrow">Contacto</p>
-      <h1 class="display">Te esperamos<br>en Gandía</h1>
-      <p class="lead">Estamos en el centro, a un paso del Passeig. Trabajamos solo con cita previa, para que no coincidan dos clientas y puedas venir sin prisas.</p>
-      <div class="contact-actions">
-        <a class="btn btn-whatsapp" href="https://wa.me/34621070775" rel="noopener">Escríbenos por WhatsApp</a>
-        <a class="btn btn-secondary" href="https://maps.google.com/?q=Carrer+de+Selelles+2,+46701+Gandia" rel="noopener">Cómo llegar</a>
-      </div>
+    <p class="breadcrumb"><a href="precios.html">&larr; Seguir eligiendo</a></p>
+    <div class="page-head">
+      <h1 class="display">Tu reserva</h1>
+      <p class="lead">Revisa lo que has elegido, dinos cuándo te viene bien y te confirmamos la cita por WhatsApp.</p>
     </div>
   </div>
 
-  <!-- ============ DETAILS ============ -->
-  <section class="contact-info">
+  <section class="price-section" id="cart-empty" hidden>
     <div class="wrap">
-      <div class="info-block">
-        <h3>Dónde estamos</h3>
-        <p>Carrer de Selelles, 2<br>46701 Gandía, Valencia</p>
-        <p><a href="https://maps.google.com/?q=Carrer+de+Selelles+2,+46701+Gandia" rel="noopener">Ver en el mapa</a></p>
-      </div>
-      <div class="info-block">
-        <h3>Horario</h3>
-        <!-- TODO · Confirmar el horario real del estudio. -->
-        <p>Lunes a viernes<br>Sábados con cita previa</p>
-      </div>
-      <div class="info-block">
-        <h3>WhatsApp</h3>
-        <p><a href="https://wa.me/34621070775" rel="noopener">+34 621 070 775</a></p>
-        <p>Te respondemos el mismo día, en horario de estudio.</p>
-      </div>
-      <div class="info-block">
-        <h3>Idiomas</h3>
-        <p>Hablamos español, ucraniano y ruso.</p>
-      </div>
+      <p class="empty-note">Todavía no has elegido ningún servicio.</p>
+      <a class="btn btn-primary btn-block" href="precios.html">Ver precios y elegir</a>
     </div>
   </section>
 
-  <!-- ============ INVITATION ============ -->
-  <section class="contact-invite">
-    <div class="wrap">
-      <h2 class="display">¿No sabes por dónde empezar?</h2>
-      <p>No pasa nada. Cuéntanos qué te gustaría mejorar y te decimos qué tratamiento encaja — o si ninguno, también te lo diremos. La primera valoración no cuesta nada y no compromete a nada.</p>
-    </div>
-  </section>
-
-  <!-- ============ FORM ============ -->
-  <section class="booking" id="cita">
+  <section class="price-section" id="checkout" hidden>
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Reserva</p>
-        <h2 class="display">Pide tu cita</h2>
+        <p class="eyebrow">Tu selección</p>
+        <h2 class="display">Servicios</h2>
       </div>
+
+      <ul class="rows cart-list" id="cart-items"></ul>
+
+      <label class="consent" id="first-session-row" hidden>
+        <input type="checkbox" id="first-session" checked>
+        <span>Es mi primera sesión de Endospheres &mdash; aplicar el &minus;20&nbsp;% de descuento.</span>
+      </label>
+
+      <p class="cart-total-row"><span>Total estimado</span><span class="cart-total" id="cart-total">0 &euro;</span></p>
+      <p class="vat-note">IVA incluido. Te confirmamos el precio final al reservar la cita.</p>
+
       <div class="form">
-        <!-- TODO · Sustituir por el bloque de formulario incrustado de Altegio. -->
-        <form method="post" action="#" novalidate>
+        <form id="reserva-form" method="post" action="#" novalidate>
           <div class="field">
             <label for="nombre">Nombre completo</label>
             <input type="text" id="nombre" name="nombre" autocomplete="name" required>
           </div>
+
           <div class="field">
-            <label for="telefono">Teléfono</label>
+            <label for="telefono">Tel&eacute;fono</label>
             <div class="phone-row">
-              <select id="prefijo" name="prefijo" class="phone-prefix" aria-label="Prefijo del país">
+              <select id="prefijo" name="prefijo" class="phone-prefix" aria-label="Prefijo del pa&iacute;s">
                 <option value="+34" selected>ES +34</option>
                 <option value="+380">UA +380</option>
                 <option value="+7">RU +7</option>
@@ -159,25 +131,41 @@
               <input type="tel" id="telefono" name="telefono" autocomplete="tel-national" inputmode="tel" placeholder="600 000 000" required>
             </div>
           </div>
-          <div class="field">
-            <label for="servicio">Tratamiento</label>
-            <select id="servicio" name="servicio" required>
-              <option value="">Elige un tratamiento</option>
-              <option value="endospheres-facial">Endospheres facial</option>
-              <option value="endospheres-corporal">Endospheres corporal</option>
-              <option value="laser">Depilación láser</option>
-              <option value="electro">Electrodepilación · consulta gratuita</option>
-              <option value="cera">Cera y sugaring</option>
-              <option value="bono">Bono regalo</option>
-              <option value="no-se">No lo tengo claro — asesoradme</option>
-            </select>
+
+          <!--
+            TODO &middot; Sustituir este bloque por el calendario de Altegio, que mostrar&aacute;
+            los huecos reales disponibles en lugar de una preferencia. Mientras tanto
+            el cliente indica el d&iacute;a y la franja, y el estudio confirma a mano.
+          -->
+          <div id="slot-picker">
+            <div class="field">
+              <label for="fecha">D&iacute;a preferido</label>
+              <input type="date" id="fecha" name="fecha" required>
+            </div>
+
+            <div class="field">
+              <label for="franja">Franja preferida</label>
+              <select id="franja" name="franja" required>
+                <option value="">Elige una franja</option>
+                <option value="Ma&ntilde;ana">Ma&ntilde;ana &middot; 10:00&ndash;14:00</option>
+                <option value="Tarde">Tarde &middot; 16:00&ndash;20:00</option>
+                <option value="Indiferente">Me da igual</option>
+              </select>
+            </div>
           </div>
+
+          <div class="field">
+            <label for="notas">Algo que debamos saber <span class="optional">(opcional)</span></label>
+            <textarea id="notas" name="notas" rows="3" placeholder="Alergias, embarazo, tratamientos en curso&hellip;"></textarea>
+          </div>
+
           <label class="consent">
             <input type="checkbox" id="consent" name="consent" required>
-            <span>Acepto la <a href="privacidad.html">política de privacidad</a> y que Studio 56 me contacte por WhatsApp o teléfono.</span>
+            <span>Acepto la <a href="privacidad.html">pol&iacute;tica de privacidad</a> y que Studio 56 me contacte por WhatsApp o tel&eacute;fono.</span>
           </label>
-          <button type="submit" class="btn btn-primary btn-block">Pedir cita</button>
-          <p class="form-note">Te respondemos el mismo día, en horario de estudio.</p>
+
+          <button type="submit" class="btn btn-primary btn-block">Confirmar reserva</button>
+          <p class="form-note">No se cobra nada ahora. Te escribimos para confirmar el hueco.</p>
         </form>
       </div>
     </div>
@@ -212,11 +200,8 @@
   </div>
 </footer>
 
-<div class="sticky-cta" id="sticky-cta">
-  <a class="btn btn-primary btn-block" href="#cita">Pedir cita</a>
-</div>
-
 <script src="app.js?v=29b7bd6f21" defer></script>
+<script src="cart.js?v=8b908d5251" defer></script>
 
 </body>
 </html>

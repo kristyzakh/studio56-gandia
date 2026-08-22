@@ -72,18 +72,23 @@
     update();
   }
 
-  /* ---------- booking form: submit stays inactive until consent is ticked ----------
+  /* ---------- booking form: submit stays inactive until every field is filled ----------
      Applied by script rather than hard-coded in the HTML, so if this file
      fails to load the form is still submittable rather than dead. */
   [].slice.call(document.querySelectorAll('form')).forEach(function (form) {
-    var consent = form.querySelector('.consent input[type="checkbox"]');
     var submit = form.querySelector('button[type="submit"]');
-    if (!consent || !submit) return;
+    var required = [].slice.call(form.querySelectorAll('[required]'));
+    if (!submit || !required.length) return;
 
     var sync = function () {
-      submit.disabled = !consent.checked;
+      submit.disabled = !required.every(function (field) {
+        return field.type === 'checkbox' ? field.checked : field.value.trim() !== '';
+      });
     };
-    consent.addEventListener('change', sync);
+    required.forEach(function (field) {
+      field.addEventListener('input', sync);
+      field.addEventListener('change', sync);
+    });
     sync();
   });
 

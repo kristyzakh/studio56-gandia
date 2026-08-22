@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet">
 
-<link rel="stylesheet" href="styles.css?v=1013310916">
+<link rel="stylesheet" href="styles.css?v=142d9242b4">
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "Service", "name": "Endospheres", "serviceType": "Endospheres", "description": "Endospheres en Gandía: microvibración compresiva para celulitis, retención de líquidos y tono de la piel. Equipo certificado. Prueba gratuita de 20 minutos.", "provider": {"@type": "BeautySalon", "name": "Studio 56", "address": {"@type": "PostalAddress", "streetAddress": "Carrer de Selelles, 2", "postalCode": "46701", "addressLocality": "Gandía", "addressRegion": "Valencia", "addressCountry": "ES"}, "telephone": "+34621070775"}, "areaServed": {"@type": "City", "name": "Gandía"}}, {"@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "¿Cuántas sesiones necesito?", "acceptedAnswer": {"@type": "Answer", "text": "Depende del objetivo. Para celulitis y retención de líquidos, lo habitual es un curso de 8 a 12 sesiones, dos por semana al principio. Para mantenimiento, una cada dos o tres semanas. En la primera visita marcamos el protocolo según tu caso."}}, {"@type": "Question", "name": "¿Duele?", "acceptedAnswer": {"@type": "Answer", "text": "No. La sensación es la de un masaje profundo y la mayoría de clientas la describen como agradable. Si en alguna zona resulta molesta, se baja la intensidad — el equipo es regulable."}}, {"@type": "Question", "name": "¿Cuándo se notan los resultados?", "acceptedAnswer": {"@type": "Answer", "text": "La sensación de ligereza y el drenaje suelen notarse desde la primera sesión. Los cambios visibles en piel y contorno aparecen a partir de la cuarta o quinta, y por eso el bono es de cuatro."}}, {"@type": "Question", "name": "¿Puedo combinarla con depilación láser?", "acceptedAnswer": {"@type": "Answer", "text": "Sí. Son tratamientos independientes y muchas clientas los alternan en la misma visita. Dínoslo al reservar y organizamos la cita para que te cuadre en un solo desplazamiento."}}, {"@type": "Question", "name": "¿Qué me pongo para la sesión?", "acceptedAnswer": {"@type": "Answer", "text": "Nosotras te damos la ropa técnica necesaria para el tratamiento corporal. Tú no tienes que traer nada."}}]}]}</script>
 </head>
 <body>
@@ -139,18 +139,19 @@
         <details>
           <summary>Precios<span class="plus" aria-hidden="true"></span></summary>
           <div class="acc-body">
+            <span class="tag">Primera sesión −20 %</span>
             <ul class="rows">
-              <li><span>Rostro<span class="note">de 30 a 40 min</span></span><span class="amount">40 €</span></li>
-              <li><span>Cuerpo<span class="note">60 min</span></span><span class="amount">65 €</span></li>
-              <li><span>Cuerpo<span class="note">90 min</span></span><span class="amount">95 €</span></li>
+              <li><span>Rostro<span class="note">de 30 a 40 min</span></span><span class="amount"><s class="was">40 €</s><span class="now">32 €</span></span></li>
+              <li><span>Cuerpo<span class="note">60 min</span></span><span class="amount"><s class="was">65 €</s><span class="now">52 €</span></span></li>
+              <li><span>Cuerpo<span class="note">90 min</span></span><span class="amount"><s class="was">95 €</s><span class="now">76 €</span></span></li>
             </ul>
             <p><strong>Compra 3 sesiones y recibe 1 gratis</strong></p>
             <ul class="rows">
-              <li><span>3 + 1 Rostro</span><span class="amount">120 €</span></li>
-              <li><span>3 + 1 Cuerpo 60 min</span><span class="amount">195 €</span></li>
-              <li><span>3 + 1 Cuerpo 90 min</span><span class="amount">285 €</span></li>
+              <li><span>3 + 1 Rostro<span class="note">30&nbsp;€ / sesión · ahorras 40&nbsp;€</span></span><span class="amount">120 €</span></li>
+              <li><span>3 + 1 Cuerpo 60 min<span class="note">48,75&nbsp;€ / sesión · ahorras 65&nbsp;€</span></span><span class="amount">195 €</span></li>
+              <li><span>3 + 1 Cuerpo 90 min<span class="note">71,25&nbsp;€ / sesión · ahorras 95&nbsp;€</span></span><span class="amount">285 €</span></li>
             </ul>
-            <p><strong>Primera sesión: −20 % de descuento.</strong></p>
+            <p>Descuento de primera sesión solo en sesión suelta — los packs 3 + 1 ya llevan su propio ahorro.</p>
             <p class="vat-note">Precios con IVA incluido.</p>
           </div>
         </details>
@@ -249,18 +250,29 @@
         <!-- TODO · Sustituir por el bloque de formulario incrustado de Altegio. -->
         <form method="post" action="#" novalidate>
           <div class="field">
-            <label for="nombre">Nombre</label>
-            <input type="text" id="nombre" name="nombre" autocomplete="given-name" required>
+            <label for="nombre">Nombre completo</label>
+            <input type="text" id="nombre" name="nombre" autocomplete="name" required>
           </div>
           <div class="field">
             <label for="telefono">Teléfono</label>
-            <input type="tel" id="telefono" name="telefono" autocomplete="tel" inputmode="tel" required>
+            <div class="phone-row">
+              <select id="prefijo" name="prefijo" class="phone-prefix" aria-label="Prefijo del país">
+                <option value="+34" selected>ES +34</option>
+                <option value="+380">UA +380</option>
+                <option value="+7">RU +7</option>
+                <option value="+44">UK +44</option>
+                <option value="+49">DE +49</option>
+                <option value="+33">FR +33</option>
+                <option value="+40">RO +40</option>
+                <option value="+212">MA +212</option>
+              </select>
+              <input type="tel" id="telefono" name="telefono" autocomplete="tel-national" inputmode="tel" placeholder="600 000 000" required>
+            </div>
           </div>
           <div class="field">
             <label for="servicio">Tratamiento</label>
             <select id="servicio" name="servicio" required>
               <option value="">Elige un tratamiento</option>
-              <option value="endospheres-prueba">Endospheres · prueba gratuita 20 min</option>
               <option value="endospheres-facial">Endospheres facial</option>
               <option value="endospheres-corporal">Endospheres corporal</option>
               <option value="laser">Depilación láser</option>
@@ -321,7 +333,7 @@
   <a class="btn btn-primary btn-block" href="#cita">Pedir cita</a>
 </div>
 
-<script src="app.js?v=87349509b3" defer></script>
+<script src="app.js?v=29b7bd6f21" defer></script>
 
 </body>
 </html>
