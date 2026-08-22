@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contacto · Studio 56 Gandía</title>
-<meta name="description" content="Studio 56, Carrer de Selelles 2, Gandía. Pide tu cita por WhatsApp al +34 621 070 775. Hablamos español, ucraniano y ruso.">
+<meta name="description" content="Studio 56, Carrer de Selelles 2, Gandía. Solo con cita previa. Escríbenos por WhatsApp al +34 621 070 775. Hablamos español, ucraniano y ruso.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet">
 
 <link rel="stylesheet" href="styles.css?v=202608221341">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BeautySalon", "name": "Studio 56", "description": "Estudio de estética en Gandía: Endospheres, depilación láser, electrodepilación y depilación con cera y sugaring.", "address": {"@type": "PostalAddress", "streetAddress": "Carrer de Selelles, 2", "postalCode": "46701", "addressLocality": "Gandía", "addressRegion": "Valencia", "addressCountry": "ES"}, "telephone": "+34621070775", "url": "https://studio56gandia.com/", "areaServed": {"@type": "City", "name": "Gandía"}, "availableLanguage": ["es", "uk", "ru"], "priceRange": "€€"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BeautySalon", "name": "Studio 56", "description": "Estudio de estética en Gandía: Endospheres, depilación láser, electrodepilación y depilación con cera y sugaring.", "image": "https://kristyzakh.github.io/studio56-gandia/images/sala-de-tratamientos-gandia.jpg", "address": {"@type": "PostalAddress", "streetAddress": "Carrer de Selelles, 2", "postalCode": "46701", "addressLocality": "Gandía", "addressRegion": "Valencia", "addressCountry": "ES"}, "telephone": "+34621070775", "areaServed": {"@type": "City", "name": "Gandía"}, "availableLanguage": ["es", "uk", "ru"], "priceRange": "€€"}</script>
 </head>
 <body>
 
@@ -76,16 +76,27 @@
 </div>
 
 <main>
+
+  <!-- ============ HERO ============ -->
+  <div class="contact-hero">
+    <img src="images/sala-de-tratamientos-gandia.jpg"
+         alt="Sala de tratamientos de Studio 56 en Gandía, con camilla, espejo y armarios blancos"
+         width="1200" height="959" fetchpriority="high" decoding="async">
+  </div>
+
   <div class="wrap">
-    <p class="breadcrumb"><a href="index.html">&larr; Inicio</a></p>
-    <div class="page-head">
+    <div class="page-head contact-head">
       <p class="eyebrow">Contacto</p>
-      <h1 class="display">Escríbenos</h1>
-      <p class="lead">Lo más rápido es WhatsApp: te respondemos el mismo día, en horario de estudio. Si prefieres, déjanos tus datos en el formulario y te escribimos nosotras.</p>
-      <a class="btn btn-whatsapp btn-block" href="https://wa.me/34621070775" rel="noopener">Escríbenos por WhatsApp</a>
+      <h1 class="display">Te esperamos<br>en Gandía</h1>
+      <p class="lead">Estamos en el centro, a un paso del Passeig. Trabajamos solo con cita previa, para que no coincidan dos clientas y puedas venir sin prisas.</p>
+      <div class="contact-actions">
+        <a class="btn btn-whatsapp" href="https://wa.me/34621070775" rel="noopener">Escríbenos por WhatsApp</a>
+        <a class="btn btn-secondary" href="https://maps.google.com/?q=Carrer+de+Selelles+2,+46701+Gandia" rel="noopener">Cómo llegar</a>
+      </div>
     </div>
   </div>
 
+  <!-- ============ DETAILS ============ -->
   <section class="contact-info">
     <div class="wrap">
       <div class="info-block">
@@ -95,21 +106,30 @@
       </div>
       <div class="info-block">
         <h3>Horario</h3>
-        <!-- TODO · Confirmar el horario real del estudio con Kristina. -->
+        <!-- TODO · Confirmar el horario real del estudio. -->
         <p>Lunes a viernes<br>Sábados con cita previa</p>
-        <p class="gift-note">Atendemos solo con cita, para que no coincidan dos clientas.</p>
+      </div>
+      <div class="info-block">
+        <h3>WhatsApp</h3>
+        <p><a href="https://wa.me/34621070775" rel="noopener">+34 621 070 775</a></p>
+        <p>Te respondemos el mismo día, en horario de estudio.</p>
       </div>
       <div class="info-block">
         <h3>Idiomas</h3>
         <p>Hablamos español, ucraniano y ruso.</p>
       </div>
-      <div class="info-block">
-        <h3>Teléfono</h3>
-        <p><a href="https://wa.me/34621070775" rel="noopener">+34 621 070 775</a></p>
-      </div>
     </div>
   </section>
 
+  <!-- ============ INVITATION ============ -->
+  <section class="contact-invite">
+    <div class="wrap">
+      <h2 class="display">¿No sabes por dónde empezar?</h2>
+      <p>No pasa nada. Cuéntanos qué te gustaría mejorar y te decimos qué tratamiento encaja — o si ninguno, también te lo diremos. La primera valoración no cuesta nada y no compromete a nada.</p>
+    </div>
+  </section>
+
+  <!-- ============ FORM ============ -->
   <section class="booking" id="cita">
     <div class="wrap">
       <div class="section-head">
@@ -135,7 +155,7 @@
               <option value="endospheres-facial">Endospheres facial</option>
               <option value="endospheres-corporal">Endospheres corporal</option>
               <option value="laser">Depilación láser</option>
-              <option value="electro">Electrodepilación</option>
+              <option value="electro">Electrodepilación · consulta gratuita</option>
               <option value="cera">Cera y sugaring</option>
               <option value="bono">Bono regalo</option>
               <option value="no-se">No lo tengo claro — asesoradme</option>

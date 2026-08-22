@@ -1116,7 +1116,28 @@ body{padding-bottom:82px;}
 .gift-layout{position:relative;}
 .gift-checkout{padding-top:8px;}
 
-/* ---- contact details grid ---- */
+/* ==========================================================================
+   CONTACT PAGE
+   Opens with the room itself — the strongest reassurance a first-time
+   visitor gets is seeing where they're actually going.
+   ========================================================================== */
+
+.contact-hero{
+  aspect-ratio:5/4;
+  overflow:hidden;
+  background:var(--cream-deep);
+}
+.contact-hero img{width:100%;height:100%;object-fit:cover;}
+
+.contact-head{padding-top:30px;}
+.contact-actions{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+  margin-top:6px;
+}
+
+.contact-info{background:var(--cream-deep);}
 .contact-info .wrap{
   display:grid;
   grid-template-columns:1fr;
@@ -1124,7 +1145,18 @@ body{padding-bottom:82px;}
 }
 .info-block h3{font-size:16px;margin:0 0 8px;}
 .info-block p{font-size:15px;margin:0 0 6px;}
+.info-block p:last-child{margin-bottom:0;}
 .info-block a{color:var(--navy);}
+
+.contact-invite{padding:52px 0;}
+.contact-invite .display{font-size:26px;margin-bottom:14px;}
+.contact-invite p{font-size:15.5px;max-width:60ch;}
+
 @media (min-width:600px){
-  .contact-info .wrap{grid-template-columns:1fr 1fr;gap:30px;}
+  .contact-info .wrap{grid-template-columns:1fr 1fr;gap:32px;}
+  .contact-actions{flex-direction:row;}
+  .contact-actions .btn{flex:1;}
+}
+@media (min-width:768px){
+  .contact-hero{aspect-ratio:16/7;}
 }
