@@ -448,14 +448,38 @@ section{padding:52px 0;}
 .about .display{color:var(--cream);}
 .about .eyebrow{color:var(--rose);}
 .about p{font-size:15.5px;opacity:.9;}
-.about-media{
-  aspect-ratio:4/5;           /* portrait — keeps both machines in frame */
+/* ---- about: swipeable strip of the studio ----------------------------
+   Same peek-past-the-edge affordance as the related-treatments slider,
+   so swiping is already a learned gesture by the time you reach it.
+--------------------------------------------------------------------- */
+.about-track{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  margin:0 calc(-1 * var(--gutter)) 10px;
+  padding:0 var(--gutter) 4px;
+  scroll-padding-left:var(--gutter);
+}
+.about-track::-webkit-scrollbar{display:none;}
+.about-slide{
+  flex:0 0 82%;
+  scroll-snap-align:start;
+  aspect-ratio:4/5;
   border-radius:var(--radius);
   overflow:hidden;
   background:rgba(252,243,238,0.08);
-  margin-bottom:26px;
 }
-.about-media img{width:100%;height:100%;object-fit:cover;}
+.about-slide img{width:100%;height:100%;object-fit:cover;}
+.about-swipe-hint{
+  font-size:12px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  opacity:.55;
+  margin:0 0 24px;
+}
 .facts{
   list-style:none;
   padding:0;
@@ -627,7 +651,6 @@ body{padding-bottom:82px;}
 }
 .hero-media.slot{background:var(--navy);}
 .hero-media.slot::after{color:var(--cream);opacity:.4;}
-.about-media.slot::after{color:var(--cream);opacity:.45;}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important;}
