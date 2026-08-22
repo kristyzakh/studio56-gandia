@@ -16,8 +16,118 @@
 (function () {
   'use strict';
 
+  /* ------------------------------------------------------------------
+     GA4. Paste the Measurement ID here and analytics switches on; leave it
+     empty and the site sets no cookies, shows no banner and needs no
+     consent — which is why it ships empty.
+     ------------------------------------------------------------------ */
+  var GA4_ID = '';                 // e.g. 'G-XXXXXXXXXX'
+  var CONSENT_KEY = 's56-consent';
+
   window.dataLayer = window.dataLayer || [];
   window.s56Events = window.s56Events || [];   // readable in the console while testing
+
+  var readConsent = function () {
+    try { return window.localStorage.getItem(CONSENT_KEY); } catch (e) { return null; }
+  };
+
+  /* ---------- consent, then GA4 ----------
+     Consent Mode v2: storage is denied before any choice is made, so the tag
+     may load but cannot write cookies. Accepting flips the four signals and
+     Google backfills what it can. Declining leaves them denied for good. */
+  if (GA4_ID) {
+    window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+
+    window.gtag('consent', 'default', {
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      analytics_storage: 'denied',
+      functionality_storage: 'granted',
+      security_storage: 'granted',
+      wait_for_update: 500
+    });
+
+    if (readConsent() === 'granted') {
+      window.gtag('consent', 'update', {
+        ad_storage: 'granted',
+        ad_user_data: 'granted',
+        ad_personalization: 'granted',
+        analytics_storage: 'granted'
+      });
+    }
+
+    var tag = document.createElement('script');
+    tag.async = true;
+    tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
+    document.head.appendChild(tag);
+
+    window.gtag('js', new Date());
+    window.gtag('config', GA4_ID, { anonymize_ip: true });
+  }
+
+  var setConsent = function (value) {
+    try { window.localStorage.setItem(CONSENT_KEY, value); } catch (e) {}
+
+    if (window.gtag) {
+      var state = value === 'granted' ? 'granted' : 'denied';
+      window.gtag('consent', 'update', {
+        ad_storage: state,
+        ad_user_data: state,
+        ad_personalization: state,
+        analytics_storage: state
+      });
+    }
+
+    var banner = document.getElementById('consent-banner');
+    if (banner) banner.remove();
+    document.body.classList.remove('consent-open');
+  };
+
+  var showBanner = function () {
+    if (document.getElementById('consent-banner')) return;
+
+    var banner = document.createElement('div');
+    banner.className = 'consent-banner';
+    banner.id = 'consent-banner';
+    banner.setAttribute('role', 'dialog');
+    banner.setAttribute('aria-label', 'Cookies');
+    banner.innerHTML =
+      '<p class="consent-text">Usamos cookies de análisis para entender cómo se usa la web y mejorarla. ' +
+      'Puedes aceptarlas o rechazarlas — rechazarlas no afecta a nada de lo que puedes hacer aquí. ' +
+      '<a href="privacidad.html">Política de privacidad</a>.</p>' +
+      '<div class="consent-actions">' +
+      '<button type="button" class="btn btn-primary" data-consent="granted">Aceptar</button>' +
+      '<button type="button" class="btn btn-secondary" data-consent="denied">Rechazar</button>' +
+      '</div>';
+
+    document.body.appendChild(banner);
+    document.body.classList.add('consent-open');
+    /* the cart bar and sticky CTA sit at bottom:0 — lift them clear of this */
+    document.documentElement.style.setProperty('--consent-h', banner.offsetHeight + 'px');
+  };
+
+  document.addEventListener('click', function (e) {
+    var choice = e.target.closest('[data-consent]');
+    if (choice) {
+      setConsent(choice.dataset.consent);
+      return;
+    }
+    /* withdrawing has to be as easy as giving — the footer link reopens this */
+    var reopen = e.target.closest('[data-consent-open]');
+    if (reopen) {
+      e.preventDefault();
+      showBanner();
+    }
+  });
+
+  if (GA4_ID && !readConsent()) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showBanner);
+    } else {
+      showBanner();
+    }
+  }
 
   /* Fan out to whichever tool is present. All are optional. */
   var send = function (name, params) {

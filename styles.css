@@ -952,6 +952,39 @@ body{padding-bottom:82px;}
 /* the cart bar replaces the generic CTA rather than stacking on top of it */
 body.has-cart .sticky-cta{display:none;}
 
+/* ---- cookie consent ---- */
+.consent-banner{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:120;                      /* above the drawer's backdrop siblings */
+  padding:16px var(--gutter) calc(16px + env(safe-area-inset-bottom));
+  background:var(--cream);
+  border-top:1px solid var(--rose);
+  box-shadow:0 -8px 26px rgba(44,60,75,0.10);
+}
+.consent-text{
+  max-width:var(--maxw);
+  margin:0 auto 12px;
+  font-size:13px;
+  line-height:1.5;
+  color:var(--charcoal);
+}
+.consent-actions{
+  display:flex;
+  gap:10px;
+  max-width:var(--maxw);
+  margin:0 auto;
+}
+.consent-actions .btn{
+  flex:1 1 0;
+  min-height:44px;
+  padding:12px 18px;
+  font-size:14px;
+}
+/* keep the bottom bars reachable while the banner is up */
+body.consent-open .cart-bar,
+body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
+
 /* ---- checkout ---- */
 .cart-list li{gap:12px;}
 .row-remove{
