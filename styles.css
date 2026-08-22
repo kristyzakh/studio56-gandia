@@ -617,6 +617,9 @@ section{padding:52px 0;}
   line-height:1.5;
   opacity:.85;
 }
+/* display:flex above beats the browser's own [hidden] rule, so hiding the
+   first-session row (pack-only carts) needs saying explicitly. */
+.consent[hidden]{display:none;}
 .consent input{
   width:20px;height:20px;
   margin:1px 0 0;
@@ -985,6 +988,11 @@ body.has-cart .sticky-cta{display:none;}
   font-variant-numeric:tabular-nums;
 }
 .empty-note{font-size:15px;opacity:.8;margin:0 0 18px;}
+/* Checkout drops straight into the selection — the full section rhythm left a
+   dead gap between the lead and the first service. */
+.page-head-tight{padding-bottom:16px;}
+.page-head-tight .lead{margin-bottom:0;}
+#checkout,#cart-empty{padding-top:8px;}
 .pick-hint{
   display:flex;
   align-items:center;

@@ -115,11 +115,17 @@
         if (at !== -1) {
           items.splice(at, 1);
         } else {
+          /* A pack's saving travels with it into the cart — the whole point of a
+             pack is the saving, so it should never be shown without one. */
+          var noteEl = btn.querySelector('.note');
+          var note = noteEl && /ahorras/i.test(noteEl.textContent) ? noteEl.textContent : null;
+
           items.push({
             id: btn.dataset.id,
             name: btn.dataset.name,
             price: Number(btn.dataset.price),
-            priceFirst: btn.dataset.priceFirst ? Number(btn.dataset.priceFirst) : null
+            priceFirst: btn.dataset.priceFirst ? Number(btn.dataset.priceFirst) : null,
+            note: note
           });
         }
         write(items);
@@ -179,6 +185,13 @@
         var label = document.createElement('span');
         label.className = 'row-label';
         label.textContent = item.name;
+
+        if (item.note) {
+          var note = document.createElement('span');
+          note.className = 'note';
+          note.textContent = item.note;
+          label.appendChild(note);
+        }
 
         var amount = document.createElement('span');
         amount.className = 'amount';
