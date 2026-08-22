@@ -64,6 +64,49 @@
       });
     };
 
+    /* The discounted rate is a choice, not a given: a returning client booking a
+       single session needs to be able to pick the normal price. The switch rewrites
+       the eligible rows so what you see is what gets added. */
+    var toggle = document.getElementById('first-toggle');
+    var hint = document.getElementById('first-hint');
+
+    var syncPrices = function () {
+      var on = isFirst();
+
+      if (toggle) {
+        toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+        hint.textContent = on
+          ? 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.'
+          : 'Mostrando el precio normal. Tócalo si es tu primera sesión.';
+      }
+
+      rowButtons.forEach(function (btn) {
+        if (!btn.dataset.priceFirst) return;
+
+        var amount = btn.querySelector('.amount');
+        amount.textContent = '';
+
+        if (on) {
+          var was = document.createElement('s');
+          was.className = 'was';
+          was.textContent = fmt(Number(btn.dataset.price));
+          var now = document.createElement('span');
+          now.className = 'now';
+          now.textContent = fmt(Number(btn.dataset.priceFirst));
+          amount.appendChild(was);
+          amount.appendChild(now);
+        } else {
+          amount.textContent = fmt(Number(btn.dataset.price));
+        }
+      });
+    };
+
+    if (toggle) {
+      toggle.addEventListener('click', function () { setFirst(!isFirst()); });
+    }
+    document.addEventListener('s56cartchange', syncPrices);
+    syncPrices();
+
     rowButtons.forEach(function (btn) {
       btn.addEventListener('click', function () {
         var items = read();

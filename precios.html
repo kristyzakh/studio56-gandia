@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet">
 
-<link rel="stylesheet" href="styles.css?v=142d9242b4">
+<link rel="stylesheet" href="styles.css?v=0f704db265">
 </head>
 <body>
 
@@ -96,7 +96,10 @@
       <div class="section-head">
         <p class="eyebrow">Microvibración compresiva</p>
         <h2 class="display">Endospheres</h2>
-        <span class="tag">Primera sesión −20 %</span>
+        <div class="tag-row">
+          <button type="button" class="tag tag-toggle" id="first-toggle" aria-pressed="true">Primera sesión −20 %</button>
+          <span class="tag-hint" id="first-hint"></span>
+        </div>
       </div>
         <ul class="rows">
           <li><button type="button" class="row-add" data-id="endospheres-rostro-de-30-a-40-min" data-name="Endospheres · Rostro (de 30 a 40 min)" data-price="40" data-price-first="32" aria-pressed="false"><span class="row-label">Rostro<span class="note">de 30 a 40 min</span></span><span class="amount"><s class="was">40 €</s><span class="now">32 €</span></span><span class="row-tick" aria-hidden="true"></span></button></li>
@@ -323,7 +326,7 @@
 </div>
 
 <script src="app.js?v=29b7bd6f21" defer></script>
-<script src="cart.js?v=8b908d5251" defer></script>
+<script src="cart.js?v=2b629d592a" defer></script>
 
 </body>
 </html>

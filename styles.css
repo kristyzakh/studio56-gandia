@@ -420,7 +420,9 @@ section{padding:52px 0;}
 }
 .card-link{font-size:14px;font-weight:700;color:var(--navy);}
 
-/* rose used ONLY as a hairline, never a fill */
+/* rose as a hairline. The one exception is .tag-toggle's "on" state below,
+   which fills rose under a navy label — same pairing as .btn-whatsapp, where
+   the contrast was already checked. Never put cream on rose. */
 .tag{
   display:inline-block;
   font-size:11px;
@@ -433,6 +435,25 @@ section{padding:52px 0;}
   padding:5px 11px;
   margin-bottom:12px;
 }
+
+/* Discount switch: on = discounted prices shown and selectable, off = normal. */
+.tag-row{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin-top:18px;
+}
+.tag-row .tag{margin-bottom:0;}
+.tag-toggle{
+  font-family:var(--body);
+  background:none;
+  cursor:pointer;
+  transition:background-color .16s ease;
+}
+.tag-toggle[aria-pressed="true"]{background:var(--rose);border-color:var(--rose);}
+.tag-toggle:focus-visible{outline:2px solid var(--navy);outline-offset:2px;}
+.tag-hint{font-size:12px;line-height:1.35;opacity:.65;}
 
 /* ============ SPECIALISTS ============ */
 .people{display:flex;flex-direction:column;gap:26px;}
