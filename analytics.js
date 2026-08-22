@@ -129,6 +129,68 @@
     }
   }
 
+  /* ---------- attribution ----------
+     Recorded first-party and sent with the booking itself, so channel data
+     survives ad blockers and a declined cookie banner — the sheet in Albato
+     ends up knowing where a lead came from even when GA4 never saw the visit.
+
+     Both touches are kept: first-touch is the one that decides the channel
+     under the studio's own attribution rule, last-touch is kept alongside it
+     so a re-engagement campaign is still visible. */
+  var ATTR_FIRST = 's56-attr-first';
+  var ATTR_LAST = 's56-attr-last';
+
+  var readStore = function (key) {
+    try { return JSON.parse(window.localStorage.getItem(key)); } catch (e) { return null; }
+  };
+
+  var currentTouch = function () {
+    var q = new URLSearchParams(window.location.search);
+    var ref = document.referrer || '';
+    var refHost = '';
+    try { refHost = ref ? new URL(ref).hostname : ''; } catch (e) {}
+
+    var source = q.get('utm_source') || '';
+    var medium = q.get('utm_medium') || '';
+
+    if (!source) {
+      if (q.get('gclid')) { source = 'google'; medium = medium || 'cpc'; }
+      else if (q.get('fbclid')) { source = 'facebook'; medium = medium || 'paid_social'; }
+      else if (refHost && refHost !== window.location.hostname) { source = refHost; medium = medium || 'referral'; }
+      else { source = 'directo'; medium = medium || 'none'; }
+    }
+
+    return {
+      source: source,
+      medium: medium,
+      campaign: q.get('utm_campaign') || '',
+      content: q.get('utm_content') || '',
+      term: q.get('utm_term') || '',
+      gclid: q.get('gclid') || '',
+      fbclid: q.get('fbclid') || '',
+      referrer: ref,
+      landing: window.location.pathname + window.location.search,
+      ts: new Date().toISOString()
+    };
+  };
+
+  var touch = currentTouch();
+
+  /* A bare direct hit on page five is not a new touch — it would overwrite a
+     real campaign with "directo" just because someone came back later. */
+  var isMeaningful = touch.source !== 'directo';
+
+  if (!readStore(ATTR_FIRST)) {
+    try { window.localStorage.setItem(ATTR_FIRST, JSON.stringify(touch)); } catch (e) {}
+  }
+  if (isMeaningful || !readStore(ATTR_LAST)) {
+    try { window.localStorage.setItem(ATTR_LAST, JSON.stringify(touch)); } catch (e) {}
+  }
+
+  window.s56Attribution = function () {
+    return { first: readStore(ATTR_FIRST), last: readStore(ATTR_LAST) };
+  };
+
   /* Fan out to whichever tool is present. All are optional. */
   var send = function (name, params) {
     var payload = params || {};

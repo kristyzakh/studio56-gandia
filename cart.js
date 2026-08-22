@@ -242,8 +242,17 @@
       var data = new FormData(form);
       var telefono = String(data.get('prefijo')) + String(data.get('telefono')).replace(/\s+/g, '');
 
+      /* Flat keys so an Albato → Google Sheets step can map straight to columns
+         without unpacking anything. The attribution fields are the reason the
+         sheet can report channel without depending on GA4. */
+      var attr = (window.s56Attribution && window.s56Attribution()) || {};
+      var first = attr.first || {};
+      var last = attr.last || {};
+
       var payload = {
         source: 'web-checkout',
+        referencia: 'S56-' + Date.now().toString(36).toUpperCase(),
+        recibido: new Date().toISOString(),
         nombre: data.get('nombre'),
         telefono: telefono,
         fecha_preferida: data.get('fecha'),
@@ -253,7 +262,21 @@
         servicios: items.map(function (i) {
           return { nombre: i.name, precio: i.price, precio_aplicado: linePrice(i) };
         }),
-        total: total(items)
+        servicios_texto: items.map(function (i) {
+          return i.name + ' (' + fmt(linePrice(i)) + ')';
+        }).join(' | '),
+        total: total(items),
+
+        origen_source: first.source || '',
+        origen_medium: first.medium || '',
+        origen_campaign: first.campaign || '',
+        origen_landing: first.landing || '',
+        origen_fecha: first.ts || '',
+        ultimo_source: last.source || '',
+        ultimo_medium: last.medium || '',
+        ultimo_campaign: last.campaign || '',
+        gclid: first.gclid || last.gclid || '',
+        fbclid: first.fbclid || last.fbclid || ''
       };
 
       var submit = form.querySelector('button[type="submit"]');
