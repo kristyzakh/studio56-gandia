@@ -118,11 +118,14 @@
     var el = function (id) { return document.getElementById(id); };
     var DEFAULT_MSG = 'Un rato para ti, que te lo has ganado.';
 
+    var billedFor = function (n) { return n === 4 ? 3 : (n === 8 ? 6 : n); };   // 3 + 1
+
     var priceFor = function () {
-      var unit = PRICES[state.treatment].unit;
-      var n = Number(state.sessions);
-      var billed = n === 4 ? 3 : (n === 8 ? 6 : n);   // 3 + 1
-      return unit * billed;
+      return PRICES[state.treatment].unit * billedFor(Number(state.sessions));
+    };
+
+    var fmtEur = function (n) {
+      return (Math.round(n * 100) / 100).toFixed(2).replace('.', ',').replace(/,00$/, '') + ' €';
     };
 
     var render = function () {
@@ -133,11 +136,21 @@
       el('gc-sessions').textContent = n === 1 ? '1 sesión' : n + ' sesiones';
       el('gc-occasion').textContent = state.occasion;
       el('gift-detail').textContent = t.detail;
-      el('gift-price').textContent = priceFor() + ' €';
+      var billed = billedFor(n);
+      var total = priceFor();
+      var saving = t.unit * (n - billed);
 
+      el('gift-price').textContent = fmtEur(total);
+
+      /* a bono is a pack: never show its total without the per-session rate
+         and the saving beside it */
       el('gift-saving').textContent = n === 1
         ? 'Una sesión suelta.'
-        : 'Pagas ' + (n === 4 ? 3 : 6) + ' sesiones, regalas ' + n + '.';
+        : 'Pagas ' + billed + ' sesiones, regalas ' + n + ' · ' + fmtEur(total / n) + ' por sesión.';
+
+      el('gift-bar-total').textContent = fmtEur(total);
+      el('gift-bar-meta').textContent = (n === 1 ? '1 sesión' : n + ' sesiones')
+        + (saving > 0 ? ' · ahorras ' + fmtEur(saving) : '');
 
       var to = el('gift-to').value.trim();
       var from = el('gift-from').value.trim();

@@ -160,12 +160,18 @@ header{
   display:none;
   overflow-y:auto;
   overscroll-behavior:contain;
+  /* inset:0 alone resolves against a viewport that stops matching the visible
+     area as Safari's toolbar collapses, so the page behind showed through in a
+     strip at the bottom — it read as content that wouldn't scroll. dvh follows
+     the toolbar; vh stays as the fallback for browsers without it. */
+  height:100vh;
+  height:100dvh;
 }
 .drawer[data-open="true"]{display:block;}
 .drawer-inner{
   max-width:var(--maxw);
   margin:0 auto;
-  padding:0 var(--gutter) 48px;
+  padding:0 var(--gutter) calc(48px + env(safe-area-inset-bottom));
   min-height:100%;
   display:flex;
   flex-direction:column;
@@ -1028,32 +1034,9 @@ body.has-cart .sticky-cta{display:none;}
   box-shadow:0 0 0 3px rgba(186,156,164,0.25);
 }
 
-.steps{
-  list-style:none;
-  counter-reset:step;
-  padding:0;
-  margin:0 0 22px;
-}
-.steps li{
-  counter-increment:step;
-  position:relative;
-  padding:0 0 18px 42px;
-  font-size:15px;
-}
-.steps li::before{
-  content:counter(step);
-  position:absolute;
-  left:0;top:-2px;
-  width:28px;height:28px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid var(--rose);
-  border-radius:50%;
-  font-size:13px;
-  font-weight:700;
-  color:var(--navy);
-}
+/* .steps itself is defined once, with the bono regalo block below. Only the
+   sub-line and the trailing gap are particular to the thank-you page. */
+#gracias .steps{margin-bottom:22px;}
 .steps .note{display:block;font-size:13px;opacity:.7;margin-top:3px;}
 
 .page-actions{
@@ -1212,10 +1195,7 @@ body.has-cart .sticky-cta{display:none;}
 
 .gift-preview-wrap{
   background:var(--cream-deep);
-  padding:30px 0 38px;
-  position:sticky;
-  top:63px;
-  z-index:40;
+  padding:30px 0 32px;
 }
 .gift-hint{
   font-size:12px;
@@ -1411,10 +1391,42 @@ body.has-cart .sticky-cta{display:none;}
   .gift-card{transition:none;}
 }
 
-/* preview sticks only while the builder fields are on screen, then releases
-   so the total and the buy button are never hidden behind it */
 .gift-layout{position:relative;}
 .gift-checkout{padding-top:8px;}
+/* preview and buy are different decisions — back-to-back they read as one control */
+.gift-checkout .btn + .btn{margin-top:16px;}
+
+/* The card scrolls away with the page, so the running total follows you
+   instead — and doubles as the way back up to the card. */
+.gift-bar .cart-bar-count{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.gift-card{scroll-margin-top:84px;}
+
+/* signals the card is live rather than a static illustration */
+.gift-hint{display:flex;align-items:center;gap:8px;}
+.live-dot{
+  flex:0 0 auto;
+  width:7px;height:7px;
+  border-radius:50%;
+  background:var(--rose);
+  animation:live-pulse 2s ease-in-out infinite;
+}
+@keyframes live-pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.3;}
+}
+.gift-preview-note{
+  font-size:13px;
+  line-height:1.45;
+  opacity:.7;
+  margin:14px 0 0;
+}
+@media (prefers-reduced-motion:reduce){
+  .live-dot{animation:none;}
+}
 
 /* ==========================================================================
    CONTACT PAGE

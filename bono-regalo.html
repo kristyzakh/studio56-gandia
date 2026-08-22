@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet">
 
-<link rel="stylesheet" href="styles.css?v=e2974a699d">
+<link rel="stylesheet" href="styles.css?v=db3a0e79ba">
 </head>
 <body>
 
@@ -84,13 +84,13 @@
     </div>
   </div>
 
-  <!-- preview + fields share a scope so the sticky card releases at its end -->
+  <!-- preview + fields share a scope; the running total follows in the bottom bar -->
   <div class="gift-layout">
 
   <!-- ============ LIVE PREVIEW ============ -->
   <section class="gift-preview-wrap">
     <div class="wrap">
-      <p class="gift-hint">Así lo recibirá</p>
+      <p class="gift-hint"><span class="live-dot" aria-hidden="true"></span>Así lo recibirá · vista previa en vivo</p>
 
       <div class="gift-card" id="gift-card">
         <div class="gift-card-inner">
@@ -111,6 +111,8 @@
           </div>
         </div>
       </div>
+
+      <p class="gift-preview-note">Elige el tratamiento, las sesiones y el mensaje aquí abajo — la tarjeta se actualiza al momento.</p>
     </div>
   </section>
 
@@ -275,7 +277,17 @@
   </div>
 </footer>
 
-<script src="app.js?v=29b7bd6f21" defer></script>
+<div class="cart-bar gift-bar" id="gift-bar">
+  <div class="cart-bar-inner">
+    <div class="cart-bar-info">
+      <span class="cart-bar-count" id="gift-bar-meta">4 sesiones</span>
+      <span class="cart-bar-total" id="gift-bar-total">195 €</span>
+    </div>
+    <a class="btn" href="#gift-card">Ver bono</a>
+  </div>
+</div>
+
+<script src="app.js?v=f22aa17645" defer></script>
 
 </body>
 </html>
