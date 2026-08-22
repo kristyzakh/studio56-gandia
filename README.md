@@ -25,6 +25,16 @@ python3 devserver.py 4056
 Serves on port 4056 with no-cache headers. `/fresh` redirects to a one-off URL,
 which is the reliable way past iOS Safari holding an old copy.
 
+## Before committing CSS or JS changes
+
+```bash
+python3 bump-assets.py
+```
+
+Stamps every page with a content hash of the assets it loads, so browsers
+refetch exactly when a file actually changed. Editing `styles.css` without
+this leaves phones on a cached copy at an unchanged `?v=`.
+
 ## Notes
 
 - Prices come from `studio56-precios.pdf`, which is the single source of truth.
