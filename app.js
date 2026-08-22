@@ -72,6 +72,31 @@
     update();
   }
 
+  /* ---------- booking form: submit stays inactive until consent is ticked ----------
+     Applied by script rather than hard-coded in the HTML, so if this file
+     fails to load the form is still submittable rather than dead. */
+  [].slice.call(document.querySelectorAll('form')).forEach(function (form) {
+    var consent = form.querySelector('.consent input[type="checkbox"]');
+    var submit = form.querySelector('button[type="submit"]');
+    if (!consent || !submit) return;
+
+    var sync = function () {
+      submit.disabled = !consent.checked;
+    };
+    consent.addEventListener('change', sync);
+    sync();
+  });
+
+  /* ---------- about carousel: retire the arrow once it's been understood ---------- */
+  var aboutCarousel = document.querySelector('.about-carousel');
+  var aboutTrack = aboutCarousel && aboutCarousel.querySelector('.about-track');
+
+  if (aboutTrack) {
+    aboutTrack.addEventListener('scroll', function () {
+      if (aboutTrack.scrollLeft > 12) aboutCarousel.classList.add('is-scrolled');
+    }, { passive: true });
+  }
+
   /* ---------- bono regalo: live card preview + price ----------
      Prices follow the studio's existing 3 + 1 mechanic: 4 sessions cost 3,
      8 sessions cost 6. Endospheres figures match the printed price list. */

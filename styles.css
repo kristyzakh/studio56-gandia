@@ -362,6 +362,18 @@ section{padding:52px 0;}
 /* WhatsApp is the one rose button — navy label, because cream on rose is 2.51 and fails */
 .btn-whatsapp{background:var(--rose);color:var(--navy);border-color:var(--rose);}
 
+/* Inactive until the consent box is ticked. Muted rather than merely
+   faded, so it reads as "not yet" instead of "broken". */
+.btn:disabled,
+.btn[disabled]{
+  background:rgba(44,60,75,0.16);
+  color:rgba(44,60,75,0.52);
+  border-color:transparent;
+  cursor:not-allowed;
+}
+.btn:disabled:active,
+.btn[disabled]:active{opacity:1;}
+
 .btn-block{display:flex;width:100%;}
 
 /* ============ SERVICES ============ */
@@ -473,6 +485,33 @@ section{padding:52px 0;}
   background:rgba(252,243,238,0.08);
 }
 .about-slide img{width:100%;height:100%;object-fit:cover;}
+/* semi-transparent nudge sitting over the right edge of the strip.
+   pointer-events:none so it never intercepts a swipe; it fades away
+   once you've started scrolling, having done its job. */
+.about-carousel{position:relative;}
+.about-arrow{
+  position:absolute;
+  top:calc(50% - 22px);
+  right:10px;
+  width:44px;height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  background:rgba(252,243,238,0.30);
+  color:var(--cream);
+  backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  pointer-events:none;
+  opacity:1;
+  transition:opacity .4s ease;
+}
+.about-carousel.is-scrolled .about-arrow{opacity:0;}
+
+@media (prefers-reduced-motion:reduce){
+  .about-arrow{transition:none;}
+}
+
 .about-swipe-hint{
   font-size:12px;
   letter-spacing:0.08em;
