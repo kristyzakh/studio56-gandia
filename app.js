@@ -92,14 +92,21 @@
     sync();
   });
 
-  /* ---------- about carousel: retire the arrow once it's been understood ---------- */
+  /* ---------- about carousel: each arrow reflects what's actually off-screen ---------- */
   var aboutCarousel = document.querySelector('.about-carousel');
   var aboutTrack = aboutCarousel && aboutCarousel.querySelector('.about-track');
 
   if (aboutTrack) {
-    aboutTrack.addEventListener('scroll', function () {
-      if (aboutTrack.scrollLeft > 12) aboutCarousel.classList.add('is-scrolled');
-    }, { passive: true });
+    var syncAboutArrows = function () {
+      var atStart = aboutTrack.scrollLeft <= 4;
+      var atEnd = aboutTrack.scrollLeft + aboutTrack.clientWidth >= aboutTrack.scrollWidth - 4;
+      aboutCarousel.classList.toggle('at-start', atStart);
+      aboutCarousel.classList.toggle('at-end', atEnd);
+    };
+
+    aboutTrack.addEventListener('scroll', syncAboutArrows, { passive: true });
+    window.addEventListener('resize', syncAboutArrows);
+    syncAboutArrows();
   }
 
   /* ---------- bono regalo: live card preview + price ----------
