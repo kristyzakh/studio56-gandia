@@ -92,21 +92,27 @@
     sync();
   });
 
-  /* ---------- about carousel: each arrow reflects what's actually off-screen ---------- */
+  /* ---------- about carousel: each arrow reflects what's actually off-screen ----------
+     Driven by IntersectionObserver on a sentinel at each end of the track, not by
+     scrollLeft math on the 'scroll' event. iOS Safari coalesces or drops scroll
+     events during momentum scrolling, which left arrows stuck invisible after one
+     swipe; IntersectionObserver's whole job is "is this on screen," so it doesn't
+     depend on the browser dispatching a particular event at a particular time. */
   var aboutCarousel = document.querySelector('.about-carousel');
   var aboutTrack = aboutCarousel && aboutCarousel.querySelector('.about-track');
+  var aboutStart = aboutTrack && aboutTrack.querySelector('.about-sentinel-start');
+  var aboutEnd = aboutTrack && aboutTrack.querySelector('.about-sentinel-end');
 
-  if (aboutTrack) {
-    var syncAboutArrows = function () {
-      var atStart = aboutTrack.scrollLeft <= 4;
-      var atEnd = aboutTrack.scrollLeft + aboutTrack.clientWidth >= aboutTrack.scrollWidth - 4;
-      aboutCarousel.classList.toggle('at-start', atStart);
-      aboutCarousel.classList.toggle('at-end', atEnd);
-    };
+  if (aboutTrack && aboutStart && aboutEnd && window.IntersectionObserver) {
+    var aboutObserver = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var cls = entry.target === aboutStart ? 'at-start' : 'at-end';
+        aboutCarousel.classList.toggle(cls, entry.isIntersecting);
+      });
+    }, { root: aboutTrack, threshold: 0.9 });
 
-    aboutTrack.addEventListener('scroll', syncAboutArrows, { passive: true });
-    window.addEventListener('resize', syncAboutArrows);
-    syncAboutArrows();
+    aboutObserver.observe(aboutStart);
+    aboutObserver.observe(aboutEnd);
   }
 
   /* ---------- bono regalo: live card preview + price ----------

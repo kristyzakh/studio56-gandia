@@ -512,9 +512,18 @@ section{padding:52px 0;}
   background:rgba(252,243,238,0.08);
 }
 .about-slide img{width:100%;height:100%;object-fit:cover;}
+/* zero-width markers the arrows watch via IntersectionObserver — no
+   scroll-snap-align, so the browser's snap logic skips straight past them */
+.about-sentinel{flex:0 0 1px;width:1px;}
 /* One arrow per edge, each reflecting whether there's actually more strip in
    that direction — not a one-time nudge. pointer-events:none so neither ever
-   intercepts a swipe; JS toggles at-start/at-end on the real scroll position. */
+   intercepts a swipe; JS toggles at-start/at-end via IntersectionObserver on
+   sentinels at each end of the track (see about-sentinel above) rather than
+   scrollLeft math — iOS Safari can coalesce or drop scroll events during
+   momentum scrolling, which left arrows stuck invisible after one swipe.
+   No backdrop-filter: transitioning opacity and backdrop-filter together on
+   the same element is a known iOS Safari freeze — the element stops
+   repainting mid-transition and never recovers. */
 .about-carousel{position:relative;}
 .about-arrow{
   position:absolute;
@@ -528,11 +537,10 @@ section{padding:52px 0;}
   border:1px solid rgba(252,243,238,0.35);
   box-shadow:0 4px 14px rgba(0,0,0,0.18);
   color:var(--cream);
-  backdrop-filter:blur(3px);
-  -webkit-backdrop-filter:blur(3px);
   pointer-events:none;
   opacity:1;
   transition:opacity .3s ease;
+  will-change:opacity;
 }
 .about-arrow-left{left:10px;}
 .about-arrow-right{right:10px;}
