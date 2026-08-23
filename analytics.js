@@ -21,7 +21,7 @@
      empty and the site sets no cookies, shows no banner and needs no
      consent — which is why it ships empty.
      ------------------------------------------------------------------ */
-  var GA4_ID = '';                 // e.g. 'G-XXXXXXXXXX'
+  var GA4_ID = 'G-ZKPRWV7WQ8';     // Studio 56 GA4 property
   var CONSENT_KEY = 's56-consent';
 
   window.dataLayer = window.dataLayer || [];
