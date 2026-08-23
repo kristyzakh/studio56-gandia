@@ -92,6 +92,48 @@
     sync();
   });
 
+  /* ---------- accordion price toggle: first-session discount switch ----------
+     Same on/off mechanic as the cart-driven toggle on precios.html, but display-
+     only — treatment pages like endospheres.html don't have a cart, so this just
+     rewrites the amount cells in place. #first-toggle is precios.html's cart
+     toggle and cart.js already owns it there; excluded here so the two never
+     both attach to the same button. */
+  [].slice.call(document.querySelectorAll('.tag-toggle:not(#first-toggle)')).forEach(function (toggle) {
+    var hint = toggle.parentElement.querySelector('.tag-hint');
+    var rows = [].slice.call(toggle.closest('.acc-body, .price-section').querySelectorAll('[data-price-first]'));
+    if (!rows.length) return;
+
+    var on = true;
+
+    var render = function () {
+      toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (hint) {
+        hint.textContent = on
+          ? 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.'
+          : 'Mostrando el precio normal. Tócalo si es tu primera sesión.';
+      }
+      rows.forEach(function (row) {
+        var amount = row.querySelector('.amount');
+        amount.textContent = '';
+        if (on) {
+          var was = document.createElement('s');
+          was.className = 'was';
+          was.textContent = row.dataset.price + ' €';
+          var now = document.createElement('span');
+          now.className = 'now';
+          now.textContent = row.dataset.priceFirst + ' €';
+          amount.appendChild(was);
+          amount.appendChild(now);
+        } else {
+          amount.textContent = row.dataset.price + ' €';
+        }
+      });
+    };
+
+    toggle.addEventListener('click', function () { on = !on; render(); });
+    render();
+  });
+
   /* ---------- about carousel: each arrow reflects what's actually off-screen ----------
      Driven by IntersectionObserver on a sentinel at each end of the track, not by
      scrollLeft math on the 'scroll' event. iOS Safari coalesces or drops scroll
