@@ -163,9 +163,14 @@ header{
   /* inset:0 alone resolves against a viewport that stops matching the visible
      area as Safari's toolbar collapses, so the page behind showed through in a
      strip at the bottom — it read as content that wouldn't scroll. dvh follows
-     the toolbar; vh stays as the fallback for browsers without it. */
+     the toolbar in browsers that support it; vh is the fallback for those that
+     don't. Neither was enough for every in-app browser though (Telegram's
+     included), which is what --vh (set in app.js from visualViewport.height,
+     the API built for exactly this) corrects — falls back to 1vh, i.e. 100vh,
+     until that script runs. */
   height:100vh;
   height:100dvh;
+  height:calc(var(--vh, 1vh) * 100);
 }
 .drawer[data-open="true"]{display:block;}
 .drawer-inner{

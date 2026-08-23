@@ -4,6 +4,22 @@
 (function () {
   'use strict';
 
+  /* ---------- real viewport height ----------
+     100dvh alone wasn't enough: some in-app browsers (Telegram's included)
+     report a dvh that doesn't match the area their own chrome actually
+     covers, so the drawer's background fell short and the page behind it
+     showed through in a strip at the bottom. visualViewport.height is the
+     API built specifically to track the real visible area on screen —
+     falling back to innerHeight where it's unavailable — recomputed on
+     resize so it stays correct as any chrome shows or hides. */
+  var setViewportHeight = function () {
+    var h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    document.documentElement.style.setProperty('--vh', h * 0.01 + 'px');
+  };
+  setViewportHeight();
+  window.addEventListener('resize', setViewportHeight);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', setViewportHeight);
+
   /* ---------- menu overlay ---------- */
   var drawer = document.getElementById('drawer');
   var openBtn = document.getElementById('menu-open');
