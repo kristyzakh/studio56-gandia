@@ -181,7 +181,7 @@
   if (giftCard) {
     var PRICES = {
       endospheres: { unit: 65, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
-      laser:       { unit: 43, label: 'Depilación láser', detail: 'Axilas + ingles completas por sesión.' }
+      laser:       { unit: 43, label: 'Depilación Láser', detail: 'Axilas + ingles completas por sesión.' }
     };
 
     var state = { treatment: 'endospheres', sessions: '4', occasion: 'Porque sí' };

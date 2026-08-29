@@ -1179,6 +1179,93 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 .faq details{border-bottom:1px solid var(--hairline);}
 .faq details:first-child{border-top:1px solid var(--hairline);}
 .faq summary{font-size:15.5px;}
+/* homepage FAQ sits between reviews (cream-deep) and booking (cream-deep),
+   so it takes the lighter ground to keep the section rhythm reading */
+.faq--light{background:var(--cream);}
+
+/* ---- reviews ----
+   cream-deep section, cream cards — same figure/ground move as .services.
+   Horizontal swipe track on phones (same peek-past-the-edge affordance as
+   .related-track and .about-track), 3-up grid from tablet. */
+.reviews{background:var(--cream-deep);}
+.review-list{
+  display:flex;
+  gap:14px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  scroll-behavior:smooth;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+  margin:0 calc(-1 * var(--gutter));
+  padding:0 var(--gutter) 4px;
+  scroll-padding-left:var(--gutter);
+}
+.review-list::-webkit-scrollbar{display:none;}
+.review{
+  flex:0 0 86%;
+  scroll-snap-align:start;
+  display:flex;
+  flex-direction:column;
+  margin:0;
+  background:var(--cream);
+  border:1px solid var(--hairline);
+  border-radius:var(--radius-sm);
+  padding:20px;
+}
+.review > p{
+  font-size:15px;
+  line-height:1.62;
+  margin:0 0 15px;
+}
+.review-by{margin-top:auto;}
+.reviews-hint{
+  font-size:12px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  opacity:.55;
+  margin:14px 0 0;
+}
+@media (prefers-reduced-motion:reduce){
+  .review-list{scroll-behavior:auto;}
+}
+@media (min-width:768px){
+  .review-list{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+    overflow:visible;
+    margin:0;
+    padding:0;
+  }
+  .review{flex:none;}
+  .reviews-hint{display:none;}
+}
+.review-stars{
+  font-size:13px;
+  letter-spacing:0.18em;
+  color:var(--rose);
+  margin:0 0 10px;
+}
+.review-by{
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.review-by cite{
+  font-style:normal;
+  font-weight:700;
+  font-size:14.5px;
+  color:var(--navy);
+}
+.review-with{
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:0.07em;
+  text-transform:uppercase;
+  color:var(--rose);
+}
+.review-date{font-size:12.5px;opacity:.6;}
+.reviews-more{margin-top:20px;}
 
 /* ---- related treatments: swipeable slider --------------------------------
    The next card deliberately peeks past the right edge — that overhang is

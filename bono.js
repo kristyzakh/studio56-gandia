@@ -11,7 +11,7 @@
       what: 'Microvibración compresiva: activa la circulación, moviliza la retención de líquidos y mejora el tono de la piel. Sin agujas, sin bajas, sin dolor.'
     },
     laser: {
-      name: 'Depilación láser',
+      name: 'Depilación Láser',
       what: 'Láser de diodo de 808 nm con refrigeración avanzada. Elimina el vello de forma progresiva y resulta cómodo incluso en las zonas más sensibles.'
     },
     electro: {
@@ -19,7 +19,7 @@
       what: 'El único método de eliminación definitiva del vello, pelo a pelo. Funciona con cualquier color de vello, también rubio o blanco.'
     },
     cera: {
-      name: 'Cera y sugaring',
+      name: 'Cera y Sugaring',
       what: 'Depilación de raíz con cera tibia o pasta de azúcar. Piel lisa el mismo día, también en pieles sensibles.'
     }
   };
