@@ -9,6 +9,45 @@
   var BOOKING_ENDPOINT = '';
   var WHATSAPP = '34621070775';
 
+  /* Language table — "uk" on the /ua/ pages, "es" everywhere else. */
+  var UK = document.documentElement.lang === 'uk';
+  var T = UK ? {
+    unit: ['послуга', 'послуги', 'послуг'],
+    priceFirstOn: 'Показано ціну першого сеансу. Натисніть, щоб побачити звичайну ціну.',
+    priceFirstOff: 'Показано звичайну ціну. Натисніть, якщо це ваш перший сеанс.',
+    remove: 'Прибрати ',
+    sending: 'Надсилаємо…',
+    hello: 'Вітаю! Хочу записатися:',
+    total: 'Разом: ',
+    name: 'Імʼя: ',
+    phone: 'Телефон: ',
+    datePref: 'Бажана дата: ',
+    notes: 'Нотатки: ',
+    saveRe: /економія|заощад/i
+  } : {
+    unit: ['servicio', 'servicios', 'servicios'],
+    priceFirstOn: 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.',
+    priceFirstOff: 'Mostrando el precio normal. Tócalo si es tu primera sesión.',
+    remove: 'Quitar ',
+    sending: 'Enviando…',
+    hello: 'Hola! Quiero reservar:',
+    total: 'Total: ',
+    name: 'Nombre: ',
+    phone: 'Teléfono: ',
+    datePref: 'Fecha preferida: ',
+    notes: 'Notas: ',
+    saveRe: /ahorras/i
+  };
+
+  /* plural form index: ES is [1 | rest]; UK is [1 | 2-4 | 5-0 & teens]. */
+  var pluralIdx = function (n) {
+    if (!UK) return n === 1 ? 0 : 1;
+    var m10 = n % 10, m100 = n % 100;
+    if (m10 === 1 && m100 !== 11) return 0;
+    if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 1;
+    return 2;
+  };
+
   var KEY = 's56-cart';
   var KEY_FIRST = 's56-cart-first';
 
@@ -50,7 +89,7 @@
   };
 
   var plural = function (n) {
-    return n === 1 ? '1 servicio' : n + ' servicios';
+    return n + ' ' + T.unit[pluralIdx(n)];
   };
 
   /* ---------- price rows: tap to add or remove ---------- */
@@ -75,9 +114,7 @@
 
       if (toggle) {
         toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
-        hint.textContent = on
-          ? 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.'
-          : 'Mostrando el precio normal. Tócalo si es tu primera sesión.';
+        hint.textContent = on ? T.priceFirstOn : T.priceFirstOff;
       }
 
       rowButtons.forEach(function (btn) {
@@ -118,7 +155,7 @@
           /* A pack's saving travels with it into the cart — the whole point of a
              pack is the saving, so it should never be shown without one. */
           var noteEl = btn.querySelector('.note');
-          var note = noteEl && /ahorras/i.test(noteEl.textContent) ? noteEl.textContent : null;
+          var note = noteEl && T.saveRe.test(noteEl.textContent) ? noteEl.textContent : null;
 
           items.push({
             id: btn.dataset.id,
@@ -211,7 +248,7 @@
         var remove = document.createElement('button');
         remove.type = 'button';
         remove.className = 'row-remove';
-        remove.setAttribute('aria-label', 'Quitar ' + item.name);
+        remove.setAttribute('aria-label', T.remove + item.name);
         remove.addEventListener('click', function () {
           write(read().filter(function (i) { return i.id !== item.id; }));
         });
@@ -281,7 +318,7 @@
 
       var submit = form.querySelector('button[type="submit"]');
       submit.disabled = true;
-      submit.textContent = 'Enviando…';
+      submit.textContent = T.sending;
 
       var done = function () {
         try { window.localStorage.removeItem(KEY); } catch (e) {}
@@ -289,13 +326,13 @@
       };
 
       if (!BOOKING_ENDPOINT) {
-        var lines = ['Hola! Quiero reservar:'];
+        var lines = [T.hello];
         items.forEach(function (i) { lines.push('· ' + i.name + ' — ' + fmt(linePrice(i))); });
-        lines.push('Total: ' + fmt(total(items)));
-        lines.push('Nombre: ' + payload.nombre);
-        lines.push('Teléfono: ' + telefono);
-        lines.push('Fecha preferida: ' + payload.fecha_preferida + ' (' + payload.franja_preferida + ')');
-        if (payload.notas) lines.push('Notas: ' + payload.notas);
+        lines.push(T.total + fmt(total(items)));
+        lines.push(T.name + payload.nombre);
+        lines.push(T.phone + telefono);
+        lines.push(T.datePref + payload.fecha_preferida + ' (' + payload.franja_preferida + ')');
+        if (payload.notas) lines.push(T.notes + payload.notas);
         window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n')), '_blank');
         done();
         return;

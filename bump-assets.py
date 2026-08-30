@@ -26,13 +26,15 @@ def main():
     versions = {a: content_hash(a) for a in ASSETS}
     changed = []
 
-    for page in sorted(glob.glob('*.html')):
+    # Root pages load "styles.css?v=…"; the /ua/ pages one level down load
+    # "../styles.css?v=…". Same content hash, only the path prefix differs.
+    for page in sorted(glob.glob('*.html')) + sorted(glob.glob('ua/*.html')):
         with open(page, encoding='utf-8') as fh:
             before = fh.read()
         after = before
         for asset, version in versions.items():
-            after = re.sub(re.escape(asset) + r'\?v=[0-9a-f]+',
-                           f'{asset}?v={version}', after)
+            after = re.sub(r'(\.\./)?' + re.escape(asset) + r'\?v=[0-9a-f]+',
+                           lambda m: f'{m.group(1) or ""}{asset}?v={version}', after)
         if after != before:
             with open(page, 'w', encoding='utf-8') as fh:
                 fh.write(after)

@@ -84,6 +84,26 @@
     document.body.classList.remove('consent-open');
   };
 
+  /* One string table per language. document.documentElement.lang is "uk" on the
+     /ua/ pages and "es" everywhere else; the /ua/ pages sit one level down, so
+     their privacy-policy link is a relative "privacidad.html" all the same. */
+  var UK = document.documentElement.lang === 'uk';
+  var T = UK ? {
+    cookies: 'Куки',
+    text: 'Ми використовуємо аналітичні куки, щоб розуміти, як користуються сайтом, і покращувати його. ' +
+          'Ви можете прийняти або відхилити їх — відмова ні на що тут не впливає. ',
+    policy: 'Політика конфіденційності',
+    accept: 'Прийняти',
+    reject: 'Відхилити'
+  } : {
+    cookies: 'Cookies',
+    text: 'Usamos cookies de análisis para entender cómo se usa la web y mejorarla. ' +
+          'Puedes aceptarlas o rechazarlas — rechazarlas no afecta a nada de lo que puedes hacer aquí. ',
+    policy: 'Política de privacidad',
+    accept: 'Aceptar',
+    reject: 'Rechazar'
+  };
+
   var showBanner = function () {
     if (document.getElementById('consent-banner')) return;
 
@@ -91,14 +111,13 @@
     banner.className = 'consent-banner';
     banner.id = 'consent-banner';
     banner.setAttribute('role', 'dialog');
-    banner.setAttribute('aria-label', 'Cookies');
+    banner.setAttribute('aria-label', T.cookies);
     banner.innerHTML =
-      '<p class="consent-text">Usamos cookies de análisis para entender cómo se usa la web y mejorarla. ' +
-      'Puedes aceptarlas o rechazarlas — rechazarlas no afecta a nada de lo que puedes hacer aquí. ' +
-      '<a href="privacidad.html">Política de privacidad</a>.</p>' +
+      '<p class="consent-text">' + T.text +
+      '<a href="privacidad.html">' + T.policy + '</a>.</p>' +
       '<div class="consent-actions">' +
-      '<button type="button" class="btn btn-primary" data-consent="granted">Aceptar</button>' +
-      '<button type="button" class="btn btn-secondary" data-consent="denied">Rechazar</button>' +
+      '<button type="button" class="btn btn-primary" data-consent="granted">' + T.accept + '</button>' +
+      '<button type="button" class="btn btn-secondary" data-consent="denied">' + T.reject + '</button>' +
       '</div>';
 
     document.body.appendChild(banner);
