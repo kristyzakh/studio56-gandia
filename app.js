@@ -114,6 +114,14 @@
      rewrites the amount cells in place. #first-toggle is precios.html's cart
      toggle and cart.js already owns it there; excluded here so the two never
      both attach to the same button. */
+  var uk = document.documentElement.lang === 'uk';
+  var HINT_ON = uk
+    ? 'Показано ціну першого сеансу. Натисніть, щоб побачити звичайну ціну.'
+    : 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.';
+  var HINT_OFF = uk
+    ? 'Показано звичайну ціну. Натисніть, якщо це ваш перший сеанс.'
+    : 'Mostrando el precio normal. Tócalo si es tu primera sesión.';
+
   [].slice.call(document.querySelectorAll('.tag-toggle:not(#first-toggle)')).forEach(function (toggle) {
     var hint = toggle.parentElement.querySelector('.tag-hint');
     var rows = [].slice.call(toggle.closest('.acc-body, .price-section').querySelectorAll('[data-price-first]'));
@@ -124,9 +132,7 @@
     var render = function () {
       toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
       if (hint) {
-        hint.textContent = on
-          ? 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.'
-          : 'Mostrando el precio normal. Tócalo si es tu primera sesión.';
+        hint.textContent = on ? HINT_ON : HINT_OFF;
       }
       rows.forEach(function (row) {
         var amount = row.querySelector('.amount');
