@@ -556,12 +556,12 @@ section{padding:52px 0;}
   .about-arrow{transition:none;}
 }
 
-.about-swipe-hint{
-  font-size:10px;
-  letter-spacing:0.06em;
+.about .about-swipe-hint{
+  font-size:9px;
+  letter-spacing:0.05em;
   text-transform:uppercase;
-  opacity:.5;
-  margin:0 0 18px;
+  opacity:.35;
+  margin:0 0 16px;
 }
 .facts{
   list-style:none;
