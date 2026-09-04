@@ -14,7 +14,7 @@ Static site — plain HTML, one stylesheet, one script. No build step.
 | `precios.html` | Full price list (+ `studio56-precios.pdf` download) |
 | `bono-regalo.html` | Gift voucher — buyer builds and orders |
 | `bono.html` | Gift voucher — what the recipient opens. All data comes from the URL |
-| `sobre-nosotras.html` · `contacto.html` | About, contact |
+| `contacto.html` | Contact |
 
 ## Local preview
 
