@@ -375,6 +375,62 @@
     syncBar();
   }
 
+  /* ---------- cart peek: review and remove without leaving the page ----------
+     Tapping a price row toggles that one service off again, but a pack the
+     calculator worked out for a single zone has no row of its own — so once it was
+     applied there was no way at all to take it back off this page. Opening the bar
+     covers every line the same way, whatever put it there. */
+  var peek = document.getElementById('cart-peek');
+
+  if (peek) {
+    var peekToggle = document.getElementById('cart-peek-toggle');
+    var peekBar = document.getElementById('cart-bar');
+
+    var setPeek = function (open) {
+      peek.hidden = !open;
+      peekToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      peekBar.classList.toggle('has-peek', open);
+    };
+
+    var renderPeek = function () {
+      var items = read();
+      peek.textContent = '';
+
+      items.forEach(function (item) {
+        var li = document.createElement('li');
+
+        var name = document.createElement('span');
+        name.className = 'cart-peek-name';
+        name.textContent = item.name;
+
+        var price = document.createElement('span');
+        price.className = 'cart-peek-price';
+        price.textContent = fmt(linePrice(item));
+
+        var remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'row-remove';
+        remove.setAttribute('aria-label', T.remove + item.name);
+        remove.addEventListener('click', function () {
+          write(read().filter(function (i) { return i.id !== item.id; }));
+        });
+
+        li.appendChild(name);
+        li.appendChild(price);
+        li.appendChild(remove);
+        peek.appendChild(li);
+      });
+
+      /* an empty bar is hidden anyway, so leaving it open would strand the state */
+      if (!items.length) setPeek(false);
+    };
+
+    peekToggle.addEventListener('click', function () { setPeek(peek.hidden); });
+
+    document.addEventListener('s56cartchange', renderPeek);
+    renderPeek();
+  }
+
   /* ---------- checkout ---------- */
   var checkout = document.getElementById('checkout');
 
