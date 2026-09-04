@@ -8,6 +8,51 @@
   margin:0;
 }
 
+/* ---------- home mark ----------
+   The card deliberately has no header — it should read as a card, not a page.
+   But that left no way out at all from the sealed state, so this sits quietly in
+   the corner: enough of an exit to always be there, small enough not to turn the
+   gift into a website. */
+.bono-home{
+  position:fixed;
+  top:16px;left:16px;
+  z-index:20;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:6px 12px 6px 6px;
+  border-radius:999px;
+  background:rgba(252,243,238,0.08);
+  text-decoration:none;
+  opacity:.75;
+  transition:opacity .18s ease, background-color .18s ease;
+}
+.bono-home:hover{opacity:1;background:rgba(252,243,238,0.14);}
+.bono-home:focus-visible{outline:2px solid var(--rose);outline-offset:3px;opacity:1;}
+.bono-home-mark{
+  width:26px;height:26px;
+  flex:0 0 auto;
+  border-radius:50%;
+  background:var(--cream);
+  color:var(--navy);
+  font-family:var(--display);
+  font-size:15px;
+  line-height:26px;
+  text-align:center;
+}
+.bono-home-word{
+  font-family:var(--display);
+  font-size:9px;
+  letter-spacing:0.24em;
+  text-indent:0.24em;
+  text-transform:uppercase;
+  color:var(--cream);
+  white-space:nowrap;
+}
+@media (max-width:359px){
+  .bono-home-word{display:none;}
+}
+
 /* ---------- 1 · the sealed opening ---------- */
 .bono-open{
   min-height:100svh;

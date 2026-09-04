@@ -186,10 +186,10 @@
 
   if (giftCard) {
     var PRICES = uk ? {
-      endospheres: { unit: 65, label: 'Ендосфера', detail: 'Тіло, 60 хв за сеанс.' },
+      endospheres: { unit: 65, first: 52, label: 'Ендосфера', detail: 'Тіло, 60 хв за сеанс.' },
       laser:       { unit: 43, label: 'Лазерна епіляція', detail: 'Пахви + глибоке бікіні за сеанс.' }
     } : {
-      endospheres: { unit: 65, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
+      endospheres: { unit: 65, first: 52, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
       laser:       { unit: 43, label: 'Depilación Láser', detail: 'Axilas + ingles completas por sesión.' }
     };
 
@@ -204,36 +204,58 @@
     };
 
     var G = uk ? {
-      occasion: 'Просто так',
+      /* must match bono.js's own fallback — it is what the card will really show */
+      occasion: 'Подарунок для вас',
       msg: 'Час для себе — ви його заслужили.',
       single: 'Один сеанс.',
+      firstOff: function (save) { return 'Ціна першого сеансу зі знижкою −20 % · економія ' + save + '.'; },
       pay: function (billed, n, per) { return 'Платите за ' + sessionWord(billed) + ', даруєте ' + n + ' · ' + per + ' за сеанс.'; },
       save: ' · економія ',
       hello: 'Вітаю! Хочу подарунковий сертифікат:',
       forWhom: '· Кому: ', fromWhom: '· Від: ',
-      occasionLine: '· Привід: ', msgLine: '· Повідомлення: ',
+      msgLine: '· Повідомлення: ',
+      whenLine: '· Надіслати: ', destLine: '· Куди: ', asap: 'одразу',
       tbc: '(уточнимо)'
     } : {
-      occasion: 'Porque sí',
+      occasion: 'Un regalo para ti',
       msg: 'Un rato para ti, que te lo has ganado.',
       single: 'Una sesión suelta.',
+      firstOff: function (save) { return 'Precio de primera sesión con el −20 % · ahorras ' + save + '.'; },
       pay: function (billed, n, per) { return 'Pagas ' + billed + ' sesiones, regalas ' + n + ' · ' + per + ' por sesión.'; },
       save: ' · ahorras ',
       hello: 'Hola! Quiero un bono regalo:',
       forWhom: '· Para: ', fromWhom: '· De: ',
-      occasionLine: '· Ocasión: ', msgLine: '· Mensaje: ',
+      msgLine: '· Mensaje: ',
+      whenLine: '· Enviar: ', destLine: '· A dónde: ', asap: 'cuanto antes',
       tbc: '(por confirmar)'
     };
 
-    var state = { treatment: 'endospheres', sessions: '4', occasion: G.occasion };
+    var state = { treatment: 'endospheres', sessions: '4' };
 
     var el = function (id) { return document.getElementById(id); };
     var DEFAULT_MSG = G.msg;
 
     var billedFor = function (n) { return n === 4 ? 3 : (n === 8 ? 6 : n); };   // 3 + 1
 
+    /* datetime-local hands back 2026-09-05T14:30; the studio reads the order in
+       WhatsApp, so it goes out as 05.09.2026, 14:30 */
+    var fmtWhen = function (v) {
+      var parts = v.split('T');
+      if (parts.length !== 2) return v;
+      var d = parts[0].split('-');
+      return d[2] + '.' + d[1] + '.' + d[0] + ', ' + parts[1];
+    };
+
+    /* A single Endospheres session is somebody's first, so it is sold at the
+       price list's −20 % first-session rate: the bono costs exactly what the
+       recipient would have paid walking in on her own. Packs carry their own
+       saving and never stack with that discount, and the discount is Endospheres
+       only — laser has no such rate. */
     var priceFor = function () {
-      return PRICES[state.treatment].unit * billedFor(Number(state.sessions));
+      var t = PRICES[state.treatment];
+      var n = Number(state.sessions);
+      if (n === 1 && t.first) return t.first;
+      return t.unit * billedFor(n);
     };
 
     var fmtEur = function (n) {
@@ -246,18 +268,18 @@
 
       el('gc-treatment').textContent = t.label;
       el('gc-sessions').textContent = sessionWord(n);
-      el('gc-occasion').textContent = state.occasion;
+      el('gc-occasion').textContent = G.occasion;
       el('gift-detail').textContent = t.detail;
       var billed = billedFor(n);
       var total = priceFor();
-      var saving = t.unit * (n - billed);
+      var saving = t.unit * n - total;
 
       el('gift-price').textContent = fmtEur(total);
 
       /* a bono is a pack: never show its total without the per-session rate
          and the saving beside it */
       el('gift-saving').textContent = n === 1
-        ? G.single
+        ? (saving > 0 ? G.firstOff(fmtEur(saving)) : G.single)
         : G.pay(billed, n, fmtEur(total / n));
 
       el('gift-bar-total').textContent = fmtEur(total);
@@ -276,17 +298,22 @@
       var lines = [
         G.hello,
         '· ' + t.label + ' — ' + sessionWord(n) + ' (' + priceFor() + ' €)',
-        G.occasionLine + state.occasion,
         G.forWhom + (to || G.tbc),
         G.fromWhom + (from || G.tbc),
         G.msgLine + (msg || DEFAULT_MSG)
       ];
+
+      /* delivery is the studio's job now, so the order has to carry when and where */
+      var when = el('gift-when').value;
+      var dest = el('gift-dest').value.trim();
+      lines.push(G.whenLine + (when ? fmtWhen(when) : G.asap));
+      if (dest) lines.push(G.destLine + dest);
       el('gift-buy').href = 'https://wa.me/34621070775?text=' + encodeURIComponent(lines.join('\n'));
 
       // same selection, rendered as the recipient will see it
       var q = new URLSearchParams({
         para: to, de: from, t: state.treatment, n: state.sessions,
-        oc: state.occasion, msg: msg || DEFAULT_MSG
+        msg: msg || DEFAULT_MSG
       });
       el('gift-preview').href = 'bono.html?' + q.toString();
 
@@ -307,9 +334,11 @@
       });
     });
 
-    ['gift-to', 'gift-from', 'gift-message'].forEach(function (id) {
+    ['gift-to', 'gift-from', 'gift-message', 'gift-when', 'gift-dest'].forEach(function (id) {
       el(id).addEventListener('input', render);
     });
+
+    el('gift-when').min = new Date().toISOString().slice(0, 16);
 
     render();
   }
