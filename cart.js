@@ -271,6 +271,24 @@
       }
       if (best) return best;
 
+      /* No combo pack fits, but a single zone is selected on its own: every real
+         "3 + 1" on the price list is priced as three sessions with the fourth free
+         (Ендосфера 40 -> 120, усе тіло 90 -> 270), so the same arithmetic gives an
+         honest figure for a zone that has no pack row of its own. Nothing invented:
+         it is the studio's own 3 + 1 applied to one zone. */
+      if (laserZones.length === 1) {
+        var zone = rowById[laserZones[0]];
+        var parts = zone.name.split(' · ');
+        return {
+          removeIds: [laserZones[0]],
+          virtual: true,
+          virtualId: 'depilacion-laser-3-1-' + laserZones[0].replace('depilacion-laser-', ''),
+          virtualName: parts[0] + ' · 3 + 1 ' + parts[parts.length - 1],
+          virtualPrice: 3 * zone.price,
+          standalone: 4 * zone.price
+        };
+      }
+
       for (var single in ENDO_PACKS) {
         if (ids.indexOf(single) !== -1 && ids.indexOf(ENDO_PACKS[single]) === -1) {
           return { removeIds: [single], addId: ENDO_PACKS[single], standalone: 4 * rowById[single].price };
@@ -295,7 +313,9 @@
       }
 
       if (match) {
-        var pack = rowById[match.addId];
+        var pack = match.virtual
+          ? { name: match.virtualName, price: match.virtualPrice }
+          : rowById[match.addId];
         var save = match.standalone - pack.price;
         if (save > 0) {
           var label = pack.name.split(' · ').pop();
@@ -322,7 +342,9 @@
         return;
       }
 
-      var pack = rowById[match.addId];
+      var pack = match.virtual
+        ? { id: match.virtualId, name: match.virtualName, price: match.virtualPrice }
+        : rowById[match.addId];
       var kept = items.filter(function (i) { return match.removeIds.indexOf(i.id) === -1; });
       kept.push({ id: pack.id, name: pack.name, price: pack.price, priceFirst: null, note: null });
       write(kept);
