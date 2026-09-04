@@ -24,7 +24,12 @@
     phone: 'Телефон: ',
     datePref: 'Бажана дата: ',
     notes: 'Нотатки: ',
-    saveRe: /економія|заощад/i
+    saveRe: /економія|заощад/i,
+    packLead: 'Вигідніше пакетом: ',
+    packSave: ' — економія ',
+    packBtn: 'Застосувати пакет',
+    packElectroHint: 'Плануєте кілька сеансів електроепіляції? Пакет годин виходить дешевше за годину.',
+    packElectroBtn: 'Переглянути пакети'
   } : {
     unit: ['servicio', 'servicios', 'servicios'],
     priceFirstOn: 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.',
@@ -38,7 +43,12 @@
     phone: 'Teléfono: ',
     datePref: 'Fecha preferida: ',
     notes: 'Notas: ',
-    saveRe: /ahorras/i
+    saveRe: /ahorras/i,
+    packLead: 'Más barato en pack: ',
+    packSave: ' — ahorras ',
+    packBtn: 'Aplicar el pack',
+    packElectroHint: '¿Vas a hacer varias sesiones de electrodepilación? Un pack de horas sale más barato por hora.',
+    packElectroBtn: 'Ver los packs'
   };
 
   /* plural form index: ES is [1 | rest]; UK is [1 | 2-4 | 5-0 & teens]. */
@@ -175,6 +185,126 @@
 
     document.addEventListener('s56cartchange', syncRows);
     syncRows();
+  }
+
+  /* ---------- pack suggestions: point out a cheaper bundle for what's picked ----------
+     Only Ендосфера, Лазер, Електро have packs; Шугаринг/віск is per-zone by design.
+     Laser and Ендосфера comparisons are apples-to-apples (the pack covers exactly what
+     was selected), so they get an exact € saving and a one-tap swap. Electro's packs
+     are hour-bundles unrelated to which single session length you picked, so a "you
+     save €X" claim would compare different amounts of service — that one stays a
+     plain nudge toward the packs list instead of a number we can't stand behind. */
+  var suggestion = document.getElementById('pack-suggestion');
+
+  if (suggestion && rowButtons.length) {
+    var suggestionText = document.getElementById('pack-suggestion-text');
+    var suggestionBtn = document.getElementById('pack-suggestion-btn');
+    var cartBarEl = document.getElementById('cart-bar');
+
+    var rowById = {};
+    rowButtons.forEach(function (b) {
+      rowById[b.dataset.id] = { id: b.dataset.id, name: b.dataset.name, price: Number(b.dataset.price) };
+    });
+
+    var LASER_PACKS = [
+      { id: 'depilacion-laser-3-1-axilas-ingles', zones: ['depilacion-laser-axilas', 'depilacion-laser-ingles-completas'] },
+      { id: 'depilacion-laser-3-1-axilas-ingles-medias-piernas', zones: ['depilacion-laser-axilas', 'depilacion-laser-ingles-completas', 'depilacion-laser-medias-piernas'] },
+      { id: 'depilacion-laser-3-1-axilas-ingles-piernas-completas', zones: ['depilacion-laser-axilas', 'depilacion-laser-ingles-completas', 'depilacion-laser-piernas-completas'] },
+      { id: 'depilacion-laser-3-1-cuerpo-completo', zones: ['depilacion-laser-cuerpo-completo'] }
+    ];
+
+    var ENDO_PACKS = {
+      'endospheres-rostro-de-30-a-40-min': 'endospheres-3-1-rostro',
+      'endospheres-cuerpo-60-min': 'endospheres-3-1-cuerpo-60-min',
+      'endospheres-cuerpo-90-min': 'endospheres-3-1-cuerpo-90-min'
+    };
+
+    var ELECTRO_MINUTES = {
+      'electrodepilacion-30-minutos': 30,
+      'electrodepilacion-60-minutos': 60,
+      'electrodepilacion-90-minutos': 90,
+      'electrodepilacion-120-minutos': 120
+    };
+
+    var sameSet = function (a, b) {
+      if (a.length !== b.length || !a.length) return false;
+      var sa = a.slice().sort(), sb = b.slice().sort();
+      return sa.every(function (v, i) { return v === sb[i]; });
+    };
+
+    /* Exact-match packs (laser, ендосфера): a swappable {removeIds, addId, standalone}.
+       Electro: a plain {electro:true} flag, no numbers attached. */
+    var findMatch = function (ids) {
+      var laserZones = ids.filter(function (id) {
+        return id.indexOf('depilacion-laser-') === 0 && id.indexOf('-3-1-') === -1;
+      });
+      for (var p = 0; p < LASER_PACKS.length; p++) {
+        var pack = LASER_PACKS[p];
+        if (ids.indexOf(pack.id) === -1 && sameSet(laserZones, pack.zones)) {
+          /* the pack is 4 sessions, so the fair comparison is 4 one-off visits, not 1 */
+          var standalone = 4 * pack.zones.reduce(function (s, z) { return s + rowById[z].price; }, 0);
+          return { removeIds: pack.zones, addId: pack.id, standalone: standalone };
+        }
+      }
+
+      for (var single in ENDO_PACKS) {
+        if (ids.indexOf(single) !== -1 && ids.indexOf(ENDO_PACKS[single]) === -1) {
+          return { removeIds: [single], addId: ENDO_PACKS[single], standalone: 4 * rowById[single].price };
+        }
+      }
+
+      var electroIds = ids.filter(function (id) { return ELECTRO_MINUTES.hasOwnProperty(id); });
+      if (electroIds.length) return { electro: true };
+
+      return null;
+    };
+
+    var syncSuggestion = function () {
+      var match = findMatch(read().map(function (i) { return i.id; }));
+
+      if (match && match.electro) {
+        suggestionText.textContent = T.packElectroHint;
+        suggestionBtn.textContent = T.packElectroBtn;
+        suggestion.hidden = false;
+        cartBarEl.classList.add('has-suggestion');
+        return;
+      }
+
+      if (match) {
+        var pack = rowById[match.addId];
+        var save = match.standalone - pack.price;
+        if (save > 0) {
+          var label = pack.name.split(' · ').pop();
+          suggestionText.textContent = T.packLead + label + ' — ' + fmt(pack.price) + T.packSave + fmt(save);
+          suggestionBtn.textContent = T.packBtn;
+          suggestion.hidden = false;
+          cartBarEl.classList.add('has-suggestion');
+          return;
+        }
+      }
+
+      suggestion.hidden = true;
+      cartBarEl.classList.remove('has-suggestion');
+    };
+
+    suggestionBtn.addEventListener('click', function () {
+      var items = read();
+      var match = findMatch(items.map(function (i) { return i.id; }));
+      if (!match) return;
+
+      if (match.electro) {
+        document.getElementById('p-electro').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
+      var pack = rowById[match.addId];
+      var kept = items.filter(function (i) { return match.removeIds.indexOf(i.id) === -1; });
+      kept.push({ id: pack.id, name: pack.name, price: pack.price, priceFirst: null, note: null });
+      write(kept);
+    });
+
+    document.addEventListener('s56cartchange', syncSuggestion);
+    syncSuggestion();
   }
 
   /* ---------- sticky cart bar ---------- */
