@@ -5,7 +5,27 @@
 (function () {
   'use strict';
 
-  var TREATMENTS = {
+  /* Same convention as cart.js and app.js: "uk" on the /ua/ pages, "es" elsewhere. */
+  var UK = document.documentElement.lang === 'uk';
+
+  var TREATMENTS = UK ? {
+    endospheres: {
+      name: 'Ендосфера',
+      what: 'Компресійна мікровібрація: активує кровообіг, розганяє застій рідини й повертає шкірі тонус. Без голок, без відновлення, без болю.'
+    },
+    laser: {
+      name: 'Лазерна епіляція',
+      what: 'Діодний лазер 808 нм із розширеним охолодженням. Поступово прибирає волосся й лишається комфортним навіть у найчутливіших зонах.'
+    },
+    electro: {
+      name: 'Електроепіляція',
+      what: 'Єдиний метод остаточного видалення волосся, волосок за волоском. Працює з волоссям будь-якого кольору, зокрема світлим і білим.'
+    },
+    cera: {
+      name: 'Віск і шугаринг',
+      what: 'Видалення волосся з коренем воском або цукровою пастою. Гладенька шкіра того ж дня, зокрема на чутливій шкірі.'
+    }
+  } : {
     endospheres: {
       name: 'Endospheres',
       what: 'Microvibración compresiva: activa la circulación, moviliza la retención de líquidos y mejora el tono de la piel. Sin agujas, sin bajas, sin dolor.'
@@ -24,6 +44,35 @@
     }
   };
 
+  var T = UK ? {
+    occasion: 'Подарунок для вас',
+    to: 'Для вас',
+    msg: 'Час для себе — ви його заслужили.',
+    titleWith: function (name) { return name + ', для вас подарунок · Studio 56'; },
+    titlePlain: 'Для вас подарунок · Studio 56',
+    hello: 'Вітаю! У мене подарунковий сертифікат Studio 56, хочу записатися.',
+    code: 'Код: ',
+    onName: 'На імʼя: '
+  } : {
+    occasion: 'Un regalo para ti',
+    to: 'Para ti',
+    msg: 'Un rato para ti, que te lo has ganado.',
+    titleWith: function (name) { return name + ', tienes un regalo · Studio 56'; },
+    titlePlain: 'Tienes un regalo · Studio 56',
+    hello: 'Hola! Tengo un bono regalo de Studio 56 y quiero pedir cita.',
+    code: 'Código: ',
+    onName: 'A nombre de: '
+  };
+
+  var sessionWord = function (n) {
+    if (!UK) return n === 1 ? '1 sesión' : n + ' sesiones';
+    var m10 = n % 10, m100 = n % 100, w;
+    if (m10 === 1 && m100 !== 11) w = 'сеанс';
+    else if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) w = 'сеанси';
+    else w = 'сеансів';
+    return n + ' ' + w;
+  };
+
   var params = new URLSearchParams(location.search);
   var get = function (k, fallback) {
     var v = (params.get(k) || '').trim();
@@ -40,23 +89,23 @@
   var from = get('de', '');
   var code = get('cod', '');
 
-  setText('bono-occasion', get('oc', 'Un regalo para ti'));
-  setText('bono-to', to || 'Para ti');
+  setText('bono-occasion', get('oc', T.occasion));
+  setText('bono-to', to || T.to);
   setText('bono-from', from || 'Studio 56');
   setText('bono-from-2', from || 'Studio 56');
   setText('bono-treatment', treatment.name);
-  setText('bono-sessions', sessions === 1 ? '1 sesión' : sessions + ' sesiones');
+  setText('bono-sessions', sessionWord(sessions));
   setText('bono-what', treatment.what);
-  setText('bono-message', get('msg', 'Un rato para ti, que te lo has ganado.'));
+  setText('bono-message', get('msg', T.msg));
   if (code) setText('bono-code', code);
 
-  document.title = to ? to + ', tienes un regalo · Studio 56' : 'Tienes un regalo · Studio 56';
+  document.title = to ? T.titleWith(to) : T.titlePlain;
 
   // hand the studio everything it needs in the first message
-  var lines = ['Hola! Tengo un bono regalo de Studio 56 y quiero pedir cita.'];
-  if (code) lines.push('Código: ' + code);
-  lines.push(treatment.name + ' — ' + (sessions === 1 ? '1 sesión' : sessions + ' sesiones'));
-  if (to) lines.push('A nombre de: ' + to);
+  var lines = [T.hello];
+  if (code) lines.push(T.code + code);
+  lines.push(treatment.name + ' — ' + sessionWord(sessions));
+  if (to) lines.push(T.onName + to);
   var cta = document.getElementById('bono-cta');
   if (cta) cta.href = 'https://wa.me/34621070775?text=' + encodeURIComponent(lines.join('\n'));
 

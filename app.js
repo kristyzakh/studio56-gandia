@@ -185,15 +185,50 @@
   var giftCard = document.getElementById('gift-card');
 
   if (giftCard) {
-    var PRICES = {
+    var PRICES = uk ? {
+      endospheres: { unit: 65, label: 'Ендосфера', detail: 'Тіло, 60 хв за сеанс.' },
+      laser:       { unit: 43, label: 'Лазерна епіляція', detail: 'Пахви + глибоке бікіні за сеанс.' }
+    } : {
       endospheres: { unit: 65, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
       laser:       { unit: 43, label: 'Depilación Láser', detail: 'Axilas + ingles completas por sesión.' }
     };
 
-    var state = { treatment: 'endospheres', sessions: '4', occasion: 'Porque sí' };
+    /* сеанс / сеанси / сеансів — the Ukrainian card can show any of the three */
+    var sessionWord = function (n) {
+      if (!uk) return n === 1 ? '1 sesión' : n + ' sesiones';
+      var m10 = n % 10, m100 = n % 100, w;
+      if (m10 === 1 && m100 !== 11) w = 'сеанс';
+      else if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) w = 'сеанси';
+      else w = 'сеансів';
+      return n + ' ' + w;
+    };
+
+    var G = uk ? {
+      occasion: 'Просто так',
+      msg: 'Час для себе — ви його заслужили.',
+      single: 'Один сеанс.',
+      pay: function (billed, n, per) { return 'Платите за ' + sessionWord(billed) + ', даруєте ' + n + ' · ' + per + ' за сеанс.'; },
+      save: ' · економія ',
+      hello: 'Вітаю! Хочу подарунковий сертифікат:',
+      forWhom: '· Кому: ', fromWhom: '· Від: ',
+      occasionLine: '· Привід: ', msgLine: '· Повідомлення: ',
+      tbc: '(уточнимо)'
+    } : {
+      occasion: 'Porque sí',
+      msg: 'Un rato para ti, que te lo has ganado.',
+      single: 'Una sesión suelta.',
+      pay: function (billed, n, per) { return 'Pagas ' + billed + ' sesiones, regalas ' + n + ' · ' + per + ' por sesión.'; },
+      save: ' · ahorras ',
+      hello: 'Hola! Quiero un bono regalo:',
+      forWhom: '· Para: ', fromWhom: '· De: ',
+      occasionLine: '· Ocasión: ', msgLine: '· Mensaje: ',
+      tbc: '(por confirmar)'
+    };
+
+    var state = { treatment: 'endospheres', sessions: '4', occasion: G.occasion };
 
     var el = function (id) { return document.getElementById(id); };
-    var DEFAULT_MSG = 'Un rato para ti, que te lo has ganado.';
+    var DEFAULT_MSG = G.msg;
 
     var billedFor = function (n) { return n === 4 ? 3 : (n === 8 ? 6 : n); };   // 3 + 1
 
@@ -210,7 +245,7 @@
       var n = Number(state.sessions);
 
       el('gc-treatment').textContent = t.label;
-      el('gc-sessions').textContent = n === 1 ? '1 sesión' : n + ' sesiones';
+      el('gc-sessions').textContent = sessionWord(n);
       el('gc-occasion').textContent = state.occasion;
       el('gift-detail').textContent = t.detail;
       var billed = billedFor(n);
@@ -222,12 +257,12 @@
       /* a bono is a pack: never show its total without the per-session rate
          and the saving beside it */
       el('gift-saving').textContent = n === 1
-        ? 'Una sesión suelta.'
-        : 'Pagas ' + billed + ' sesiones, regalas ' + n + ' · ' + fmtEur(total / n) + ' por sesión.';
+        ? G.single
+        : G.pay(billed, n, fmtEur(total / n));
 
       el('gift-bar-total').textContent = fmtEur(total);
-      el('gift-bar-meta').textContent = (n === 1 ? '1 sesión' : n + ' sesiones')
-        + (saving > 0 ? ' · ahorras ' + fmtEur(saving) : '');
+      el('gift-bar-meta').textContent = sessionWord(n)
+        + (saving > 0 ? G.save + fmtEur(saving) : '');
 
       var to = el('gift-to').value.trim();
       var from = el('gift-from').value.trim();
@@ -239,12 +274,12 @@
 
       // hand the studio the whole order in the first WhatsApp message
       var lines = [
-        'Hola! Quiero un bono regalo:',
-        '· ' + t.label + ' — ' + (n === 1 ? '1 sesión' : n + ' sesiones') + ' (' + priceFor() + ' €)',
-        '· Ocasión: ' + state.occasion,
-        '· Para: ' + (to || '(por confirmar)'),
-        '· De: ' + (from || '(por confirmar)'),
-        '· Mensaje: ' + (msg || DEFAULT_MSG)
+        G.hello,
+        '· ' + t.label + ' — ' + sessionWord(n) + ' (' + priceFor() + ' €)',
+        G.occasionLine + state.occasion,
+        G.forWhom + (to || G.tbc),
+        G.fromWhom + (from || G.tbc),
+        G.msgLine + (msg || DEFAULT_MSG)
       ];
       el('gift-buy').href = 'https://wa.me/34621070775?text=' + encodeURIComponent(lines.join('\n'));
 
