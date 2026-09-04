@@ -1763,6 +1763,10 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 
 @media (min-width:600px){
   .contact-info .wrap{grid-template-columns:1fr 1fr;gap:32px;}
+  /* an odd number of blocks leaves the last one alone in its row with a gap
+     beside it — let that one span instead. :nth-child(odd) keeps it correct
+     if a fourth block is ever added. */
+  .contact-info .info-block:nth-child(odd):last-child{grid-column:1 / -1;}
   .contact-actions{flex-direction:row;}
   .contact-actions .btn{flex:1;}
 }
