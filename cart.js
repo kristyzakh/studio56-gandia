@@ -15,6 +15,7 @@
     unit: ['послуга', 'послуги', 'послуг'],
     priceFirstOn: 'Показано ціну першого сеансу. Натисніть, щоб побачити звичайну ціну.',
     priceFirstOff: 'Показано звичайну ціну. Натисніть, якщо це ваш перший сеанс.',
+    add: 'Додати ',
     remove: 'Прибрати ',
     sending: 'Надсилаємо…',
     hello: 'Вітаю! Хочу записатися:',
@@ -28,6 +29,7 @@
     unit: ['servicio', 'servicios', 'servicios'],
     priceFirstOn: 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.',
     priceFirstOff: 'Mostrando el precio normal. Tócalo si es tu primera sesión.',
+    add: 'Añadir ',
     remove: 'Quitar ',
     sending: 'Enviando…',
     hello: 'Hola! Quiero reservar:',
@@ -99,7 +101,9 @@
     var syncRows = function () {
       var ids = read().map(function (i) { return i.id; });
       rowButtons.forEach(function (btn) {
-        btn.setAttribute('aria-pressed', ids.indexOf(btn.dataset.id) !== -1 ? 'true' : 'false');
+        var on = ids.indexOf(btn.dataset.id) !== -1;
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        btn.setAttribute('aria-label', (on ? T.remove : T.add) + btn.dataset.name);
       });
     };
 

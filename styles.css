@@ -919,15 +919,14 @@ body{padding-bottom:82px;}
 .row-tick::before{width:10px;height:1.5px;}
 .row-tick::after{width:1.5px;height:10px;}
 .row-add[aria-pressed="true"] .row-tick{background:var(--navy);border-color:var(--navy);}
-.row-add[aria-pressed="true"] .row-tick::before{
-  width:9px;height:5px;
-  background:none;
+.row-add[aria-pressed="true"] .row-tick::before,
+.row-add[aria-pressed="true"] .row-tick::after{
+  width:11px;height:1.5px;
+  background:var(--cream);
   opacity:1;
-  border-left:1.8px solid var(--cream);
-  border-bottom:1.8px solid var(--cream);
-  transform:translate(-50%,-70%) rotate(-45deg);
 }
-.row-add[aria-pressed="true"] .row-tick::after{opacity:0;}
+.row-add[aria-pressed="true"] .row-tick::before{transform:translate(-50%,-50%) rotate(45deg);}
+.row-add[aria-pressed="true"] .row-tick::after{transform:translate(-50%,-50%) rotate(-45deg);}
 
 /* ---- sticky cart bar ---- */
 .cart-bar{
