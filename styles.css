@@ -557,11 +557,11 @@ section{padding:52px 0;}
 }
 
 .about-swipe-hint{
-  font-size:12px;
-  letter-spacing:0.08em;
+  font-size:10px;
+  letter-spacing:0.06em;
   text-transform:uppercase;
-  opacity:.55;
-  margin:0 0 24px;
+  opacity:.5;
+  margin:0 0 18px;
 }
 .facts{
   list-style:none;
