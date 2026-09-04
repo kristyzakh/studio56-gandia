@@ -91,14 +91,14 @@
   var T = UK ? {
     cookies: 'Куки',
     text: 'Ми використовуємо аналітичні куки, щоб розуміти, як користуються сайтом, і покращувати його. ' +
-          'Ви можете прийняти або відхилити їх — відмова ні на що тут не впливає. ',
+          'Ви можете прийняти або відхилити їх — відмова не вплине на роботу сайту. ',
     policy: 'Політика конфіденційності',
     accept: 'Прийняти',
     reject: 'Відхилити'
   } : {
     cookies: 'Cookies',
     text: 'Usamos cookies de análisis para entender cómo se usa la web y mejorarla. ' +
-          'Puedes aceptarlas o rechazarlas — rechazarlas no afecta a nada de lo que puedes hacer aquí. ',
+          'Puedes aceptarlas o rechazarlas — rechazarlas no afecta al funcionamiento de la web. ',
     policy: 'Política de privacidad',
     accept: 'Aceptar',
     reject: 'Rechazar'
