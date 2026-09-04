@@ -1333,6 +1333,8 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   opacity:.7;
   margin:12px 0 0;
 }
+/* under the price rows, line it up with the right-aligned amounts */
+.acc .acc-body .vat-note{text-align:right;}
 
 /* sticky in-page jump bar — four treatments is too many to scroll blindly */
 .price-jump{
