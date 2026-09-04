@@ -151,10 +151,15 @@
   font-size:11px;letter-spacing:0.16em;text-transform:uppercase;
   opacity:.55;margin:0 0 6px;
 }
+/* a code is read character by character, so it goes in the body face with
+   tabular figures — Playfair's numerals made it look like a decorative line
+   rather than something to copy down */
 .bono-code{
-  font-family:var(--display);
-  font-size:24px;
-  letter-spacing:0.04em;
+  font-family:var(--body);
+  font-weight:700;
+  font-size:21px;
+  letter-spacing:0.08em;
+  font-variant-numeric:tabular-nums;
   margin:0 0 30px;
 }
 
