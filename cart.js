@@ -26,6 +26,7 @@
     notes: 'Нотатки: ',
     saveRe: /економія|заощад/i,
     packLead: 'Вигідніше пакетом: ',
+    packLeadPartial: 'Частину зон вигідніше пакетом: ',
     packSave: ' — економія ',
     packBtn: 'Застосувати пакет',
     packElectroHint: 'Плануєте кілька сеансів електроепіляції? Пакет годин виходить дешевше за годину.',
@@ -45,6 +46,7 @@
     notes: 'Notas: ',
     saveRe: /ahorras/i,
     packLead: 'Más barato en pack: ',
+    packLeadPartial: 'Parte de las zonas sale mejor en pack: ',
     packSave: ' — ahorras ',
     packBtn: 'Aplicar el pack',
     packElectroHint: '¿Vas a hacer varias sesiones de electrodepilación? Un pack de horas sale más barato por hora.',
@@ -232,20 +234,42 @@
       return sa.every(function (v, i) { return v === sb[i]; });
     };
 
-    /* Exact-match packs (laser, ендосфера): a swappable {removeIds, addId, standalone}.
-       Electro: a plain {electro:true} flag, no numbers attached. */
+    /* Laser and ендосфера return a swappable {removeIds, addId, standalone};
+       electro is a plain {electro:true} flag, with no numbers attached.
+
+       A pack counts when everything it covers is already selected — it does NOT have
+       to be the whole selection. Picking axilas + ingles + brazos should still hear
+       about the axilas + ingles pack, with brazos simply staying a separate line;
+       requiring an exact set match meant that case said nothing at all. */
     var findMatch = function (ids) {
       var laserZones = ids.filter(function (id) {
         return id.indexOf('depilacion-laser-') === 0 && id.indexOf('-3-1-') === -1;
       });
+
+      var best = null;
       for (var p = 0; p < LASER_PACKS.length; p++) {
         var pack = LASER_PACKS[p];
-        if (ids.indexOf(pack.id) === -1 && sameSet(laserZones, pack.zones)) {
-          /* the pack is 4 sessions, so the fair comparison is 4 one-off visits, not 1 */
-          var standalone = 4 * pack.zones.reduce(function (s, z) { return s + rowById[z].price; }, 0);
-          return { removeIds: pack.zones, addId: pack.id, standalone: standalone };
+        if (ids.indexOf(pack.id) !== -1) continue;
+
+        var coversAll = pack.zones.every(function (z) { return laserZones.indexOf(z) !== -1; });
+        if (!coversAll) continue;
+
+        /* the pack is 4 sessions, so the fair comparison is 4 one-off visits, not 1 */
+        var standalone = 4 * pack.zones.reduce(function (s, z) { return s + rowById[z].price; }, 0);
+        var save = standalone - rowById[pack.id].price;
+
+        /* several packs can fit at once (packs 1-3 nest); offer the biggest saving */
+        if (save > 0 && (!best || save > best.save)) {
+          best = {
+            removeIds: pack.zones,
+            addId: pack.id,
+            standalone: standalone,
+            save: save,
+            partial: pack.zones.length < laserZones.length
+          };
         }
       }
+      if (best) return best;
 
       for (var single in ENDO_PACKS) {
         if (ids.indexOf(single) !== -1 && ids.indexOf(ENDO_PACKS[single]) === -1) {
@@ -275,7 +299,8 @@
         var save = match.standalone - pack.price;
         if (save > 0) {
           var label = pack.name.split(' · ').pop();
-          suggestionText.textContent = T.packLead + label + ' — ' + fmt(pack.price) + T.packSave + fmt(save);
+          var lead = match.partial ? T.packLeadPartial : T.packLead;
+          suggestionText.textContent = lead + label + ' — ' + fmt(pack.price) + T.packSave + fmt(save);
           suggestionBtn.textContent = T.packBtn;
           suggestion.hidden = false;
           cartBarEl.classList.add('has-suggestion');
