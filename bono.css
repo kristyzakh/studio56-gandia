@@ -141,8 +141,8 @@
   z-index:55;
   pointer-events:none;
   background:linear-gradient(180deg,var(--rose) 0%,var(--cream) 100%);
-  /* parked 124 % down so the dome that sticks out above it is off-screen too */
-  transform:translateY(124%);
+  /* parked well clear so the dome and its blur halo start off-screen too */
+  transform:translateY(132%);
   will-change:transform;
 }
 
@@ -154,12 +154,21 @@
 .bono-veil::before{
   content:"";
   position:absolute;
-  left:-20%;
-  width:140%;
-  bottom:calc(100% - 1px);   /* overlap, or a subpixel seam shows at the join */
-  height:18vh;
+  left:-25%;
+  width:150%;
+  /* The dome's opaque core is buried 70 px inside the veil — deeper than the
+     blur radius. Blur softens a shape's bottom edge as much as its top, and
+     at a 2 px overlap that falloff landed just above the veil's own edge and
+     drew the very line the fog is meant to abolish. */
+  bottom:calc(100% - 70px);
+  height:calc(22vh + 70px);
   background:var(--rose);
   border-radius:50% 50% 0 0 / 100% 100% 0 0;
+  /* Blurred, so the leading edge is weather rather than geometry: the arc is
+     felt as a swell gathering in the middle instead of seen as an outline.
+     Only the dome is blurred — the veil under it is opaque and the same
+     colour, so the join never shows. */
+  filter:blur(26px);
 }
 .bono-veil.is-up{transform:translateY(0);transition:transform .42s cubic-bezier(.45,0,.55,1);}
 .bono-veil.is-gone{transform:translateY(-100%);transition:transform .52s cubic-bezier(.22,1,.28,1);}
