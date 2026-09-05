@@ -108,6 +108,9 @@
      wax is per zone, so they stay at one session whatever the toggle says. */
   var OFFER_PREFIXES = ['depilacion-laser-', 'endospheres-'];
   var offerable = function (item) {
+    /* A 3 + 1 row on the price list already is four sessions; multiplying it
+       again would quote twelve. Only single sessions can take the offer. */
+    if (item.id.indexOf('-3-1-') !== -1) return false;
     return OFFER_PREFIXES.some(function (pre) { return item.id.indexOf(pre) === 0; });
   };
 
