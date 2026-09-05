@@ -257,18 +257,21 @@
     root.insertBefore(note, mount);
   }
 
-  var step = function (n, title, done, body) {
-    var s = el('section', 'bk-step' + (done ? ' is-done' : ''));
+  /* label on top, answer underneath, exactly like every other field on the
+     site. The number stays, quietly, because progress is worth showing. */
+  var step = function (n, label, value, onChange, body) {
+    var s = el('section', 'bk-step' + (onChange ? ' is-done' : ''));
     var head = el('div', 'bk-step-head');
     head.appendChild(el('span', 'bk-step-n', String(n)));
-    head.appendChild(el('span', 'bk-step-t', title));
-    if (done) {
+    head.appendChild(el('span', 'bk-step-t', label));
+    if (onChange) {
       var btn = el('button', 'bk-change', T.change);
       btn.type = 'button';
-      btn.addEventListener('click', done);
+      btn.addEventListener('click', onChange);
       head.appendChild(btn);
     }
     s.appendChild(head);
+    if (value) s.appendChild(el('p', 'bk-step-v', value));
     if (body) s.appendChild(body);
     return s;
   };
@@ -297,7 +300,7 @@
           });
           list.appendChild(b);
         });
-        mount.appendChild(step(n, T.pickService, null, list));
+        mount.appendChild(step(n, T.steps[0], null, null, list));
         return;
       }
 
@@ -319,16 +322,10 @@
         list.appendChild(b);
       });
 
-      if (state.category) {
-        var back = el('button', 'bk-more', T.otherCategories);
-        back.type = 'button';
-        back.addEventListener('click', function () { state.category = null; render(); });
-        list.appendChild(back);
-      }
-      mount.appendChild(step(n, state.category ? state.category.title : T.pickService, null, list));
+      mount.appendChild(step(n, T.steps[0], state.category ? state.category.title : null, state.category ? function () { state.category = null; render(); } : null, list));
       return;
     }
-    mount.appendChild(step(n, state.service.title, function () {
+    mount.appendChild(step(n, T.steps[0], state.service.title, function () {
       state.service = null; state.category = null;
       state.staff = null; state.date = null; state.time = null; render();
     }));
@@ -357,10 +354,10 @@
         });
         slist.appendChild(b);
       });
-      mount.appendChild(step(n, T.steps[1], null, slist));
+      mount.appendChild(step(n, T.steps[1], null, null, slist));
       return;
     }
-    mount.appendChild(step(n, state.staff.name, function () {
+    mount.appendChild(step(n, T.steps[1], state.staff.name, function () {
       state.staff = null; state.date = null; state.time = null; render();
     }));
 
@@ -394,10 +391,10 @@
           wrap.appendChild(more);
         }
       }
-      mount.appendChild(step(n, T.pickDate, null, wrap));
+      mount.appendChild(step(n, T.steps[2], null, null, wrap));
       return;
     }
-    mount.appendChild(step(n, human(state.date), function () {
+    mount.appendChild(step(n, T.steps[2], human(state.date), function () {
       state.date = null; state.time = null; render();
     }));
 
@@ -418,14 +415,14 @@
         });
         box.appendChild(grid);
       }
-      mount.appendChild(step(n, T.pickTime, null, box));
+      mount.appendChild(step(n, T.steps[3], null, null, box));
       return;
     }
-    mount.appendChild(step(n, state.time.time, function () { state.time = null; render(); }));
+    mount.appendChild(step(n, T.steps[3], state.time.time, function () { state.time = null; render(); }));
 
     /* 5 · details */
     n++;
-    mount.appendChild(step(n, T.steps[4], null, form()));
+    mount.appendChild(step(n, T.steps[4], null, null, form()));
   };
 
   var form = function () {
