@@ -144,8 +144,25 @@
   transform:translateY(100%);
   will-change:transform;
 }
-.bono-veil.is-up{transform:translateY(0);transition:transform .52s cubic-bezier(.45,0,.55,1);}
-.bono-veil.is-gone{transform:translateY(-100%);transition:transform .62s cubic-bezier(.22,1,.28,1);}
+.bono-veil.is-up{transform:translateY(0);transition:transform .42s cubic-bezier(.45,0,.55,1);}
+.bono-veil.is-gone{transform:translateY(-100%);transition:transform .52s cubic-bezier(.22,1,.28,1);}
+
+/* The foot of the curtain is the last thing the eye sees, and what waits
+   underneath is navy. So navy gathers there in stripes — sparse at first,
+   denser toward the edge, solid at the very end — and the two surfaces melt
+   into each other instead of meeting at a hard line. Two stripe periods so
+   the texture reads as a gradient of density, not as a pattern. */
+.bono-veil::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,transparent 91%,var(--navy) 100%),
+    repeating-linear-gradient(180deg,var(--navy) 0 3px,transparent 3px 11px),
+    repeating-linear-gradient(180deg,var(--navy) 0 6px,transparent 6px 27px);
+  -webkit-mask-image:linear-gradient(180deg,transparent 44%,rgba(0,0,0,.45) 72%,#000 100%);
+          mask-image:linear-gradient(180deg,transparent 44%,rgba(0,0,0,.45) 72%,#000 100%);
+}
 
 .bono-confetti{
   position:fixed;

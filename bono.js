@@ -241,16 +241,16 @@
       veil.setAttribute('aria-hidden', 'true');
       document.body.appendChild(veil);
 
-      window.setTimeout(function () { veil.classList.add('is-up'); }, 560);
+      window.setTimeout(function () { veil.classList.add('is-up'); }, 480);
 
       window.setTimeout(function () {
         gift.scrollIntoView({ block: 'start' });   // instant: nobody sees it
         veil.classList.remove('is-up');
         veil.classList.add('is-gone');
         if (window.studio56BonoUpdate) window.studio56BonoUpdate();
-      }, 1260);
+      }, 1020);
 
-      window.setTimeout(function () { veil.remove(); }, 1950);
+      window.setTimeout(function () { veil.remove(); }, 1600);
     }, { once: true });
   }
 
