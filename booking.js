@@ -491,7 +491,38 @@
        hard to check against the phone in your other hand, and a wrong number is
        a booking the studio cannot confirm. The caret is put back after the same
        digit it was after, or typing in the middle would throw it to the end. */
+    /* Every country groups its numbers its own way, and threes-for-everyone left
+       a Ukrainian number reading "287 319 1" — a stray digit that looks like a
+       typo at the exact moment somebody is checking their own number. */
+    var GROUPS = {
+      '+34':  [3, 3, 3],          // 600 111 222
+      '+380': [2, 3, 2, 2],       // 67 123 45 67
+      '+7':   [3, 3, 2, 2],       // 912 345 67 89
+      '+44':  [4, 3, 4],          // 7911 123 4567
+      '+49':  [3, 3, 4],
+      '+33':  [1, 2, 2, 2, 2],    // 6 12 34 56 78
+      '+40':  [3, 3, 3],
+      '+212': [3, 3, 3]
+    };
+
+    var group = function (digits, code) {
+      var pattern = GROUPS[code] || [3, 3, 3];
+      var out = [], i = 0, k = 0;
+      while (i < digits.length) {
+        var size = pattern[k] || 3;   // past the pattern, carry on in threes
+        out.push(digits.slice(i, i + size));
+        i += size; k++;
+      }
+      return out.join(' ');
+    };
+
     var phone = f.querySelector('#bk-phone');
+    var prefix = f.querySelector('#bk-prefix');
+    prefix.addEventListener('change', function () {
+      /* regroup what is already typed: the same digits split differently */
+      phone.value = group(phone.value.replace(/\D/g, ''), prefix.value);
+    });
+
     phone.addEventListener('input', function () {
       var caret = phone.selectionStart;
       var raw = phone.value;
@@ -502,14 +533,14 @@
          swallowed into the number — 346 001 112 22 — and the studio would call
          a number that does not exist. The code is already chosen in the select
          beside this field, so drop it when it is clearly there. */
-      var cc = f.querySelector('#bk-prefix').value.replace('+', '');
+      var cc = prefix.value.replace('+', '');
       if ((raw.indexOf('+') !== -1 || digits.length > 9) && digits.indexOf(cc) === 0) {
         var cut = cc.length;
         digits = digits.slice(cut);
         before = Math.max(0, before - cut);
       }
       digits = digits.slice(0, 15);
-      var out = digits.replace(/(\d{3})(?=\d)/g, '$1 ');
+      var out = group(digits, prefix.value);
       if (out === phone.value) return;
       phone.value = out;
       var pos = 0, seen = 0;
