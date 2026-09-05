@@ -36,9 +36,9 @@
     otherCategories: '← Інші процедури',
     optionsWord: function (n) {
       var m10 = n % 10, m100 = n % 100;
-      if (m10 === 1 && m100 !== 11) return ' варіант';
-      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return ' варіанти';
-      return ' варіантів';
+      if (m10 === 1 && m100 !== 11) return ' послуга';
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return ' послуги';
+      return ' послуг';
     },
     name: 'Як вас звати',
     namePh: 'Імʼя та прізвище',
@@ -80,7 +80,7 @@
     more: 'Ver dos semanas más',
     change: 'Atrás',
     otherCategories: '← Otros tratamientos',
-    optionsWord: function (n) { return n === 1 ? ' opción' : ' opciones'; },
+    optionsWord: function (n) { return n === 1 ? ' servicio' : ' servicios'; },
     name: 'Cómo te llamas',
     namePh: 'Nombre y apellidos',
     phone: 'Teléfono',
