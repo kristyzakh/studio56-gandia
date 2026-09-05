@@ -379,7 +379,7 @@
 
         var name = document.createElement('span');
         name.className = 'cart-peek-name';
-        name.textContent = item.name;
+        name.textContent = lineName(item);
 
         var price = document.createElement('span');
         price.className = 'cart-peek-price';
