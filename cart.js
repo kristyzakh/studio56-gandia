@@ -81,12 +81,24 @@
     document.dispatchEvent(new CustomEvent('s56cartchange'));
   };
 
+  /* Kept for the visit, not for ever. "Is this your first session" is a fact
+     about a person on a particular day, not a preference: somebody who once
+     tapped to see the normal price would otherwise never be shown the
+     introductory one again, on any later visit. Session storage still carries
+     the answer from the price list to the booking page, which is what it is
+     needed for. */
+  var firstStore = function () {
+    try { return window.sessionStorage; } catch (e) { return null; }
+  };
+
   var isFirst = function () {
-    return window.localStorage.getItem(KEY_FIRST) !== '0';
+    var s = firstStore();
+    return !s || s.getItem(KEY_FIRST) !== '0';
   };
 
   var setFirst = function (on) {
-    try { window.localStorage.setItem(KEY_FIRST, on ? '1' : '0'); } catch (e) {}
+    var s = firstStore();
+    try { if (s) s.setItem(KEY_FIRST, on ? '1' : '0'); } catch (e) {}
     document.dispatchEvent(new CustomEvent('s56cartchange'));
   };
 
