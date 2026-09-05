@@ -45,8 +45,6 @@
     phone: 'Телефон',
     email: 'Пошта',
     optional: '(необовʼязково)',
-    comment: 'Щось, що нам варто знати',
-    commentPh: 'Алергії, поточні процедури…',
     consent: 'Погоджуюся з <a href="privacidad.html">політикою конфіденційності</a> і на те, щоб Studio 56 звʼязалася зі мною.',
     submit: 'Записатися',
     sending: 'Записуємо…',
@@ -87,8 +85,6 @@
     phone: 'Teléfono',
     email: 'Email',
     optional: '(opcional)',
-    comment: 'Algo que debamos saber',
-    commentPh: 'Alergias, tratamientos en curso…',
     consent: 'Acepto la <a href="privacidad.html">política de privacidad</a> y que Studio 56 se ponga en contacto conmigo.',
     submit: 'Reservar',
     sending: 'Reservando…',
@@ -485,8 +481,6 @@
       '<input type="tel" id="bk-phone" inputmode="tel" autocomplete="tel-national" placeholder="600 000 000" required></div></div>' +
       '<div class="field"><label for="bk-email">' + T.email + ' <span class="optional">' + T.optional + '</span></label>' +
       '<input type="email" id="bk-email" autocomplete="email"></div>' +
-      '<div class="field"><label for="bk-comment">' + T.comment + ' <span class="optional">' + T.optional + '</span></label>' +
-      '<textarea id="bk-comment" rows="2" placeholder="' + T.commentPh + '"></textarea></div>' +
       '<label class="consent"><input type="checkbox" id="bk-consent" required><span>' + T.consent + '</span></label>' +
       '<p class="bk-error" id="bk-error" hidden></p>' +
       '<button type="submit" class="btn btn-primary btn-block" id="bk-submit" disabled>' + T.submit + '</button>';
@@ -552,7 +546,6 @@
            list email as not required, so asking for it would be our rule, not
            the studio's — and every required field costs bookings. */
         email: f.querySelector('#bk-email').value.trim(),
-        comment: f.querySelector('#bk-comment').value.trim() || undefined,
         appointments: [{
           id: 1,
           services: [state.service.id],

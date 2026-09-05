@@ -23,7 +23,6 @@
     name: 'Імʼя: ',
     phone: 'Телефон: ',
     datePref: 'Бажана дата: ',
-    notes: 'Нотатки: ',
     saveRe: /економія|заощад/i,
     packLead: 'Вигідніше пакетом: ',
     packLeadPartial: 'Частину зон вигідніше пакетом: ',
@@ -43,7 +42,6 @@
     name: 'Nombre: ',
     phone: 'Teléfono: ',
     datePref: 'Fecha preferida: ',
-    notes: 'Notas: ',
     saveRe: /ahorras/i,
     packLead: 'Más barato en pack: ',
     packLeadPartial: 'Parte de las zonas sale mejor en pack: ',
@@ -532,7 +530,6 @@
         fecha_preferida: data.get('fecha'),
         franja_preferida: data.get('franja'),
         primera_sesion: isFirst(),
-        notas: data.get('notas') || '',
         servicios: items.map(function (i) {
           return { nombre: i.name, precio: i.price, precio_aplicado: linePrice(i) };
         }),
@@ -569,7 +566,6 @@
         lines.push(T.name + payload.nombre);
         lines.push(T.phone + telefono);
         lines.push(T.datePref + payload.fecha_preferida + ' (' + payload.franja_preferida + ')');
-        if (payload.notas) lines.push(T.notes + payload.notas);
         window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n')), '_blank');
         done();
         return;
