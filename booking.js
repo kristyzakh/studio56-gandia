@@ -63,6 +63,7 @@
     errEmail: 'Перевірте адресу пошти — вона потрібна для запису.',
     errPhone: 'Перевірте номер телефону.',
     errNet: 'Не вдалося звʼязатися зі студією. Спробуйте ще раз або напишіть у WhatsApp.',
+    errNoProof: 'Не вдалося підтвердити, що запис створився. Напишіть нам у WhatsApp, щоб не вийшло подвійного запису.',
     mock: 'Демонстраційний режим: показані вигадані вікна, запис не створюється.',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
@@ -103,6 +104,7 @@
     errEmail: 'Revisa el email — hace falta para reservar.',
     errPhone: 'Revisa el número de teléfono.',
     errNet: 'No hemos podido conectar con el estudio. Inténtalo otra vez o escríbenos por WhatsApp.',
+    errNoProof: 'No hemos podido confirmar que la cita se haya creado. Escríbenos por WhatsApp para no duplicarla.',
     mock: 'Modo demostración: los huecos son inventados y no se crea ninguna reserva.',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
     months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -558,6 +560,16 @@
 
       api.record(payload).then(function (data) {
         var rec = (data && data[0]) || {};
+
+        /* Altegio answered, but without a record id there is nothing proving an
+           appointment exists. Telling somebody they are booked on that basis is
+           a guess, and the one thing this form must never do is guess. */
+        if (!rec.record_id) {
+          var blind = new Error('no record id');
+          blind.noProof = true;
+          throw blind;
+        }
+
         track('booking_success', { record: rec.record_id });
         /* A booking deserves a page, not a swapped-out panel: the person gets
            something that looks like a confirmation and can be kept, and the
@@ -574,7 +586,8 @@
         var box = f.querySelector('#bk-error');
         var fields = err.fields ? Object.keys(err.fields) : [];
         box.textContent =
-            err.code === 437 ? T.errBusy
+            err.noProof ? T.errNoProof
+          : err.code === 437 ? T.errBusy
           : err.code === 436 || err.code === 433 ? T.errStaff
           : fields.indexOf('email') !== -1 || err.code === 400 ? T.errEmail
           : fields.indexOf('phone') !== -1 ? T.errPhone
