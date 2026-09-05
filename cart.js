@@ -26,6 +26,10 @@
     saveRe: /економія|заощад/i,
     offerLead: 'З акцією 3 + 1 чотири сеанси — ',
     offerInstead: ' замість ',
+    courseOff: 'Порахувати курс 3 + 1',
+    courseOn: 'Ціна за курс — 4 сеанси',
+    courseHint: 'Показано ціну курсу. Окремими сеансами вийшло б ',
+    courseTag: ' · курс 4 сеанси',
     packElectroHint: 'Плануєте кілька сеансів електроепіляції? Пакет годин виходить дешевше за годину.',
     packElectroBtn: 'Переглянути пакети'
   } : {
@@ -43,6 +47,10 @@
     saveRe: /ahorras/i,
     offerLead: 'Con el 3 + 1, cuatro sesiones — ',
     offerInstead: ' en vez de ',
+    courseOff: 'Calcular el curso 3 + 1',
+    courseOn: 'Precio del curso — 4 sesiones',
+    courseHint: 'Precio del curso. Sesión a sesión saldría ',
+    courseTag: ' · curso de 4 sesiones',
     packElectroHint: '¿Vas a hacer varias sesiones de electrodepilación? Un pack de horas sale más barato por hora.',
     packElectroBtn: 'Ver los packs'
   };
@@ -84,7 +92,31 @@
 
   /* Price actually charged for a line: the −20 % first-session rate only exists
      on single Endospheres sessions, and only while the client says it's their first. */
+  /* 3 + 1 applies to laser and endospheres only; electro sells hour bundles and
+     wax is per zone, so they stay at one session whatever the toggle says. */
+  var OFFER_PREFIXES = ['depilacion-laser-', 'endospheres-'];
+  var offerable = function (item) {
+    return OFFER_PREFIXES.some(function (pre) { return item.id.indexOf(pre) === 0; });
+  };
+
+  var COURSE_KEY = 's56-course';
+  var isCourse = function () {
+    try { return localStorage.getItem(COURSE_KEY) === '1'; } catch (e) { return false; }
+  };
+  var setCourse = function (on) {
+    try { on ? localStorage.setItem(COURSE_KEY, '1') : localStorage.removeItem(COURSE_KEY); } catch (e) {}
+  };
+
+  /* The studio must see what the visitor actually chose, not a price we
+     reverse-engineered: a line booked as a course says so. */
+  var lineName = function (item) {
+    return item.name + (isCourse() && offerable(item) ? T.courseTag : '');
+  };
+
   var linePrice = function (item) {
+    /* four sessions, pay for three — and never off the first-session rate, which
+       is an introductory price and does not compound with the offer */
+    if (isCourse() && offerable(item)) return 3 * item.price;
     return (isFirst() && item.priceFirst) ? item.priceFirst : item.price;
   };
 
@@ -208,8 +240,6 @@
        four sessions of what is already picked would cost under it. The old
        engine matched hard-coded pack rows; those rows are gone from the price
        list now, and matching them would have thrown on the first lookup. */
-    var OFFER_PREFIXES = ['depilacion-laser-', 'endospheres-'];
-
     var ELECTRO_MINUTES = {
       'electrodepilacion-30-minutos': 30,
       'electrodepilacion-60-minutos': 60,
@@ -221,16 +251,14 @@
       var items = read();
       var ids = items.map(function (i) { return i.id; });
 
-      var eligible = items.filter(function (i) {
-        return OFFER_PREFIXES.some(function (pre) { return i.id.indexOf(pre) === 0; });
-      });
+      var eligible = items.filter(offerable);
 
       if (eligible.length) {
-        /* Per-session prices only, and never the first-session rate: that one is
-           an introductory price and does not stack with the offer. */
         var perVisit = eligible.reduce(function (s, i) { return s + rowById[i.id].price; }, 0);
         if (perVisit > 0) {
-          suggestionText.textContent = T.offerLead + fmt(3 * perVisit) + T.offerInstead + fmt(4 * perVisit);
+          suggestionText.textContent = isCourse()
+            ? T.courseHint + fmt(4 * perVisit)
+            : T.offerLead + fmt(3 * perVisit) + T.offerInstead + fmt(4 * perVisit);
           suggestionBtn.hidden = true;
           suggestion.hidden = false;
           cartBarEl.classList.add('has-suggestion');
@@ -260,6 +288,27 @@
 
     document.addEventListener('s56cartchange', syncSuggestion);
     syncSuggestion();
+  }
+
+  /* ---------- course toggle ---------- */
+  var courseBtn = document.getElementById('cart-course');
+
+  if (courseBtn) {
+    var courseLabel = document.getElementById('cart-course-label');
+    var syncCourse = function () {
+      var on = isCourse();
+      var any = read().some(offerable);
+      courseBtn.hidden = !any;               // nothing to apply it to
+      courseBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      courseLabel.textContent = on ? T.courseOn : T.courseOff;
+    };
+    courseBtn.addEventListener('click', function () {
+      setCourse(!isCourse());
+      syncCourse();
+      document.dispatchEvent(new CustomEvent('s56cartchange'));
+    });
+    document.addEventListener('s56cartchange', syncCourse);
+    syncCourse();
   }
 
   /* ---------- sticky cart bar ---------- */
@@ -369,13 +418,16 @@
       list.textContent = '';
       items.forEach(function (item) {
         var charged = linePrice(item);
-        var discounted = charged !== item.price;
+        /* Strike through the old price only when the new one is lower. A course
+           costs more than one session by design, and "28 € 84 €" with the 28
+           crossed out reads as a price rise, not as four sessions. */
+        var discounted = charged < item.price;
 
         var li = document.createElement('li');
 
         var label = document.createElement('span');
         label.className = 'row-label';
-        label.textContent = item.name;
+        label.textContent = lineName(item);
 
         if (item.note) {
           var note = document.createElement('span');
@@ -450,10 +502,10 @@
         franja_preferida: data.get('franja'),
         primera_sesion: isFirst(),
         servicios: items.map(function (i) {
-          return { nombre: i.name, precio: i.price, precio_aplicado: linePrice(i) };
+          return { nombre: lineName(i), precio: i.price, precio_aplicado: linePrice(i) };
         }),
         servicios_texto: items.map(function (i) {
-          return i.name + ' (' + fmt(linePrice(i)) + ')';
+          return lineName(i) + ' (' + fmt(linePrice(i)) + ')';
         }).join(' | '),
         total: total(items),
 
@@ -480,7 +532,7 @@
 
       if (!BOOKING_ENDPOINT) {
         var lines = [T.hello];
-        items.forEach(function (i) { lines.push('· ' + i.name + ' — ' + fmt(linePrice(i))); });
+        items.forEach(function (i) { lines.push('· ' + lineName(i) + ' — ' + fmt(linePrice(i))); });
         lines.push(T.total + fmt(total(items)));
         lines.push(T.name + payload.nombre);
         lines.push(T.phone + telefono);

@@ -1015,16 +1015,22 @@ button.cart-bar-info{
 .cart-peek .row-remove::after{background:var(--cream);opacity:.8;}
 .pack-suggestion{
   flex:1 1 100%;
-  order:-1;
+  /* below the total, not above it: this is a footnote about the price, and a
+     footnote that sits over the number it annotates competes with it */
+  order:1;
   display:flex;
   align-items:center;
   justify-content:space-between;
   gap:10px;
   padding-bottom:9px;
   margin-bottom:2px;
-  border-bottom:1px solid rgba(252,243,238,0.18);
-  font-size:12.5px;
-  line-height:1.35;
+  border-top:1px solid rgba(252,243,238,0.18);
+  border-bottom:0;
+  padding:9px 0 0;
+  margin:2px 0 0;
+  font-size:11.5px;
+  line-height:1.4;
+  opacity:.8;
 }
 .pack-suggestion[hidden]{display:none;}
 .pack-suggestion span{flex:1 1 auto;min-width:0;}
@@ -1940,3 +1946,31 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 .offer-note p{margin:0;font-size:14.5px;line-height:1.55;color:var(--charcoal);}
 
 .acc-note{margin:14px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:rgba(186,156,164,.14);font-size:13.5px;line-height:1.5;}
+
+/* course toggle: the 3 + 1 offer as a choice the visitor makes, not a price we
+   quietly apply for them */
+.cart-course{
+  flex:1 1 100%;
+  order:-1;
+  display:flex;align-items:center;gap:9px;
+  padding:0 0 9px;margin:0 0 2px;
+  border:0;border-bottom:1px solid rgba(252,243,238,0.18);
+  background:none;color:inherit;
+  font-family:var(--body);font-size:13px;text-align:left;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.cart-course-box{
+  flex:0 0 auto;width:17px;height:17px;
+  border:1.5px solid currentColor;border-radius:5px;
+  opacity:.6;position:relative;
+  transition:opacity .15s ease, background-color .15s ease;
+}
+.cart-course[aria-pressed="true"] .cart-course-box{
+  opacity:1;background:var(--cream);
+}
+.cart-course[aria-pressed="true"] .cart-course-box::after{
+  content:"";position:absolute;left:5px;top:1px;
+  width:4px;height:9px;
+  border-right:2px solid var(--navy);border-bottom:2px solid var(--navy);
+  transform:rotate(45deg);
+}
