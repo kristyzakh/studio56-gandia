@@ -180,17 +180,17 @@
   }
 
   /* ---------- bono regalo: live card preview + price ----------
-     Prices follow the studio's existing 3 + 1 mechanic: 4 sessions cost 3,
-     8 sessions cost 6. Endospheres figures match the printed price list. */
+     Prices come straight from the price list's 3 + 1 packs, so a bono never
+     costs more than walking in and buying the same thing. */
   var giftCard = document.getElementById('gift-card');
 
   if (giftCard) {
     var PRICES = uk ? {
-      endospheres: { unit: 65, first: 52, label: 'Ендосфера', detail: 'Тіло, 60 хв за сеанс.' },
-      laser:       { unit: 43, label: 'Лазерна епіляція', detail: 'Пахви + глибоке бікіні за сеанс.' }
+      endospheres: { unit: 65, first: 52, pack4: 195, pack8: 390, label: 'Ендосфера', detail: 'Тіло, 60 хв за сеанс.' },
+      laser:       { unit: 43, pack4: 120, pack8: 240, label: 'Лазерна епіляція', detail: 'Пахви + глибоке бікіні за сеанс.' }
     } : {
-      endospheres: { unit: 65, first: 52, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
-      laser:       { unit: 43, label: 'Depilación Láser', detail: 'Axilas + ingles completas por sesión.' }
+      endospheres: { unit: 65, first: 52, pack4: 195, pack8: 390, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
+      laser:       { unit: 43, pack4: 120, pack8: 240, label: 'Depilación Láser', detail: 'Axilas + ingles completas por sesión.' }
     };
 
     /* сеанс / сеанси / сеансів — the Ukrainian card can show any of the three */
@@ -255,7 +255,11 @@
       var t = PRICES[state.treatment];
       var n = Number(state.sessions);
       if (n === 1 && t.first) return t.first;
-      return t.unit * billedFor(n);
+      /* Multi-session bonos are sold at the price list's own pack price. The
+         laser 3 + 1 costs 120 €, not 3 × 43 € — charging the giver the
+         arithmetic would have them pay 9 € more than the person they are
+         giving it to would pay at the counter. */
+      return t['pack' + n] || t.unit * billedFor(n);
     };
 
     var fmtEur = function (n) {
