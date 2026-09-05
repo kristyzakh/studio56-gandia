@@ -1,7 +1,7 @@
 /* Studio 56 — recipient gift page.
    Everything comes from the URL, so a bono is just a link: no accounts,
    no database. Example:
-   bono.html?para=Elena&de=Anna&t=endospheres&n=4&oc=Feliz%20cumpleaños&msg=...&cod=S56-1042 */
+   bono.html?para=Elena&de=Anna&t=endospheres&n=4&oc=Feliz%20cumpleaños&msg=...&cod=S56-1042&hasta=2027-09-05 */
 (function () {
   'use strict';
 
@@ -52,7 +52,9 @@
     titlePlain: 'Для вас подарунок · Studio 56',
     hello: 'Вітаю! У мене подарунковий сертифікат Studio 56, хочу записатися.',
     code: 'Код: ',
-    onName: 'На імʼя: '
+    onName: 'На імʼя: ',
+    validUntil: 'Дійсний до ',
+    locale: 'uk-UA'
   } : {
     occasion: 'Un regalo para ti',
     to: 'Para ti',
@@ -61,7 +63,9 @@
     titlePlain: 'Tienes un regalo · Studio 56',
     hello: 'Hola! Tengo un bono regalo de Studio 56 y quiero pedir cita.',
     code: 'Código: ',
-    onName: 'A nombre de: '
+    onName: 'A nombre de: ',
+    validUntil: 'Válido hasta el ',
+    locale: 'es-ES'
   };
 
   var sessionWord = function (n) {
@@ -98,6 +102,22 @@
   setText('bono-what', treatment.what);
   setText('bono-message', get('msg', T.msg));
   if (code) setText('bono-code', code);
+
+  /* The expiry only shows when the link actually carries one: an invented
+     date on somebody's gift would be worse than no date at all. */
+  var until = get('hasta', '');
+  if (until) {
+    var ymd = until.split('-');
+    var day = new Date(+ymd[0], +ymd[1] - 1, +ymd[2]);
+    if (ymd.length === 3 && !isNaN(day.getTime())) {
+      var validEl = document.getElementById('bono-valid');
+      var pretty = day.toLocaleDateString(T.locale, {
+        day: 'numeric', month: 'long', year: 'numeric'
+      }).replace(/\s*р\.$/, '');   // uk-UA appends "р."; too clerical for a gift
+      setText('bono-valid', T.validUntil + pretty);
+      if (validEl) validEl.hidden = false;
+    }
+  }
 
   document.title = to ? T.titleWith(to) : T.titlePlain;
 

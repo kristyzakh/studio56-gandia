@@ -311,9 +311,15 @@
       el('gift-buy').href = 'https://wa.me/34621070775?text=' + encodeURIComponent(lines.join('\n'));
 
       // same selection, rendered as the recipient will see it
+      /* a year from today, because that is when this one would be bought */
+      var until = new Date();
+      until.setFullYear(until.getFullYear() + 1);
+      var pad2 = function (x) { return (x < 10 ? '0' : '') + x; };
+
       var q = new URLSearchParams({
         para: to, de: from, t: state.treatment, n: state.sessions,
-        msg: msg || DEFAULT_MSG
+        msg: msg || DEFAULT_MSG,
+        hasta: until.getFullYear() + '-' + pad2(until.getMonth() + 1) + '-' + pad2(until.getDate())
       });
       el('gift-preview').href = 'bono.html?' + q.toString();
 

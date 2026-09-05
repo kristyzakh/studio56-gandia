@@ -192,6 +192,10 @@
 }
 .bono-steps b{display:block;}
 
+.bono-valid{
+  font-size:12.5px;letter-spacing:0.02em;
+  opacity:.55;margin:-22px 0 30px;
+}
 .bono-code-label{
   font-size:11px;letter-spacing:0.16em;text-transform:uppercase;
   opacity:.55;margin:0 0 6px;
