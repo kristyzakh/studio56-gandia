@@ -104,7 +104,13 @@
 
   /* ---------- transport ---------- */
 
+  /* The Cloudflare Worker that holds the partner token. Not a secret — it is
+     just an address — so it lives here in plain sight. Empty until deployed,
+     and while it is empty the widget stays off the live site. */
+  var PROXY = '';
+
   var cfg = window.S56_BOOKING || {};
+  if (!cfg.base && PROXY) cfg.base = PROXY;
   var local = /^(localhost|127\.0\.0\.1|\[::1\]|192\.168\.)/.test(location.hostname);
   var MOCK = !cfg.base && (local || /[?&]mock=1/.test(location.search));
   if (!cfg.base && !MOCK) return;          // never pretend to take a booking
