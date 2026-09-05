@@ -276,7 +276,9 @@
   /* label on top, answer underneath, exactly like every other field on the
      site. The number stays, quietly, because progress is worth showing. */
   var step = function (n, label, value, onChange, body) {
-    var s = el('section', 'bk-step' + (onChange ? ' is-done' : ''));
+    /* a div, not a section: the site gives every <section> 52 px of vertical
+       padding, and a step is a field, not a chapter of the page */
+    var s = el('div', 'bk-step' + (onChange ? ' is-done' : ''));
     var head = el('div', 'bk-step-head');
     head.appendChild(el('span', 'bk-step-n', String(n)));
     head.appendChild(el('span', 'bk-step-t', label));

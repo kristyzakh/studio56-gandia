@@ -1791,6 +1791,7 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 }
 
 /* a step reads exactly like a labelled field: label above, answer below */
+.bk-step{padding:0;margin:0;}
 .bk-step-head{display:flex;align-items:baseline;gap:7px;}
 .bk-step-n,.bk-step-t{
   font-size:12px;font-weight:700;
