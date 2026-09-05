@@ -206,7 +206,7 @@
     var G = uk ? {
       /* must match bono.js's own fallback — it is what the card will really show */
       occasion: 'Подарунок для вас',
-      msg: 'Час для себе — ви його заслужили.',
+      msg: 'Побудь трохи для себе.',
       single: 'Один сеанс.',
       firstOff: function (save) { return 'Ціна першого сеансу зі знижкою −20 % · економія ' + save + '.'; },
       pay: function (billed, n, per) { return 'Платите за ' + sessionWord(billed) + ', даруєте ' + n + ' · ' + per + ' за сеанс.'; },
@@ -218,7 +218,7 @@
       tbc: '(уточнимо)'
     } : {
       occasion: 'Un regalo para ti',
-      msg: 'Un rato para ti, que te lo has ganado.',
+      msg: 'Tómate un rato para ti.',
       single: 'Una sesión suelta.',
       firstOff: function (save) { return 'Precio de primera sesión con el −20 % · ahorras ' + save + '.'; },
       pay: function (billed, n, per) { return 'Pagas ' + billed + ' sesiones, regalas ' + n + ' · ' + per + ' por sesión.'; },

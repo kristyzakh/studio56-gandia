@@ -47,7 +47,7 @@
   var T = UK ? {
     occasion: 'Подарунок для вас',
     to: 'Для вас',
-    msg: 'Час для себе — ви його заслужили.',
+    msg: 'Побудь трохи для себе.',
     titleWith: function (name) { return name + ', для вас подарунок · Studio 56'; },
     titlePlain: 'Для вас подарунок · Studio 56',
     hello: 'Вітаю! У мене подарунковий сертифікат Studio 56, хочу записатися.',
@@ -56,7 +56,7 @@
   } : {
     occasion: 'Un regalo para ti',
     to: 'Para ti',
-    msg: 'Un rato para ti, que te lo has ganado.',
+    msg: 'Tómate un rato para ti.',
     titleWith: function (name) { return name + ', tienes un regalo · Studio 56'; },
     titlePlain: 'Tienes un regalo · Studio 56',
     hello: 'Hola! Tengo un bono regalo de Studio 56 y quiero pedir cita.',
