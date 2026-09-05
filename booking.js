@@ -32,7 +32,7 @@
     noTimes: 'На цей день вільних вікон немає. Спробуйте інший.',
     noDates: 'Найближчими днями вільних вікон немає — напишіть нам у WhatsApp, підберемо час.',
     more: 'Показати ще два тижні',
-    change: 'Змінити',
+    change: 'Назад',
     otherCategories: '← Інші процедури',
     optionsWord: function (n) {
       var m10 = n % 10, m100 = n % 100;
@@ -78,7 +78,7 @@
     noTimes: 'Ese día no queda hueco. Prueba con otro.',
     noDates: 'No quedan huecos en estos días — escríbenos por WhatsApp y buscamos hora.',
     more: 'Ver dos semanas más',
-    change: 'Cambiar',
+    change: 'Atrás',
     otherCategories: '← Otros tratamientos',
     optionsWord: function (n) { return n === 1 ? ' opción' : ' opciones'; },
     name: 'Cómo te llamas',
@@ -238,6 +238,14 @@
     if (html != null) n.innerHTML = html;
     return n;
   };
+  /* Options drop in one after another rather than all at once. Capped at the
+     ninth item: at 55 ms a step, the 33 laser zones would otherwise take the
+     better part of two seconds to finish arriving. */
+  var cascade = function (node, i) {
+    node.style.animationDelay = (Math.min(i, 8) * 55) + 'ms';
+    return node;
+  };
+
   var money = function (lo, hi) {
     if (!lo && !hi) return '';
     if (hi && hi !== lo) return lo + '–' + hi + ' €';
@@ -298,7 +306,7 @@
             track('booking_category', { category: c.title });
             render();
           });
-          list.appendChild(b);
+          list.appendChild(cascade(b, list.children.length));
         });
         mount.appendChild(step(n, T.steps[0], null, null, list));
         return;
@@ -319,7 +327,7 @@
           track('booking_service', { service: sv.title });
           loadDates();
         });
-        list.appendChild(b);
+        list.appendChild(cascade(b, list.children.length));
       });
 
       mount.appendChild(step(n, T.steps[0], state.category ? state.category.title : null, state.category ? function () { state.category = null; render(); } : null, list));
@@ -342,7 +350,7 @@
         track('booking_staff', { staff: 'any' });   // a step is a step: drop-off here counts too
         loadDates();
       });
-      slist.appendChild(any);
+      slist.appendChild(cascade(any, 0));
       cache.staff.forEach(function (st) {
         var b = el('button', 'bk-opt');
         b.type = 'button';
@@ -352,7 +360,7 @@
           track('booking_staff', { staff: st.name });
           loadDates();
         });
-        slist.appendChild(b);
+        slist.appendChild(cascade(b, slist.children.length));
       });
       mount.appendChild(step(n, T.steps[1], null, null, slist));
       return;
@@ -411,7 +419,7 @@
           b.addEventListener('click', function () {
             state.time = t; track('booking_time', { datetime: t.datetime }); render();
           });
-          grid.appendChild(b);
+          grid.appendChild(cascade(b, grid.children.length));
         });
         box.appendChild(grid);
       }

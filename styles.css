@@ -1813,6 +1813,18 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 
 /* options carry the same shape as an input: same ground, same border, same radius */
 .bk-list{display:flex;flex-direction:column;gap:8px;margin-top:9px;}
+
+/* Arrival, not a switch. 340 ms on a strong ease-out, with the cascade set
+   per item in booking.js — long enough to read as movement, short enough that
+   the list is usable before it has finished. */
+@keyframes bk-in{
+  from{opacity:0;transform:translateY(9px);}
+  to{opacity:1;transform:none;}
+}
+.bk-opt,.bk-time{
+  opacity:0;
+  animation:bk-in .34s cubic-bezier(.23,1,.32,1) forwards;
+}
 .bk-opt{
   display:flex;flex-direction:column;gap:3px;
   width:100%;min-height:52px;padding:12px 15px;
@@ -1892,6 +1904,6 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 .bk-done-d dd{margin:0;font-size:15.5px;color:var(--charcoal);}
 
 @media (prefers-reduced-motion:reduce){
-  .bk-opt,.bk-time{transition:none;}
+  .bk-opt,.bk-time{transition:none;animation:none;opacity:1;}
   .bk-opt:active,.bk-time:active{transform:none;}
 }
