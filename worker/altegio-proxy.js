@@ -19,7 +19,11 @@
      4. Deploy again, copy the worker URL, send it over -- it is not secret. */
 
 const ALTEGIO = 'https://api.alteg.io/api/v1';
-const LOCATION = '1465552';                 // Studio 56, Gandia
+/* Studio 56, Gandia. NOT the number in the booking link n1465552.alteg.io --
+   that one is the booking-form id. Altegio answers "No location with
+   identifier 1465552 found" if you use it here. The location id is the one in
+   the admin's own /location/<id>/ URL. */
+const LOCATION = '1255416';
 
 /* Only these origins may use the proxy. Not a wall -- an Origin header can be
    forged -- but it stops the everyday case of somebody embedding our booking

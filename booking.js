@@ -33,6 +33,13 @@
     noDates: 'Найближчими днями вільних вікон немає — напишіть нам у WhatsApp, підберемо час.',
     more: 'Показати ще два тижні',
     change: 'Змінити',
+    otherCategories: '← Інші процедури',
+    optionsWord: function (n) {
+      var m10 = n % 10, m100 = n % 100;
+      if (m10 === 1 && m100 !== 11) return ' варіант';
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return ' варіанти';
+      return ' варіантів';
+    },
     name: 'Як вас звати',
     namePh: 'Імʼя та прізвище',
     phone: 'Телефон',
@@ -72,6 +79,8 @@
     noDates: 'No quedan huecos en estos días — escríbenos por WhatsApp y buscamos hora.',
     more: 'Ver dos semanas más',
     change: 'Cambiar',
+    otherCategories: '← Otros tratamientos',
+    optionsWord: function (n) { return n === 1 ? ' opción' : ' opciones'; },
     name: 'Cómo te llamas',
     namePh: 'Nombre y apellidos',
     phone: 'Teléfono',
@@ -107,7 +116,7 @@
   /* The Cloudflare Worker that holds the partner token. Not a secret — it is
      just an address — so it lives here in plain sight. Empty until deployed,
      and while it is empty the widget stays off the live site. */
-  var PROXY = '';
+  var PROXY = 'https://studio56-booking.kristyzakharchenko.workers.dev';
 
   var cfg = window.S56_BOOKING || {};
   if (!cfg.base && PROXY) cfg.base = PROXY;
@@ -188,7 +197,13 @@
 
   var api = {
     services: function () {
-      return MOCK ? Promise.resolve(FIX.services) : live('/book_services');
+      /* The real endpoint answers with { services, category }, not a bare list.
+         68 services in 5 categories, so the picker is two shallow screens
+         rather than one list nobody would scroll. */
+      if (MOCK) return Promise.resolve({ services: FIX.services, categories: [] });
+      return live('/book_services').then(function (d) {
+        return { services: (d && d.services) || [], categories: (d && d.category) || [] };
+      });
     },
     staff: function () {
       return MOCK ? Promise.resolve(FIX.staff) : live('/book_staff');
@@ -214,8 +229,8 @@
 
   /* ---------- state ---------- */
 
-  var state = { service: null, staff: null, date: null, time: null, weeks: 2 };
-  var cache = { services: [], staff: [], dates: [], times: [] };
+  var state = { category: null, service: null, staff: null, date: null, time: null, weeks: 2 };
+  var cache = { services: [], categories: [], staff: [], dates: [], times: [] };
 
   var el = function (tag, cls, html) {
     var n = document.createElement(tag);
@@ -223,7 +238,11 @@
     if (html != null) n.innerHTML = html;
     return n;
   };
-  var money = function (n) { return n ? T.from + n + ' €' : ''; };
+  var money = function (lo, hi) {
+    if (!lo && !hi) return '';
+    if (hi && hi !== lo) return lo + '–' + hi + ' €';
+    return lo + ' €';
+  };
   var human = function (date) {
     var d = new Date(date + 'T00:00:00');
     return d.getDate() + ' ' + T.months[d.getMonth()];
@@ -262,11 +281,35 @@
     n++;
     if (!state.service) {
       var list = el('div', 'bk-list');
-      cache.services.forEach(function (sv) {
+
+      if (cache.categories.length && !state.category) {
+        cache.categories.forEach(function (c) {
+          var count = cache.services.filter(function (s) { return s.category_id === c.id; }).length;
+          if (!count) return;
+          var b = el('button', 'bk-opt');
+          b.type = 'button';
+          b.innerHTML = '<span class="bk-opt-t">' + c.title + '</span>' +
+                        '<span class="bk-opt-m">' + count + T.optionsWord(count) + '</span>';
+          b.addEventListener('click', function () {
+            state.category = c;
+            track('booking_category', { category: c.title });
+            render();
+          });
+          list.appendChild(b);
+        });
+        mount.appendChild(step(n, T.pickService, null, list));
+        return;
+      }
+
+      var pool = state.category
+        ? cache.services.filter(function (s) { return s.category_id === state.category.id; })
+        : cache.services;
+
+      pool.forEach(function (sv) {
         var b = el('button', 'bk-opt');
         b.type = 'button';
         b.innerHTML = '<span class="bk-opt-t">' + sv.title + '</span>' +
-                      '<span class="bk-opt-m">' + money(sv.price_min) +
+                      '<span class="bk-opt-m">' + money(sv.price_min, sv.price_max) +
                       (sv.seance_length ? ' · ' + Math.round(sv.seance_length / 60) + T.min : '') + '</span>';
         b.addEventListener('click', function () {
           state.service = sv; state.date = null; state.time = null;
@@ -275,11 +318,19 @@
         });
         list.appendChild(b);
       });
-      mount.appendChild(step(n, T.pickService, null, list));
+
+      if (state.category) {
+        var back = el('button', 'bk-more', T.otherCategories);
+        back.type = 'button';
+        back.addEventListener('click', function () { state.category = null; render(); });
+        list.appendChild(back);
+      }
+      mount.appendChild(step(n, state.category ? state.category.title : T.pickService, null, list));
       return;
     }
     mount.appendChild(step(n, state.service.title, function () {
-      state.service = null; state.staff = null; state.date = null; state.time = null; render();
+      state.service = null; state.category = null;
+      state.staff = null; state.date = null; state.time = null; render();
     }));
 
     /* 2 · staff */
@@ -495,7 +546,8 @@
   };
 
   Promise.all([api.services(), api.staff()]).then(function (r) {
-    cache.services = r[0] || [];
+    cache.services = (r[0] && r[0].services) || [];
+    cache.categories = (r[0] && r[0].categories) || [];
     cache.staff = r[1] || [];
     track('booking_open', {});
     render();
