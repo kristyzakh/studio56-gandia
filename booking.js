@@ -474,6 +474,39 @@
       '<p class="bk-error" id="bk-error" hidden></p>' +
       '<button type="submit" class="btn btn-primary btn-block" id="bk-submit" disabled>' + T.submit + '</button>';
 
+    /* Group the number in threes while it is typed. Nine digits in a row are
+       hard to check against the phone in your other hand, and a wrong number is
+       a booking the studio cannot confirm. The caret is put back after the same
+       digit it was after, or typing in the middle would throw it to the end. */
+    var phone = f.querySelector('#bk-phone');
+    phone.addEventListener('input', function () {
+      var caret = phone.selectionStart;
+      var raw = phone.value;
+      var before = raw.slice(0, caret).replace(/\D/g, '').length;
+      var digits = raw.replace(/\D/g, '');
+
+      /* Somebody pasting "+34 600 111 222" would otherwise get the country code
+         swallowed into the number — 346 001 112 22 — and the studio would call
+         a number that does not exist. The code is already chosen in the select
+         beside this field, so drop it when it is clearly there. */
+      var cc = f.querySelector('#bk-prefix').value.replace('+', '');
+      if ((raw.indexOf('+') !== -1 || digits.length > 9) && digits.indexOf(cc) === 0) {
+        var cut = cc.length;
+        digits = digits.slice(cut);
+        before = Math.max(0, before - cut);
+      }
+      digits = digits.slice(0, 15);
+      var out = digits.replace(/(\d{3})(?=\d)/g, '$1 ');
+      if (out === phone.value) return;
+      phone.value = out;
+      var pos = 0, seen = 0;
+      while (pos < out.length && seen < before) {
+        if (out.charAt(pos) !== ' ') seen++;
+        pos++;
+      }
+      try { phone.setSelectionRange(pos, pos); } catch (e) {}
+    });
+
     var submit = f.querySelector('#bk-submit');
     var required = [f.querySelector('#bk-name'), f.querySelector('#bk-phone'),
                     f.querySelector('#bk-consent')];
