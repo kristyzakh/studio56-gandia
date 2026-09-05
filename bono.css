@@ -131,6 +131,13 @@
 }
 .bono-open.is-open .bono-scroll-hint{opacity:1;}
 
+.bono-confetti{
+  position:fixed;
+  inset:0;
+  z-index:60;
+  pointer-events:none;
+}
+
 /* ---------- panels ---------- */
 .bono-panel{
   max-width:var(--maxw);

@@ -134,11 +134,109 @@
   var openBtn = document.getElementById('bono-open-btn');
   var gift = document.getElementById('bono-gift');
 
+  /* Confetti, drawn by hand rather than pulled from a CDN: it is one burst on
+     one button, and a gift page should not depend on somebody else's server
+     being up. The canvas is created on the click and removed when the last
+     piece falls, so nobody who never opens the bono pays for it. */
+  var CONFETTI = ['#FCF3EE', '#BA9CA4', '#F5EBE4', '#D8C0C6'];
+
+  var burstFrom = function (el) {
+    var canvas = document.createElement('canvas');
+    canvas.className = 'bono-confetti';
+    canvas.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(canvas);
+
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w, h;
+    var size = function () {
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    size();
+
+    /* from the button the finger just pressed, so the burst belongs to the tap */
+    var r = el.getBoundingClientRect();
+    var ox = r.left + r.width / 2;
+    var oy = r.top + r.height / 2;
+
+    var n = w < 520 ? 90 : 130;
+    var bits = [];
+    for (var i = 0; i < n; i++) {
+      /* a cone that opens upward: straight down would read as falling, not opening */
+      var a = -Math.PI / 2 + (Math.random() - 0.5) * 2.2;
+      var v = 620 + Math.random() * 820;
+      bits.push({
+        x: ox, y: oy,
+        vx: Math.cos(a) * v,
+        vy: Math.sin(a) * v,
+        w: 5 + Math.random() * 5,
+        h: 8 + Math.random() * 7,
+        spin: (Math.random() - 0.5) * 14,
+        phase: Math.random() * Math.PI * 2,
+        color: CONFETTI[(Math.random() * CONFETTI.length) | 0]
+      });
+    }
+
+    var GRAVITY = 1250;
+    var LIFE = 2.6;
+    var t0 = null;
+    window.addEventListener('resize', size);
+
+    var frame = function (now) {
+      if (t0 === null) t0 = now;
+      var elapsed = (now - t0) / 1000;
+      var dt = Math.min(0.032, elapsed - (frame.last || 0));
+      frame.last = elapsed;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalAlpha = elapsed > LIFE - 0.6 ? Math.max(0, (LIFE - elapsed) / 0.6) : 1;
+
+      bits.forEach(function (b) {
+        b.vy += GRAVITY * dt;
+        var drag = Math.exp(-0.85 * dt);
+        b.vx *= drag; b.vy *= drag;
+        b.x += b.vx * dt;
+        b.y += b.vy * dt;
+        b.phase += b.spin * dt;
+
+        /* squashing the width by the spin phase reads as paper turning over */
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.phase * 0.35);
+        ctx.fillStyle = b.color;
+        ctx.fillRect(-b.w / 2, -b.h / 2, b.w * Math.abs(Math.cos(b.phase)), b.h);
+        ctx.restore();
+      });
+
+      if (elapsed < LIFE) {
+        window.requestAnimationFrame(frame);
+      } else {
+        window.removeEventListener('resize', size);
+        canvas.remove();
+      }
+    };
+    window.requestAnimationFrame(frame);
+  };
+
   if (openBtn && gift) {
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     openBtn.addEventListener('click', function () {
       openSection.classList.add('is-open');
-      gift.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
+
+      if (calm) {
+        gift.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return;
+      }
+
+      burstFrom(openBtn);
+      /* let the burst have its moment before the page moves on */
+      window.setTimeout(function () {
+        gift.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 650);
+    }, { once: true });
   }
 
   /* ---- reveal panels on scroll ----
