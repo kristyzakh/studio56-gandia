@@ -241,6 +241,14 @@
   /* Options drop in one after another rather than all at once. Capped at the
      ninth item: at 55 ms a step, the 33 laser zones would otherwise take the
      better part of two seconds to finish arriving. */
+  /* Altegio holds this category as "Depilación láser" while the next one along
+     is "Depilación Láser Hombre" — the source is inconsistent with itself, and
+     the category is chain-level, so fixing it there would reach further than
+     this site. Normalised on the way out instead. */
+  var pretty = function (s) {
+    return String(s || '').replace(/\bl([áa])ser\b/g, function (m, a) { return 'L' + a + 'ser'; });
+  };
+
   var cascade = function (node, i) {
     node.style.animationDelay = (Math.min(i, 8) * 55) + 'ms';
     return node;
@@ -299,7 +307,7 @@
           if (!count) return;
           var b = el('button', 'bk-opt');
           b.type = 'button';
-          b.innerHTML = '<span class="bk-opt-t">' + c.title + '</span>' +
+          b.innerHTML = '<span class="bk-opt-t">' + pretty(c.title) + '</span>' +
                         '<span class="bk-opt-m">' + count + T.optionsWord(count) + '</span>';
           b.addEventListener('click', function () {
             state.category = c;
@@ -319,7 +327,7 @@
       pool.forEach(function (sv) {
         var b = el('button', 'bk-opt');
         b.type = 'button';
-        b.innerHTML = '<span class="bk-opt-t">' + sv.title + '</span>' +
+        b.innerHTML = '<span class="bk-opt-t">' + pretty(sv.title) + '</span>' +
                       '<span class="bk-opt-m">' + money(sv.price_min, sv.price_max) +
                       (sv.seance_length ? ' · ' + Math.round(sv.seance_length / 60) + T.min : '') + '</span>';
         b.addEventListener('click', function () {
@@ -330,10 +338,10 @@
         list.appendChild(cascade(b, list.children.length));
       });
 
-      mount.appendChild(step(n, T.steps[0], state.category ? state.category.title : null, state.category ? function () { state.category = null; render(); } : null, list));
+      mount.appendChild(step(n, T.steps[0], state.category ? pretty(state.category.title) : null, state.category ? function () { state.category = null; render(); } : null, list));
       return;
     }
-    mount.appendChild(step(n, T.steps[0], state.service.title, function () {
+    mount.appendChild(step(n, T.steps[0], pretty(state.service.title), function () {
       state.service = null; state.category = null;
       state.staff = null; state.date = null; state.time = null; render();
     }));
@@ -514,7 +522,7 @@
       '<p class="bk-done-l">' + T.okLead + '</p>' +
       '<dl class="bk-done-d">' +
       '<dt>' + T.okWhen + '</dt><dd>' + human(state.date) + ', ' + state.time.time + '</dd>' +
-      '<dt>' + T.okWhat + '</dt><dd>' + state.service.title + '</dd>' +
+      '<dt>' + T.okWhat + '</dt><dd>' + pretty(state.service.title) + '</dd>' +
       '<dt>' + T.okWho + '</dt><dd>' + state.staff.name + '</dd>' +
       (rec.record_id ? '<dt>' + T.okNumber + '</dt><dd>' + rec.record_id + '</dd>' : '') +
       '</dl>';
