@@ -466,8 +466,8 @@
       '<option value="+33">FR +33</option><option value="+40">RO +40</option>' +
       '<option value="+212">MA +212</option></select>' +
       '<input type="tel" id="bk-phone" inputmode="tel" autocomplete="tel-national" placeholder="600 000 000" required></div></div>' +
-      '<div class="field"><label for="bk-email">' + T.email + '</label>' +
-      '<input type="email" id="bk-email" autocomplete="email" required></div>' +
+      '<div class="field"><label for="bk-email">' + T.email + ' <span class="optional">' + T.optional + '</span></label>' +
+      '<input type="email" id="bk-email" autocomplete="email"></div>' +
       '<div class="field"><label for="bk-comment">' + T.comment + ' <span class="optional">' + T.optional + '</span></label>' +
       '<textarea id="bk-comment" rows="2" placeholder="' + T.commentPh + '"></textarea></div>' +
       '<label class="consent"><input type="checkbox" id="bk-consent" required><span>' + T.consent + '</span></label>' +
@@ -475,12 +475,8 @@
       '<button type="submit" class="btn btn-primary btn-block" id="bk-submit" disabled>' + T.submit + '</button>';
 
     var submit = f.querySelector('#bk-submit');
-    /* Altegio's own booking settings make email mandatory: without it the API
-       answers 422 "The required parameter email was not passed" and nothing is
-       created. So the form asks for it rather than letting somebody fill in
-       five steps and be turned away at the last one. */
     var required = [f.querySelector('#bk-name'), f.querySelector('#bk-phone'),
-                    f.querySelector('#bk-email'), f.querySelector('#bk-consent')];
+                    f.querySelector('#bk-consent')];
     var sync = function () {
       submit.disabled = !required.every(function (x) {
         return x.type === 'checkbox' ? x.checked : x.value.trim() !== '';
@@ -499,6 +495,12 @@
       var payload = {
         phone: f.querySelector('#bk-prefix').value + f.querySelector('#bk-phone').value.replace(/\s+/g, ''),
         fullname: f.querySelector('#bk-name').value.trim(),
+        /* Always send the key, even empty. book_record checks that email was
+           passed, not that it holds anything: omit it and the API answers 422
+           "The required parameter email was not passed", send "" and it moves
+           straight on to validating the slot. Altegio's own booking settings
+           list email as not required, so asking for it would be our rule, not
+           the studio's — and every required field costs bookings. */
         email: f.querySelector('#bk-email').value.trim(),
         comment: f.querySelector('#bk-comment').value.trim() || undefined,
         appointments: [{
