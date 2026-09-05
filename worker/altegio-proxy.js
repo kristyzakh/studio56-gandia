@@ -1,4 +1,4 @@
-/* Studio 56 — Altegio booking proxy (Cloudflare Worker)
+/* Studio 56 -- Altegio booking proxy (Cloudflare Worker)
    =====================================================
    The site needs Altegio's live availability, and every one of those calls
    must carry a partner token. That token cannot live in the page: anyone
@@ -10,19 +10,19 @@
    else gets 403 without reaching Altegio at all.
 
    Setup (no tooling to install):
-     1. Cloudflare dashboard → Workers & Pages → Create → Worker
+     1. Cloudflare dashboard -> Workers & Pages -> Create -> Worker
      2. Replace the sample code with this file, Deploy
-     3. Settings → Variables and Secrets → Add → Secret
+     3. Settings -> Variables and Secrets -> Add -> Secret
           name:  ALTEGIO_TOKEN
           value: the partner token from
-                 app.alteg.io → Настройки аккаунта → Данные аккаунта
-     4. Deploy again, copy the worker URL, send it over — it is not secret. */
+                 app.alteg.io -> Nastroyki akkaunta -> Dannye akkaunta
+     4. Deploy again, copy the worker URL, send it over -- it is not secret. */
 
 const ALTEGIO = 'https://api.alteg.io/api/v1';
-const LOCATION = '1465552';                 // Studio 56, Gandía
+const LOCATION = '1465552';                 // Studio 56, Gandia
 
-/* Only these origins may use the proxy. Not a wall — an Origin header can be
-   forged — but it stops the everyday case of somebody embedding our booking
+/* Only these origins may use the proxy. Not a wall -- an Origin header can be
+   forged -- but it stops the everyday case of somebody embedding our booking
    endpoint in their own page. The real limits are the two below it. */
 const ORIGINS = [
   'https://kristyzakh.github.io',
@@ -108,7 +108,7 @@ export default {
       return deny(origin, 502, 'altegio unreachable');
     }
 
-    /* Altegio's own body passes through untouched — the site already knows how
+    /* Altegio's own body passes through untouched -- the site already knows how
        to read its error codes (437 taken, 436 nobody free, and so on) and
        turns them into something a person can act on. Only the headers are
        replaced, so nothing from upstream can leak the token back out. */
