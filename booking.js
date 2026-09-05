@@ -227,6 +227,15 @@
       return live('/book_dates?date_from=' + from + '&date_to=' + to +
                   '&service_ids[]=' + serviceId + '&staff_id=' + (staffId || 0));
     },
+    /* "Any specialist" has to become a person before the booking is made, or
+       the confirmation cannot say who it is with. book_staff filtered by the
+       service and the slot answers exactly that. The datetime carries a +02:00
+       offset, and a raw + in a query string means a space — hence the encode. */
+    staffAt: function (datetime, serviceId) {
+      if (MOCK) return Promise.resolve(FIX.staff);
+      return live('/book_staff?datetime=' + encodeURIComponent(String(datetime).slice(0, 19)) +
+                  '&service_ids[]=' + serviceId);
+    },
     times: function (staffId, date, serviceId) {
       if (MOCK) return Promise.resolve(mockTimes(date));
       return live('/book_times/' + (staffId || 0) + '/' + date + '?service_ids[]=' + serviceId);
@@ -239,7 +248,7 @@
 
   /* ---------- state ---------- */
 
-  var state = { category: null, service: null, staff: null, date: null, time: null, weeks: 2 };
+  var state = { category: null, service: null, staff: null, assigned: null, date: null, time: null, weeks: 2 };
   var cache = { services: [], categories: [], staff: [], dates: [], times: [] };
 
   var el = function (tag, cls, html) {
@@ -355,7 +364,7 @@
     }
     mount.appendChild(step(n, T.steps[0], pretty(state.service.title), function () {
       state.service = null; state.category = null;
-      state.staff = null; state.date = null; state.time = null; render();
+      state.staff = null; state.assigned = null; state.date = null; state.time = null; state.assigned = null; render();
     }));
 
     /* 2 · staff */
@@ -385,8 +394,8 @@
       mount.appendChild(step(n, T.steps[1], null, null, slist));
       return;
     }
-    mount.appendChild(step(n, T.steps[1], state.staff.name, function () {
-      state.staff = null; state.date = null; state.time = null; render();
+    mount.appendChild(step(n, T.steps[1], (state.assigned && state.assigned.name) || state.staff.name, function () {
+      state.staff = null; state.assigned = null; state.date = null; state.time = null; state.assigned = null; render();
     }));
 
     /* 3 · date */
@@ -423,7 +432,7 @@
       return;
     }
     mount.appendChild(step(n, T.steps[2], human(state.date), function () {
-      state.date = null; state.time = null; render();
+      state.date = null; state.time = null; state.assigned = null; render();
     }));
 
     /* 4 · time */
@@ -437,7 +446,15 @@
           var b = el('button', 'bk-time', t.time);
           b.type = 'button';
           b.addEventListener('click', function () {
-            state.time = t; track('booking_time', { datetime: t.datetime }); render();
+            state.time = t;
+            track('booking_time', { datetime: t.datetime });
+            if (state.staff && state.staff.id) { state.assigned = state.staff; render(); return; }
+            busy(true);
+            api.staffAt(t.datetime, state.service.id).then(function (list) {
+              var free = (list || []).filter(function (s) { return s.bookable !== false; });
+              state.assigned = free[0] || null;
+            })['catch'](function () { state.assigned = null; })
+              .then(function () { busy(false); render(); });
           });
           grid.appendChild(cascade(b, grid.children.length));
         });
@@ -446,7 +463,7 @@
       mount.appendChild(step(n, T.steps[3], null, null, box));
       return;
     }
-    mount.appendChild(step(n, T.steps[3], state.time.time, function () { state.time = null; render(); }));
+    mount.appendChild(step(n, T.steps[3], state.time.time, function () { state.time = null; state.assigned = null; render(); }));
 
     /* 5 · details */
     n++;
@@ -539,7 +556,7 @@
         appointments: [{
           id: 1,
           services: [state.service.id],
-          staff_id: state.staff.id || 0,
+          staff_id: (state.assigned && state.assigned.id) || state.staff.id || 0,
           datetime: state.time.datetime
         }]
       };
@@ -549,7 +566,16 @@
       api.record(payload).then(function (data) {
         var rec = (data && data[0]) || {};
         track('booking_success', { record: rec.record_id });
-        done(rec);
+        /* A booking deserves a page, not a swapped-out panel: the person gets
+           something that looks like a confirmation and can be kept, and the
+           studio gets a page view it can actually count. */
+        var q = new URLSearchParams({
+          when: human(state.date) + ', ' + state.time.time,
+          what: pretty(state.service.title),
+          who: (state.assigned && state.assigned.name) || state.staff.name,
+          id: rec.record_id || ''
+        });
+        location.href = 'cita-confirmada.html?' + q.toString();
       })['catch'](function (err) {
         track('booking_error', { code: err.code || 'network' });
         var box = f.querySelector('#bk-error');

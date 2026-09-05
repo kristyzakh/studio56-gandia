@@ -1908,3 +1908,9 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   .bk-opt,.bk-time{transition:none;animation:none;opacity:1;}
   .bk-opt:active,.bk-time:active{transform:none;}
 }
+
+/* confirmation page */
+.cc-notes{margin:26px 0 30px;}
+.cc-notes p{margin:0 0 12px;font-size:15px;line-height:1.6;color:var(--charcoal);}
+.cc-notes p:last-child{margin-bottom:0;}
+#cita-confirmada .bk-done-d{margin-top:4px;}
