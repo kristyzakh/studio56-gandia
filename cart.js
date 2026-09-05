@@ -333,6 +333,12 @@
     var barCount = document.getElementById('cart-bar-count');
     var barTotal = document.getElementById('cart-bar-total');
 
+    /* A plain link, not a popup: window.open from a submit handler is exactly
+       what a phone's popup blocker stops, and the old flow then showed a thank
+       you page for a message that never left. The href is rebuilt on every
+       change, so the tap is an ordinary navigation that nothing can block. */
+    var send = document.getElementById('cart-send');
+
     var syncBar = function () {
       var items = read();
       bar.hidden = items.length === 0;
@@ -340,6 +346,12 @@
       if (items.length) {
         barCount.textContent = plural(items.length);
         barTotal.textContent = fmt(total(items));
+        if (send) {
+          var lines = [T.hello];
+          items.forEach(function (i) { lines.push('· ' + lineName(i) + ' — ' + fmt(linePrice(i))); });
+          lines.push(T.total + fmt(total(items)));
+          send.href = 'https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n'));
+        }
       }
     };
 
@@ -412,165 +424,4 @@
     renderPeek();
   }
 
-  /* ---------- checkout ---------- */
-  var checkout = document.getElementById('checkout');
-
-  if (checkout) {
-    var list = document.getElementById('cart-items');
-    var empty = document.getElementById('cart-empty');
-    var totalEl = document.getElementById('cart-total');
-    var firstRow = document.getElementById('first-session-row');
-    var firstBox = document.getElementById('first-session');
-    var form = document.getElementById('reserva-form');
-
-    var renderCart = function () {
-      var items = read();
-
-      empty.hidden = items.length > 0;
-      checkout.hidden = items.length === 0;
-      if (!items.length) return;
-
-      list.textContent = '';
-      items.forEach(function (item) {
-        var charged = linePrice(item);
-        /* Strike through the old price only when the new one is lower. A course
-           costs more than one session by design, and "28 € 84 €" with the 28
-           crossed out reads as a price rise, not as four sessions. */
-        var discounted = charged < item.price;
-
-        var li = document.createElement('li');
-
-        var label = document.createElement('span');
-        label.className = 'row-label';
-        label.textContent = lineName(item);
-
-        if (item.note) {
-          var note = document.createElement('span');
-          note.className = 'note';
-          note.textContent = item.note;
-          label.appendChild(note);
-        }
-
-        var amount = document.createElement('span');
-        amount.className = 'amount';
-        if (discounted) {
-          var was = document.createElement('s');
-          was.className = 'was';
-          was.textContent = fmt(item.price);
-          var now = document.createElement('span');
-          now.className = 'now';
-          now.textContent = fmt(charged);
-          amount.appendChild(was);
-          amount.appendChild(now);
-        } else {
-          amount.textContent = fmt(charged);
-        }
-
-        var remove = document.createElement('button');
-        remove.type = 'button';
-        remove.className = 'row-remove';
-        remove.setAttribute('aria-label', T.remove + item.name);
-        remove.addEventListener('click', function () {
-          write(read().filter(function (i) { return i.id !== item.id; }));
-        });
-
-        li.appendChild(label);
-        li.appendChild(amount);
-        li.appendChild(remove);
-        list.appendChild(li);
-      });
-
-      firstRow.hidden = !items.some(function (i) { return i.priceFirst; });
-      firstBox.checked = isFirst();
-      totalEl.textContent = fmt(total(items));
-    };
-
-    form.querySelector('#fecha').min = new Date().toISOString().slice(0, 10);
-
-    firstBox.addEventListener('change', function () { setFirst(firstBox.checked); });
-    document.addEventListener('s56cartchange', renderCart);
-    renderCart();
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-
-      var items = read();
-      if (!items.length) return;
-
-      var data = new FormData(form);
-      var telefono = String(data.get('prefijo')) + String(data.get('telefono')).replace(/\s+/g, '');
-
-      /* Flat keys so an Albato → Google Sheets step can map straight to columns
-         without unpacking anything. The attribution fields are the reason the
-         sheet can report channel without depending on GA4. */
-      var attr = (window.s56Attribution && window.s56Attribution()) || {};
-      var first = attr.first || {};
-      var last = attr.last || {};
-
-      var payload = {
-        source: 'web-checkout',
-        referencia: 'S56-' + Date.now().toString(36).toUpperCase(),
-        recibido: new Date().toISOString(),
-        nombre: data.get('nombre'),
-        telefono: telefono,
-        fecha_preferida: data.get('fecha'),
-        franja_preferida: data.get('franja'),
-        primera_sesion: isFirst(),
-        servicios: items.map(function (i) {
-          return { nombre: lineName(i), precio: i.price, precio_aplicado: linePrice(i) };
-        }),
-        servicios_texto: items.map(function (i) {
-          return lineName(i) + ' (' + fmt(linePrice(i)) + ')';
-        }).join(' | '),
-        total: total(items),
-
-        origen_source: first.source || '',
-        origen_medium: first.medium || '',
-        origen_campaign: first.campaign || '',
-        origen_landing: first.landing || '',
-        origen_fecha: first.ts || '',
-        ultimo_source: last.source || '',
-        ultimo_medium: last.medium || '',
-        ultimo_campaign: last.campaign || '',
-        gclid: first.gclid || last.gclid || '',
-        fbclid: first.fbclid || last.fbclid || ''
-      };
-
-      var submit = form.querySelector('button[type="submit"]');
-      submit.disabled = true;
-      submit.textContent = T.sending;
-
-      var done = function () {
-        try { window.localStorage.removeItem(KEY); } catch (e) {}
-        window.location.href = 'gracias.html';
-      };
-
-      if (!BOOKING_ENDPOINT) {
-        var lines = [T.hello];
-        items.forEach(function (i) { lines.push('· ' + lineName(i) + ' — ' + fmt(linePrice(i))); });
-        lines.push(T.total + fmt(total(items)));
-        lines.push(T.name + payload.nombre);
-        lines.push(T.phone + telefono);
-        lines.push(T.datePref + payload.fecha_preferida + ' (' + payload.franja_preferida + ')');
-        window.open('https://wa.me/' + WHATSAPP + '?text=' + encodeURIComponent(lines.join('\n')), '_blank');
-        done();
-        return;
-      }
-
-      /* no-cors keeps the browser from blocking the request when the webhook
-         sends no CORS headers. The response is opaque, so this cannot report a
-         failure — the studio confirms every booking by hand, which is the check. */
-      window.fetch(BOOKING_ENDPOINT, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'text/plain' },
-        body: JSON.stringify(payload)
-      }).then(done, done);
-    });
-  }
-
-  /* ---------- thank-you page: the booking is sent, so the cart is spent ---------- */
-  if (document.getElementById('gracias')) {
-    try { window.localStorage.removeItem(KEY); } catch (e) {}
-  }
 })();

@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+
+# Pages a person reaches only from their own booking or gift link.
+Disallow: /cita-confirmada.html
+Disallow: /ua/cita-confirmada.html
+Disallow: /bono.html
+Disallow: /ua/bono.html
+
+Sitemap: https://kristyzakh.github.io/studio56-gandia/sitemap.xml
