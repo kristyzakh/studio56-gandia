@@ -62,7 +62,8 @@
     errBusy: 'Це вікно щойно зайняли. Оберіть, будь ласка, інший час.',
     errStaff: 'На цей час немає вільної майстрині. Спробуйте інший час.',
     errParams: 'Щось не так із даними запису. Перевірте, будь ласка, поля.',
-    errEmail: 'Перевірте адресу пошти.',
+    errEmail: 'Перевірте адресу пошти — вона потрібна для запису.',
+    errPhone: 'Перевірте номер телефону.',
     errNet: 'Не вдалося звʼязатися зі студією. Спробуйте ще раз або напишіть у WhatsApp.',
     mock: 'Демонстраційний режим: показані вигадані вікна, запис не створюється.',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
@@ -103,7 +104,8 @@
     errBusy: 'Acaban de ocupar ese hueco. Elige otra hora, por favor.',
     errStaff: 'No hay nadie libre a esa hora. Prueba con otra.',
     errParams: 'Algo no cuadra en la reserva. Revisa los campos, por favor.',
-    errEmail: 'Revisa la dirección de email.',
+    errEmail: 'Revisa el email — hace falta para reservar.',
+    errPhone: 'Revisa el número de teléfono.',
     errNet: 'No hemos podido conectar con el estudio. Inténtalo otra vez o escríbenos por WhatsApp.',
     mock: 'Modo demostración: los huecos son inventados y no se crea ninguna reserva.',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
@@ -141,8 +143,16 @@
       return r.json().then(function (j) { return { ok: r.ok, j: j }; });
     }).then(function (res) {
       if (!res.j || res.j.success === false) {
+        var meta = (res.j && res.j.meta) || {};
         var err = new Error('altegio');
-        err.code = (res.j && res.j.meta && res.j.meta.code) || 0;
+        err.code = meta.code || 0;
+        err.status = res.status;
+        /* Altegio reports field problems in meta.errors and sends no numeric
+           code with them. Reading only the code turned every one of those into
+           "could not reach the studio" — which sent us looking at the network
+           while the API was answering perfectly clearly. */
+        err.fields = meta.errors || null;
+        err.detail = meta.message || '';
         throw err;
       }
       return res.j.data;
@@ -456,8 +466,8 @@
       '<option value="+33">FR +33</option><option value="+40">RO +40</option>' +
       '<option value="+212">MA +212</option></select>' +
       '<input type="tel" id="bk-phone" inputmode="tel" autocomplete="tel-national" placeholder="600 000 000" required></div></div>' +
-      '<div class="field"><label for="bk-email">' + T.email + ' <span class="optional">' + T.optional + '</span></label>' +
-      '<input type="email" id="bk-email" autocomplete="email"></div>' +
+      '<div class="field"><label for="bk-email">' + T.email + '</label>' +
+      '<input type="email" id="bk-email" autocomplete="email" required></div>' +
       '<div class="field"><label for="bk-comment">' + T.comment + ' <span class="optional">' + T.optional + '</span></label>' +
       '<textarea id="bk-comment" rows="2" placeholder="' + T.commentPh + '"></textarea></div>' +
       '<label class="consent"><input type="checkbox" id="bk-consent" required><span>' + T.consent + '</span></label>' +
@@ -465,7 +475,12 @@
       '<button type="submit" class="btn btn-primary btn-block" id="bk-submit" disabled>' + T.submit + '</button>';
 
     var submit = f.querySelector('#bk-submit');
-    var required = [f.querySelector('#bk-name'), f.querySelector('#bk-phone'), f.querySelector('#bk-consent')];
+    /* Altegio's own booking settings make email mandatory: without it the API
+       answers 422 "The required parameter email was not passed" and nothing is
+       created. So the form asks for it rather than letting somebody fill in
+       five steps and be turned away at the last one. */
+    var required = [f.querySelector('#bk-name'), f.querySelector('#bk-phone'),
+                    f.querySelector('#bk-email'), f.querySelector('#bk-consent')];
     var sync = function () {
       submit.disabled = !required.every(function (x) {
         return x.type === 'checkbox' ? x.checked : x.value.trim() !== '';
@@ -484,7 +499,7 @@
       var payload = {
         phone: f.querySelector('#bk-prefix').value + f.querySelector('#bk-phone').value.replace(/\s+/g, ''),
         fullname: f.querySelector('#bk-name').value.trim(),
-        email: f.querySelector('#bk-email').value.trim() || undefined,
+        email: f.querySelector('#bk-email').value.trim(),
         comment: f.querySelector('#bk-comment').value.trim() || undefined,
         appointments: [{
           id: 1,
@@ -503,11 +518,14 @@
       })['catch'](function (err) {
         track('booking_error', { code: err.code || 'network' });
         var box = f.querySelector('#bk-error');
-        box.textContent = err.code === 437 ? T.errBusy
-                        : err.code === 436 || err.code === 433 ? T.errStaff
-                        : err.code === 400 ? T.errEmail
-                        : err.code === 404 || err.code === 422 || err.code === 438 ? T.errParams
-                        : T.errNet;
+        var fields = err.fields ? Object.keys(err.fields) : [];
+        box.textContent =
+            err.code === 437 ? T.errBusy
+          : err.code === 436 || err.code === 433 ? T.errStaff
+          : fields.indexOf('email') !== -1 || err.code === 400 ? T.errEmail
+          : fields.indexOf('phone') !== -1 ? T.errPhone
+          : fields.length || err.status === 422 || err.code === 404 || err.code === 438 ? T.errParams
+          : T.errNet;
         box.hidden = false;
         submit.textContent = T.submit;
         sync();
