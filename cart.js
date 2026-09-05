@@ -294,6 +294,12 @@
     var peekToggle = document.getElementById('cart-peek-toggle');
     var peekBar = document.getElementById('cart-bar');
 
+    /* Open by default: what you picked is the thing you came to check, and
+       hiding it behind a tap made the bar a number with no explanation.
+       Collapsing is remembered for the visit, so somebody who wants it out of
+       the way does not have to close it again after every service they add. */
+    var collapsed = false;
+
     var setPeek = function (open) {
       peek.hidden = !open;
       peekToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -330,10 +336,13 @@
       });
 
       /* an empty bar is hidden anyway, so leaving it open would strand the state */
-      if (!items.length) setPeek(false);
+      setPeek(items.length > 0 && !collapsed);
     };
 
-    peekToggle.addEventListener('click', function () { setPeek(peek.hidden); });
+    peekToggle.addEventListener('click', function () {
+      collapsed = !peek.hidden;
+      setPeek(peek.hidden);
+    });
 
     document.addEventListener('s56cartchange', renderPeek);
     renderPeek();

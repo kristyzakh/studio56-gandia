@@ -966,19 +966,29 @@ button.cart-bar-info{
   cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
-button.cart-bar-info .cart-bar-count::after{
-  content:"";
-  display:inline-block;
-  width:5px;height:5px;
-  margin-left:7px;
+
+/* The handle belongs to the list it opens, not to the total line underneath:
+   the arrow is now at the top of the bar, where the thing it reveals appears. */
+.cart-peek-handle{
+  flex:1 1 100%;
+  order:-3;
+  display:flex;align-items:center;justify-content:center;
+  min-height:26px;padding:0 0 6px;
+  background:none;border:0;color:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.cart-peek-chevron{
+  width:9px;height:9px;
   border-right:1.5px solid currentColor;
   border-bottom:1.5px solid currentColor;
-  transform:translateY(-2px) rotate(45deg);
-  transition:transform .15s ease;
+  transform:rotate(-135deg);
+  opacity:.6;
+  transition:transform .18s ease, opacity .18s ease;
 }
-button.cart-bar-info[aria-expanded="true"] .cart-bar-count::after{
-  transform:translateY(1px) rotate(-135deg);
-}
+.cart-peek-handle[aria-expanded="true"] .cart-peek-chevron{transform:rotate(45deg);}
+.cart-peek-handle:hover .cart-peek-chevron{opacity:1;}
+.cart-bar-info{display:block;}
+
 .cart-peek{
   flex:1 1 100%;
   order:-2;

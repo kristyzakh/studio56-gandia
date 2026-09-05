@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=PT+Sans:wght@400;700&display=swap&subset=latin,latin-ext,cyrillic,cyrillic-ext" rel="stylesheet">
 
-<link rel="stylesheet" href="../styles.css?v=83a6811f06">
+<link rel="stylesheet" href="../styles.css?v=1b231f2f55">
 </head>
 <body>
 
@@ -302,17 +302,21 @@
       <span id="pack-suggestion-text"></span>
       <button type="button" class="pack-suggestion-btn" id="pack-suggestion-btn"></button>
     </p>
+    <button type="button" class="cart-peek-handle" id="cart-peek-toggle" aria-expanded="true" aria-controls="cart-peek">
+      <span class="cart-peek-chevron" aria-hidden="true"></span>
+      <span class="sr-only">Показати або сховати обрані послуги</span>
+    </button>
     <ul class="cart-peek" id="cart-peek" hidden></ul>
-    <button type="button" class="cart-bar-info" id="cart-peek-toggle" aria-expanded="false" aria-controls="cart-peek">
+    <div class="cart-bar-info">
       <span class="cart-bar-count" id="cart-bar-count">0 послуг</span>
       <span class="cart-bar-total" id="cart-bar-total">0 €</span>
-    </button>
+        </div>
     <a class="btn" href="reserva.html" data-track="begin_checkout" data-track-label="barra del carrito">До запису</a>
   </div>
 </div>
 
 <script src="../app.js?v=cab46e695f" defer></script>
-<script src="../cart.js?v=ad8b5543f3" defer></script>
+<script src="../cart.js?v=e9b23c5364" defer></script>
 
 <script src="../analytics.js?v=6d5ce1c5e5" defer></script>
 <script src="../booking.js?v=a544cf6e62" defer></script>
