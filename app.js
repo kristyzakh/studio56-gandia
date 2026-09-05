@@ -238,12 +238,14 @@
     var billedFor = function (n) { return n === 4 ? 3 : (n === 8 ? 6 : n); };   // 3 + 1
 
     /* datetime-local hands back 2026-09-05T14:30; the studio reads the order in
-       WhatsApp, so it goes out as 05.09.2026, 14:30 */
+       WhatsApp, so it goes out as a written date — with the separator each
+       language actually uses: 05.09.2026 in Ukrainian, 05/09/2026 in Spanish. */
     var fmtWhen = function (v) {
       var parts = v.split('T');
       if (parts.length !== 2) return v;
       var d = parts[0].split('-');
-      return d[2] + '.' + d[1] + '.' + d[0] + ', ' + parts[1];
+      var sep = uk ? '.' : '/';
+      return d[2] + sep + d[1] + sep + d[0] + ', ' + parts[1];
     };
 
     /* A single Endospheres session is somebody's first, so it is sold at the
