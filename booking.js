@@ -564,6 +564,19 @@
     cache.services = (r[0] && r[0].services) || [];
     cache.categories = (r[0] && r[0].categories) || [];
     cache.staff = r[1] || [];
+
+    /* A treatment page has already answered the first question. Opening on
+       "choose a category" there would make somebody who is reading about laser
+       tell us it is laser. Matched on the category title, and if the title
+       ever changes in Altegio the widget simply opens on the full list. */
+    var want = (root.getAttribute('data-preselect') || '').toLowerCase();
+    if (want) {
+      var hit = null;
+      cache.categories.forEach(function (c) {
+        if (!hit && String(c.title || '').toLowerCase().indexOf(want) !== -1) hit = c;
+      });
+      if (hit) state.category = hit;
+    }
     track('booking_open', {});
     render();
   })['catch'](function () {

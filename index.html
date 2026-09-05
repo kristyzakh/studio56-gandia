@@ -405,55 +405,13 @@
     </div>
 
     <div class="form">
-      <!--
-        TODO · Sustituir por el bloque de formulario incrustado de Altegio
-        (el calendario se muestra dentro de la página, no redirige fuera).
-        Este formulario corto es el respaldo mientras tanto.
-      -->
-      <form id="booking-form" method="post" action="#" novalidate>
-        <div class="field">
-          <label for="nombre">Nombre completo</label>
-          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+        <div id="booking-widget"></div>
+
+        <div id="booking-fallback">
+          <p class="form-note" style="margin-top:0">Escríbenos y buscamos hora el mismo día.</p>
+          <a class="btn btn-whatsapp btn-block" href="https://wa.me/34621070775" rel="noopener" data-track="whatsapp_click" data-track-label="cita">Escríbenos por WhatsApp</a>
+          <a class="btn btn-secondary btn-block" href="https://n1465552.alteg.io" rel="noopener" target="_blank" data-track="online_booking_click" data-track-label="cita">Reservar online</a>
         </div>
-
-        <div class="field">
-          <label for="telefono">Teléfono</label>
-          <div class="phone-row">
-            <select id="prefijo" name="prefijo" class="phone-prefix" aria-label="Prefijo del país">
-              <option value="+34" selected>ES +34</option>
-              <option value="+380">UA +380</option>
-              <option value="+7">RU +7</option>
-              <option value="+44">UK +44</option>
-              <option value="+49">DE +49</option>
-              <option value="+33">FR +33</option>
-              <option value="+40">RO +40</option>
-              <option value="+212">MA +212</option>
-            </select>
-            <input type="tel" id="telefono" name="telefono" autocomplete="tel-national" inputmode="tel" placeholder="600 000 000" required>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="servicio">Tratamiento</label>
-          <select id="servicio" name="servicio" required>
-            <option value="">Elige un tratamiento</option>
-            <option value="endospheres-facial">Endospheres Facial</option>
-            <option value="endospheres-corporal">Endospheres Corporal</option>
-            <option value="laser">Depilación Láser</option>
-            <option value="electro">Electrodepilación</option>
-            <option value="cera-sugaring">Depilación con Cera y Sugaring</option>
-            <option value="no-se">No lo tengo claro — asesoradme</option>
-          </select>
-        </div>
-
-        <label class="consent">
-          <input type="checkbox" id="consent" name="consent" required>
-          <span>Acepto la <a href="privacidad.html">política de privacidad</a> y que Studio 56 me contacte por WhatsApp o teléfono.</span>
-        </label>
-
-        <button type="submit" class="btn btn-primary btn-block">Pedir cita</button>
-        <p class="form-note">Te respondemos el mismo día, en horario de estudio.</p>
-      </form>
 
       <div class="divider">o</div>
 
@@ -508,6 +466,7 @@
 <script src="app.js?v=cab46e695f" defer></script>
 
 <script src="analytics.js?v=6d5ce1c5e5" defer></script>
+<script src="booking.js?v=0713f4a287" defer></script>
 
 </body>
 </html>

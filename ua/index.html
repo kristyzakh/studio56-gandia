@@ -405,55 +405,13 @@
     </div>
 
     <div class="form">
-      <!--
-        TODO · Замінити на вбудований блок форми Altegio
-        (календар показується на сторінці, без переходу назовні).
-        Ця коротка форма — тимчасове рішення.
-      -->
-      <form id="booking-form" method="post" action="#" novalidate>
-        <div class="field">
-          <label for="nombre">Повне ім'я</label>
-          <input type="text" id="nombre" name="nombre" autocomplete="name" required>
+        <div id="booking-widget"></div>
+
+        <div id="booking-fallback">
+          <p class="form-note" style="margin-top:0">Напишіть нам — підберемо зручний час того ж дня.</p>
+          <a class="btn btn-whatsapp btn-block" href="https://wa.me/34621070775" rel="noopener" data-track="whatsapp_click" data-track-label="cita">Написати у WhatsApp</a>
+          <a class="btn btn-secondary btn-block" href="https://n1465552.alteg.io" rel="noopener" target="_blank" data-track="online_booking_click" data-track-label="cita">Записатись онлайн</a>
         </div>
-
-        <div class="field">
-          <label for="telefono">Телефон</label>
-          <div class="phone-row">
-            <select id="prefijo" name="prefijo" class="phone-prefix" aria-label="Код країни">
-              <option value="+34" selected>ES +34</option>
-              <option value="+380">UA +380</option>
-              <option value="+7">RU +7</option>
-              <option value="+44">UK +44</option>
-              <option value="+49">DE +49</option>
-              <option value="+33">FR +33</option>
-              <option value="+40">RO +40</option>
-              <option value="+212">MA +212</option>
-            </select>
-            <input type="tel" id="telefono" name="telefono" autocomplete="tel-national" inputmode="tel" placeholder="600 000 000" required>
-          </div>
-        </div>
-
-        <div class="field">
-          <label for="servicio">Процедура</label>
-          <select id="servicio" name="servicio" required>
-            <option value="">Оберіть процедуру</option>
-            <option value="endospheres-facial">Ендосфера для обличчя</option>
-            <option value="endospheres-corporal">Ендосфера для тіла</option>
-            <option value="laser">Лазерна епіляція</option>
-            <option value="electro">Електроепіляція</option>
-            <option value="cera-sugaring">Депіляція воском і шугаринг</option>
-            <option value="no-se">Ще не визначилися — порадьте</option>
-          </select>
-        </div>
-
-        <label class="consent">
-          <input type="checkbox" id="consent" name="consent" required>
-          <span>Погоджуюся з <a href="privacidad.html">політикою конфіденційності</a> і на те, щоб Studio 56 звʼязалася зі мною у WhatsApp або по телефону.</span>
-        </label>
-
-        <button type="submit" class="btn btn-primary btn-block">Записатися</button>
-        <p class="form-note">Відповідаємо того ж дня, у робочі години студії.</p>
-      </form>
 
       <div class="divider">або</div>
 
@@ -508,6 +466,7 @@
 <script src="../app.js?v=cab46e695f" defer></script>
 
 <script src="../analytics.js?v=6d5ce1c5e5" defer></script>
+<script src="../booking.js?v=0713f4a287" defer></script>
 
 </body>
 </html>
