@@ -141,8 +141,25 @@
   z-index:55;
   pointer-events:none;
   background:linear-gradient(180deg,var(--rose) 0%,var(--cream) 100%);
-  transform:translateY(100%);
+  /* parked 124 % down so the dome that sticks out above it is off-screen too */
+  transform:translateY(124%);
   will-change:transform;
+}
+
+/* The curtain is led by a wide dome with a rounded tip instead of a ruled
+   edge. A straight line announces itself as a rectangle sliding past; an arc
+   with its high point in the middle reads as something pulling the next
+   screen up behind it. Wide and shallow — 140 % of the screen across, 18 vh
+   tall — so it stays a swell rather than turning into a bubble. */
+.bono-veil::before{
+  content:"";
+  position:absolute;
+  left:-20%;
+  width:140%;
+  bottom:calc(100% - 1px);   /* overlap, or a subpixel seam shows at the join */
+  height:18vh;
+  background:var(--rose);
+  border-radius:50% 50% 0 0 / 100% 100% 0 0;
 }
 .bono-veil.is-up{transform:translateY(0);transition:transform .42s cubic-bezier(.45,0,.55,1);}
 .bono-veil.is-gone{transform:translateY(-100%);transition:transform .52s cubic-bezier(.22,1,.28,1);}
