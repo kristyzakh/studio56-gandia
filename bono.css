@@ -157,11 +157,11 @@
   position:absolute;
   inset:0;
   background:
-    linear-gradient(180deg,transparent 91%,var(--navy) 100%),
-    repeating-linear-gradient(180deg,var(--navy) 0 3px,transparent 3px 11px),
-    repeating-linear-gradient(180deg,var(--navy) 0 6px,transparent 6px 27px);
-  -webkit-mask-image:linear-gradient(180deg,transparent 44%,rgba(0,0,0,.45) 72%,#000 100%);
-          mask-image:linear-gradient(180deg,transparent 44%,rgba(0,0,0,.45) 72%,#000 100%);
+    linear-gradient(180deg,transparent 76%,var(--navy) 95%),
+    repeating-linear-gradient(180deg,var(--navy) 0 5px,transparent 5px 11px),
+    repeating-linear-gradient(180deg,var(--navy) 0 9px,transparent 9px 24px);
+  -webkit-mask-image:linear-gradient(180deg,transparent 16%,rgba(0,0,0,.55) 46%,rgba(0,0,0,.85) 72%,#000 90%);
+          mask-image:linear-gradient(180deg,transparent 16%,rgba(0,0,0,.55) 46%,rgba(0,0,0,.85) 72%,#000 90%);
 }
 
 .bono-confetti{
