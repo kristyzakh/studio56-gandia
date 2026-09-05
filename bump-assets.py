@@ -2,7 +2,7 @@
 """
 Stamp every HTML page with a content hash of the CSS/JS it loads.
 
-Run this after editing styles.css, app.js, bono.css or bono.js, before
+Run this after editing styles.css, app.js, bono.css, bono.js or booking.js, before
 committing. The version changes only when the file's bytes change, so
 browsers refetch exactly when they should — and never otherwise.
 
@@ -14,7 +14,7 @@ import hashlib
 import glob
 import re
 
-ASSETS = ['styles.css', 'app.js', 'bono.css', 'bono.js', 'cart.js', 'analytics.js']
+ASSETS = ['styles.css', 'app.js', 'bono.css', 'bono.js', 'cart.js', 'analytics.js', 'booking.js']
 
 
 def content_hash(path):

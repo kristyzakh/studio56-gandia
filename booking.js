@@ -1,0 +1,501 @@
+/* Studio 56 — booking straight into Altegio, without leaving the site.
+   -------------------------------------------------------------------
+   Backed by Altegio's public booking API (book_services / book_staff /
+   book_dates / book_times / book_check / book_record). Those endpoints need
+   only a partner token and no client login, which is the whole point: the
+   reason so few people book online today is almost certainly the number of
+   steps between wanting an appointment and having one.
+
+   The token must never reach the browser, so every call goes to our own
+   proxy, which adds the Authorization header and refuses any location but
+   ours. window.S56_BOOKING = { base: '<proxy url>' } switches this on.
+
+   Until that exists, the widget runs against fixtures — but ONLY on
+   localhost or with ?mock=1. On the live site with no proxy configured it
+   does not render at all and the WhatsApp fallback stays. A form that
+   accepts a booking and quietly does nothing with it is worse than no form. */
+(function () {
+  'use strict';
+
+  var root = document.getElementById('booking-widget');
+  if (!root) return;
+
+  var UK = document.documentElement.lang === 'uk';
+
+  var T = UK ? {
+    steps: ['Процедура', 'Майстриня', 'Дата', 'Час', 'Ваші дані'],
+    anyStaff: 'Будь-яка вільна',
+    anyStaffNote: 'Підберемо, хто вільний у цей час',
+    pickService: 'Оберіть процедуру',
+    pickDate: 'Оберіть день',
+    pickTime: 'Оберіть час',
+    noTimes: 'На цей день вільних вікон немає. Спробуйте інший.',
+    noDates: 'Найближчими днями вільних вікон немає — напишіть нам у WhatsApp, підберемо час.',
+    more: 'Показати ще два тижні',
+    change: 'Змінити',
+    name: 'Як вас звати',
+    namePh: 'Імʼя та прізвище',
+    phone: 'Телефон',
+    email: 'Пошта',
+    emailNote: 'Необовʼязково — надішлемо підтвердження',
+    comment: 'Щось, що нам варто знати',
+    commentPh: 'Алергії, вагітність, поточні процедури…',
+    consent: 'Погоджуюся з <a href="privacidad.html">політикою конфіденційності</a> і на те, щоб Studio 56 звʼязалася зі мною.',
+    submit: 'Записатися',
+    sending: 'Записуємо…',
+    from: 'від ',
+    min: ' хв',
+    okTitle: 'Готово, ви записані',
+    okLead: 'Чекаємо на вас у Studio 56. Підтвердження надіслали, а якщо плани зміняться — просто напишіть нам.',
+    okWhen: 'Коли',
+    okWhat: 'Що',
+    okWho: 'Майстриня',
+    okNumber: 'Номер запису',
+    again: 'Записатися ще раз',
+    errBusy: 'Це вікно щойно зайняли. Оберіть, будь ласка, інший час.',
+    errStaff: 'На цей час немає вільної майстрині. Спробуйте інший час.',
+    errParams: 'Щось не так із даними запису. Перевірте, будь ласка, поля.',
+    errEmail: 'Перевірте адресу пошти.',
+    errNet: 'Не вдалося звʼязатися зі студією. Спробуйте ще раз або напишіть у WhatsApp.',
+    mock: 'Демонстраційний режим: показані вигадані вікна, запис не створюється.',
+    days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+             'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
+  } : {
+    steps: ['Tratamiento', 'Profesional', 'Día', 'Hora', 'Tus datos'],
+    anyStaff: 'La que esté libre',
+    anyStaffNote: 'Asignamos a quien esté disponible a esa hora',
+    pickService: 'Elige el tratamiento',
+    pickDate: 'Elige el día',
+    pickTime: 'Elige la hora',
+    noTimes: 'Ese día no queda hueco. Prueba con otro.',
+    noDates: 'No quedan huecos en estos días — escríbenos por WhatsApp y buscamos hora.',
+    more: 'Ver dos semanas más',
+    change: 'Cambiar',
+    name: 'Cómo te llamas',
+    namePh: 'Nombre y apellidos',
+    phone: 'Teléfono',
+    email: 'Email',
+    emailNote: 'Opcional — te enviamos la confirmación',
+    comment: 'Algo que debamos saber',
+    commentPh: 'Alergias, embarazo, tratamientos en curso…',
+    consent: 'Acepto la <a href="privacidad.html">política de privacidad</a> y que Studio 56 se ponga en contacto conmigo.',
+    submit: 'Reservar',
+    sending: 'Reservando…',
+    from: 'desde ',
+    min: ' min',
+    okTitle: 'Listo, tienes tu cita',
+    okLead: 'Te esperamos en Studio 56. Te hemos enviado la confirmación, y si te cambian los planes solo tienes que escribirnos.',
+    okWhen: 'Cuándo',
+    okWhat: 'Qué',
+    okWho: 'Profesional',
+    okNumber: 'Nº de reserva',
+    again: 'Pedir otra cita',
+    errBusy: 'Acaban de ocupar ese hueco. Elige otra hora, por favor.',
+    errStaff: 'No hay nadie libre a esa hora. Prueba con otra.',
+    errParams: 'Algo no cuadra en la reserva. Revisa los campos, por favor.',
+    errEmail: 'Revisa la dirección de email.',
+    errNet: 'No hemos podido conectar con el estudio. Inténtalo otra vez o escríbenos por WhatsApp.',
+    mock: 'Modo demostración: los huecos son inventados y no se crea ninguna reserva.',
+    days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+    months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+             'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
+  };
+
+  /* ---------- transport ---------- */
+
+  var cfg = window.S56_BOOKING || {};
+  var local = /^(localhost|127\.0\.0\.1|\[::1\]|192\.168\.)/.test(location.hostname);
+  var MOCK = !cfg.base && (local || /[?&]mock=1/.test(location.search));
+  if (!cfg.base && !MOCK) return;          // never pretend to take a booking
+
+  var fallback = document.getElementById('booking-fallback');
+  if (fallback) fallback.hidden = true;
+
+  var track = function (name, payload) {
+    if (window.s56Track) window.s56Track(name, payload || {});
+  };
+
+  var live = function (path, opts) {
+    opts = opts || {};
+    return fetch(cfg.base.replace(/\/$/, '') + path, {
+      method: opts.method || 'GET',
+      headers: { 'Accept': 'application/vnd.api.v2+json', 'Content-Type': 'application/json' },
+      body: opts.body ? JSON.stringify(opts.body) : undefined
+    }).then(function (r) {
+      return r.json().then(function (j) { return { ok: r.ok, j: j }; });
+    }).then(function (res) {
+      if (!res.j || res.j.success === false) {
+        var err = new Error('altegio');
+        err.code = (res.j && res.j.meta && res.j.meta.code) || 0;
+        throw err;
+      }
+      return res.j.data;
+    });
+  };
+
+  /* Fixtures shaped exactly like the API's own payloads, so switching to the
+     proxy is a change of transport and nothing else. */
+  var FIX = {
+    services: UK ? [
+      { id: 1, title: 'Ендосфера · Обличчя', price_min: 40, seance_length: 2400 },
+      { id: 2, title: 'Ендосфера · Тіло, 60 хв', price_min: 65, seance_length: 3600 },
+      { id: 3, title: 'Ендосфера · Тіло, 90 хв', price_min: 95, seance_length: 5400 },
+      { id: 4, title: 'Лазерна епіляція', price_min: 10, seance_length: 1800 },
+      { id: 5, title: 'Електроепіляція · безкоштовна консультація', price_min: 0, seance_length: 1800 },
+      { id: 6, title: 'Віск і шугаринг', price_min: 8, seance_length: 1800 }
+    ] : [
+      { id: 1, title: 'Endospheres · Rostro', price_min: 40, seance_length: 2400 },
+      { id: 2, title: 'Endospheres · Cuerpo, 60 min', price_min: 65, seance_length: 3600 },
+      { id: 3, title: 'Endospheres · Cuerpo, 90 min', price_min: 95, seance_length: 5400 },
+      { id: 4, title: 'Depilación Láser', price_min: 10, seance_length: 1800 },
+      { id: 5, title: 'Electrodepilación · consulta gratuita', price_min: 0, seance_length: 1800 },
+      { id: 6, title: 'Cera y Sugaring', price_min: 8, seance_length: 1800 }
+    ],
+    staff: [
+      { id: 11, name: 'Anna', specialization: UK ? 'Ендосфера, лазер' : 'Endospheres, láser' },
+      { id: 12, name: 'Alina', specialization: UK ? 'Епіляція, депіляція' : 'Depilación' }
+    ]
+  };
+
+  var ymd = function (d) {
+    return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+  };
+  /* deterministic per date, so a mocked calendar looks like a real one:
+     closed Sundays, thin Saturdays, the odd fully-booked day */
+  var seeded = function (s) {
+    var h = 0, i;
+    for (i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 9973;
+    return h;
+  };
+  var mockTimes = function (date) {
+    var d = new Date(date + 'T00:00:00'), h = seeded(date), out = [], t;
+    if (d.getDay() === 0) return [];
+    if (h % 11 === 0) return [];
+    for (t = 10 * 60; t <= (d.getDay() === 6 ? 14 * 60 : 19 * 60); t += 30) {
+      if ((h + t) % 3 === 0) continue;
+      out.push({ time: ('0' + Math.floor(t / 60)).slice(-2) + ':' + ('0' + (t % 60)).slice(-2),
+                 datetime: date + 'T' + ('0' + Math.floor(t / 60)).slice(-2) + ':' + ('0' + (t % 60)).slice(-2) + ':00' });
+    }
+    return out;
+  };
+
+  var api = {
+    services: function () {
+      return MOCK ? Promise.resolve(FIX.services) : live('/book_services');
+    },
+    staff: function () {
+      return MOCK ? Promise.resolve(FIX.staff) : live('/book_staff');
+    },
+    dates: function (from, to, serviceId, staffId) {
+      if (MOCK) {
+        var out = [], d = new Date(from + 'T00:00:00'), end = new Date(to + 'T00:00:00');
+        for (; d <= end; d.setDate(d.getDate() + 1)) if (mockTimes(ymd(d)).length) out.push(ymd(d));
+        return Promise.resolve({ booking_dates: out });
+      }
+      return live('/book_dates?date_from=' + from + '&date_to=' + to +
+                  '&service_ids[]=' + serviceId + '&staff_id=' + (staffId || 0));
+    },
+    times: function (staffId, date, serviceId) {
+      if (MOCK) return Promise.resolve(mockTimes(date));
+      return live('/book_times/' + (staffId || 0) + '/' + date + '?service_ids[]=' + serviceId);
+    },
+    record: function (payload) {
+      if (MOCK) return Promise.resolve([{ id: 0, record_id: 'DEMO-' + Date.now().toString(36).toUpperCase() }]);
+      return live('/book_record', { method: 'POST', body: payload });
+    }
+  };
+
+  /* ---------- state ---------- */
+
+  var state = { service: null, staff: null, date: null, time: null, weeks: 2 };
+  var cache = { services: [], staff: [], dates: [], times: [] };
+
+  var el = function (tag, cls, html) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (html != null) n.innerHTML = html;
+    return n;
+  };
+  var money = function (n) { return n ? T.from + n + ' €' : ''; };
+  var human = function (date) {
+    var d = new Date(date + 'T00:00:00');
+    return d.getDate() + ' ' + T.months[d.getMonth()];
+  };
+
+  /* ---------- steps ---------- */
+
+  var mount = el('div', 'bk');
+  root.appendChild(mount);
+  if (MOCK) {
+    var note = el('p', 'bk-mock', T.mock);
+    root.insertBefore(note, mount);
+  }
+
+  var step = function (n, title, done, body) {
+    var s = el('section', 'bk-step' + (done ? ' is-done' : ''));
+    var head = el('div', 'bk-step-head');
+    head.appendChild(el('span', 'bk-step-n', String(n)));
+    head.appendChild(el('span', 'bk-step-t', title));
+    if (done) {
+      var btn = el('button', 'bk-change', T.change);
+      btn.type = 'button';
+      btn.addEventListener('click', done);
+      head.appendChild(btn);
+    }
+    s.appendChild(head);
+    if (body) s.appendChild(body);
+    return s;
+  };
+
+  var render = function () {
+    mount.innerHTML = '';
+    var n = 0;
+
+    /* 1 · service */
+    n++;
+    if (!state.service) {
+      var list = el('div', 'bk-list');
+      cache.services.forEach(function (sv) {
+        var b = el('button', 'bk-opt');
+        b.type = 'button';
+        b.innerHTML = '<span class="bk-opt-t">' + sv.title + '</span>' +
+                      '<span class="bk-opt-m">' + money(sv.price_min) +
+                      (sv.seance_length ? ' · ' + Math.round(sv.seance_length / 60) + T.min : '') + '</span>';
+        b.addEventListener('click', function () {
+          state.service = sv; state.date = null; state.time = null;
+          track('booking_service', { service: sv.title });
+          loadDates();
+        });
+        list.appendChild(b);
+      });
+      mount.appendChild(step(n, T.pickService, null, list));
+      return;
+    }
+    mount.appendChild(step(n, state.service.title, function () {
+      state.service = null; state.staff = null; state.date = null; state.time = null; render();
+    }));
+
+    /* 2 · staff */
+    n++;
+    if (!state.staff) {
+      var slist = el('div', 'bk-list');
+      var any = el('button', 'bk-opt');
+      any.type = 'button';
+      any.innerHTML = '<span class="bk-opt-t">' + T.anyStaff + '</span><span class="bk-opt-m">' + T.anyStaffNote + '</span>';
+      any.addEventListener('click', function () {
+        state.staff = { id: 0, name: T.anyStaff }; state.date = null; state.time = null;
+        track('booking_staff', { staff: 'any' });   // a step is a step: drop-off here counts too
+        loadDates();
+      });
+      slist.appendChild(any);
+      cache.staff.forEach(function (st) {
+        var b = el('button', 'bk-opt');
+        b.type = 'button';
+        b.innerHTML = '<span class="bk-opt-t">' + st.name + '</span><span class="bk-opt-m">' + (st.specialization || '') + '</span>';
+        b.addEventListener('click', function () {
+          state.staff = st; state.date = null; state.time = null;
+          track('booking_staff', { staff: st.name });
+          loadDates();
+        });
+        slist.appendChild(b);
+      });
+      mount.appendChild(step(n, T.steps[1], null, slist));
+      return;
+    }
+    mount.appendChild(step(n, state.staff.name, function () {
+      state.staff = null; state.date = null; state.time = null; render();
+    }));
+
+    /* 3 · date */
+    n++;
+    if (!state.date) {
+      var wrap = el('div');
+      if (!cache.dates.length) {
+        wrap.appendChild(el('p', 'bk-empty', T.noDates));
+      } else {
+        var strip = el('div', 'bk-days');
+        var d = new Date(), end = new Date();
+        end.setDate(end.getDate() + state.weeks * 7);
+        for (; d <= end; d.setDate(d.getDate() + 1)) {
+          var key = ymd(d), free = cache.dates.indexOf(key) !== -1;
+          var b = el('button', 'bk-day' + (free ? '' : ' is-off'));
+          b.type = 'button';
+          b.disabled = !free;
+          b.innerHTML = '<span class="bk-day-w">' + T.days[d.getDay()] + '</span>' +
+                        '<span class="bk-day-n">' + d.getDate() + '</span>';
+          if (free) b.addEventListener('click', (function (k) {
+            return function () { state.date = k; state.time = null; track('booking_date', { date: k }); loadTimes(); };
+          })(key));
+          strip.appendChild(b);
+        }
+        wrap.appendChild(strip);
+        if (state.weeks < 8) {
+          var more = el('button', 'bk-more', T.more);
+          more.type = 'button';
+          more.addEventListener('click', function () { state.weeks += 2; loadDates(); });
+          wrap.appendChild(more);
+        }
+      }
+      mount.appendChild(step(n, T.pickDate, null, wrap));
+      return;
+    }
+    mount.appendChild(step(n, human(state.date), function () {
+      state.date = null; state.time = null; render();
+    }));
+
+    /* 4 · time */
+    n++;
+    if (!state.time) {
+      var box = el('div');
+      if (!cache.times.length) box.appendChild(el('p', 'bk-empty', T.noTimes));
+      else {
+        var grid = el('div', 'bk-times');
+        cache.times.forEach(function (t) {
+          var b = el('button', 'bk-time', t.time);
+          b.type = 'button';
+          b.addEventListener('click', function () {
+            state.time = t; track('booking_time', { datetime: t.datetime }); render();
+          });
+          grid.appendChild(b);
+        });
+        box.appendChild(grid);
+      }
+      mount.appendChild(step(n, T.pickTime, null, box));
+      return;
+    }
+    mount.appendChild(step(n, state.time.time, function () { state.time = null; render(); }));
+
+    /* 5 · details */
+    n++;
+    mount.appendChild(step(n, T.steps[4], null, form()));
+  };
+
+  var form = function () {
+    var f = el('form', 'bk-form');
+    f.noValidate = true;
+    f.innerHTML =
+      '<div class="field"><label for="bk-name">' + T.name + '</label>' +
+      '<input type="text" id="bk-name" autocomplete="name" placeholder="' + T.namePh + '" required></div>' +
+      '<div class="field"><label for="bk-phone">' + T.phone + '</label><div class="phone-row">' +
+      '<select id="bk-prefix" class="phone-prefix" aria-label="' + T.phone + '">' +
+      '<option value="+34" selected>ES +34</option><option value="+380">UA +380</option>' +
+      '<option value="+44">UK +44</option><option value="+49">DE +49</option>' +
+      '<option value="+33">FR +33</option><option value="+40">RO +40</option>' +
+      '<option value="+212">MA +212</option></select>' +
+      '<input type="tel" id="bk-phone" inputmode="tel" autocomplete="tel-national" placeholder="600 000 000" required></div></div>' +
+      '<div class="field"><label for="bk-email">' + T.email + '</label>' +
+      '<input type="email" id="bk-email" autocomplete="email"><p class="bk-note">' + T.emailNote + '</p></div>' +
+      '<div class="field"><label for="bk-comment">' + T.comment + '</label>' +
+      '<textarea id="bk-comment" rows="2" placeholder="' + T.commentPh + '"></textarea></div>' +
+      '<label class="consent"><input type="checkbox" id="bk-consent" required><span>' + T.consent + '</span></label>' +
+      '<p class="bk-error" id="bk-error" hidden></p>' +
+      '<button type="submit" class="btn btn-primary btn-block" id="bk-submit" disabled>' + T.submit + '</button>';
+
+    var submit = f.querySelector('#bk-submit');
+    var required = [f.querySelector('#bk-name'), f.querySelector('#bk-phone'), f.querySelector('#bk-consent')];
+    var sync = function () {
+      submit.disabled = !required.every(function (x) {
+        return x.type === 'checkbox' ? x.checked : x.value.trim() !== '';
+      });
+    };
+    required.forEach(function (x) {
+      x.addEventListener('input', sync); x.addEventListener('change', sync);
+    });
+
+    f.addEventListener('submit', function (e) {
+      e.preventDefault();
+      submit.disabled = true;
+      submit.textContent = T.sending;
+      f.querySelector('#bk-error').hidden = true;
+
+      var payload = {
+        phone: f.querySelector('#bk-prefix').value + f.querySelector('#bk-phone').value.replace(/\s+/g, ''),
+        fullname: f.querySelector('#bk-name').value.trim(),
+        email: f.querySelector('#bk-email').value.trim() || undefined,
+        comment: f.querySelector('#bk-comment').value.trim() || undefined,
+        appointments: [{
+          id: 1,
+          services: [state.service.id],
+          staff_id: state.staff.id || 0,
+          datetime: state.time.datetime
+        }]
+      };
+
+      track('booking_submit', { service: state.service.title, datetime: state.time.datetime });
+
+      api.record(payload).then(function (data) {
+        var rec = (data && data[0]) || {};
+        track('booking_success', { record: rec.record_id });
+        done(rec);
+      })['catch'](function (err) {
+        track('booking_error', { code: err.code || 'network' });
+        var box = f.querySelector('#bk-error');
+        box.textContent = err.code === 437 ? T.errBusy
+                        : err.code === 436 || err.code === 433 ? T.errStaff
+                        : err.code === 400 ? T.errEmail
+                        : err.code === 404 || err.code === 422 || err.code === 438 ? T.errParams
+                        : T.errNet;
+        box.hidden = false;
+        submit.textContent = T.submit;
+        sync();
+      });
+    });
+    return f;
+  };
+
+  var done = function (rec) {
+    mount.innerHTML = '';
+    var box = el('div', 'bk-done');
+    box.innerHTML =
+      '<p class="bk-done-t">' + T.okTitle + '</p>' +
+      '<p class="bk-done-l">' + T.okLead + '</p>' +
+      '<dl class="bk-done-d">' +
+      '<dt>' + T.okWhen + '</dt><dd>' + human(state.date) + ', ' + state.time.time + '</dd>' +
+      '<dt>' + T.okWhat + '</dt><dd>' + state.service.title + '</dd>' +
+      '<dt>' + T.okWho + '</dt><dd>' + state.staff.name + '</dd>' +
+      (rec.record_id ? '<dt>' + T.okNumber + '</dt><dd>' + rec.record_id + '</dd>' : '') +
+      '</dl>';
+    var again = el('button', 'bk-more', T.again);
+    again.type = 'button';
+    again.addEventListener('click', function () {
+      state = { service: null, staff: null, date: null, time: null, weeks: 2 };
+      render();
+    });
+    box.appendChild(again);
+    mount.appendChild(box);
+  };
+
+  /* ---------- loaders ---------- */
+
+  var busy = function (on) { mount.setAttribute('aria-busy', on ? 'true' : 'false'); };
+
+  var loadDates = function () {
+    busy(true);
+    var from = ymd(new Date()), to = new Date();
+    to.setDate(to.getDate() + state.weeks * 7);
+    api.dates(from, ymd(to), state.service.id, state.staff && state.staff.id)
+      .then(function (d) { cache.dates = (d && d.booking_dates) || []; })
+      ['catch'](function () { cache.dates = []; })
+      .then(function () { busy(false); render(); });
+  };
+
+  var loadTimes = function () {
+    busy(true);
+    api.times(state.staff && state.staff.id, state.date, state.service.id)
+      .then(function (t) { cache.times = t || []; })
+      ['catch'](function () { cache.times = []; })
+      .then(function () { busy(false); render(); });
+  };
+
+  Promise.all([api.services(), api.staff()]).then(function (r) {
+    cache.services = r[0] || [];
+    cache.staff = r[1] || [];
+    track('booking_open', {});
+    render();
+  })['catch'](function () {
+    /* if we cannot even list services we cannot book: hand the page back */
+    mount.remove();
+    if (fallback) fallback.hidden = false;
+  });
+})();
