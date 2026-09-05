@@ -232,10 +232,25 @@
       }
 
       burstFrom(openBtn);
-      /* let the burst have its moment before the page moves on */
+
+      /* Curtain up, cut, curtain away. The confetti canvas sits above the
+         veil, so the paper keeps falling across the whole transition and
+         ties the two halves of the page together. */
+      var veil = document.createElement('div');
+      veil.className = 'bono-veil';
+      veil.setAttribute('aria-hidden', 'true');
+      document.body.appendChild(veil);
+
+      window.setTimeout(function () { veil.classList.add('is-up'); }, 620);
+
       window.setTimeout(function () {
-        gift.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 650);
+        gift.scrollIntoView({ block: 'start' });   // instant: nobody sees it
+        veil.classList.remove('is-up');
+        veil.classList.add('is-gone');
+        if (window.studio56BonoUpdate) window.studio56BonoUpdate();
+      }, 1120);
+
+      window.setTimeout(function () { veil.remove(); }, 1760);
     }, { once: true });
   }
 
