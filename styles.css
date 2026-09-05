@@ -1920,3 +1920,13 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 
 .acc-lead{margin:18px 0 8px;font-size:14px;}
 .acc-lead strong{font-weight:700;}
+
+/* the 3 + 1 offer: one studio-wide rule, stated once, not sold as a product */
+.offer-note{
+  margin:18px 0 6px;padding:14px 16px;
+  border:1px solid var(--hairline);border-radius:var(--radius-sm);
+  background:rgba(186,156,164,.14);
+}
+.offer-note p{margin:0;font-size:14.5px;line-height:1.55;color:var(--charcoal);}
+
+.acc-note{margin:14px 0 0;padding:10px 12px;border-radius:var(--radius-sm);background:rgba(186,156,164,.14);font-size:13.5px;line-height:1.5;}

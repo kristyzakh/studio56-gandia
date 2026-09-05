@@ -24,10 +24,8 @@
     phone: 'Телефон: ',
     datePref: 'Бажана дата: ',
     saveRe: /економія|заощад/i,
-    packLead: 'Вигідніше пакетом: ',
-    packLeadPartial: 'Частину зон вигідніше пакетом: ',
-    packSave: ' — економія ',
-    packBtn: 'Застосувати пакет',
+    offerLead: 'З акцією 3 + 1 чотири сеанси — ',
+    offerInstead: ' замість ',
     packElectroHint: 'Плануєте кілька сеансів електроепіляції? Пакет годин виходить дешевше за годину.',
     packElectroBtn: 'Переглянути пакети'
   } : {
@@ -43,10 +41,8 @@
     phone: 'Teléfono: ',
     datePref: 'Fecha preferida: ',
     saveRe: /ahorras/i,
-    packLead: 'Más barato en pack: ',
-    packLeadPartial: 'Parte de las zonas sale mejor en pack: ',
-    packSave: ' — ahorras ',
-    packBtn: 'Aplicar el pack',
+    offerLead: 'Con el 3 + 1, cuatro sesiones — ',
+    offerInstead: ' en vez de ',
     packElectroHint: '¿Vas a hacer varias sesiones de electrodepilación? Un pack de horas sale más barato por hora.',
     packElectroBtn: 'Ver los packs'
   };
@@ -206,18 +202,13 @@
       rowById[b.dataset.id] = { id: b.dataset.id, name: b.dataset.name, price: Number(b.dataset.price) };
     });
 
-    var LASER_PACKS = [
-      { id: 'depilacion-laser-3-1-axilas-ingles', zones: ['depilacion-laser-axilas', 'depilacion-laser-ingles-completas'] },
-      { id: 'depilacion-laser-3-1-axilas-ingles-medias-piernas', zones: ['depilacion-laser-axilas', 'depilacion-laser-ingles-completas', 'depilacion-laser-medias-piernas'] },
-      { id: 'depilacion-laser-3-1-axilas-ingles-piernas-completas', zones: ['depilacion-laser-axilas', 'depilacion-laser-ingles-completas', 'depilacion-laser-piernas-completas'] },
-      { id: 'depilacion-laser-3-1-cuerpo-completo', zones: ['depilacion-laser-cuerpo-completo'] }
-    ];
-
-    var ENDO_PACKS = {
-      'endospheres-rostro-de-30-a-40-min': 'endospheres-3-1-rostro',
-      'endospheres-cuerpo-60-min': 'endospheres-3-1-cuerpo-60-min',
-      'endospheres-cuerpo-90-min': 'endospheres-3-1-cuerpo-90-min'
-    };
+    /* 3 + 1 is a studio-wide offer, not a product: every fourth session free,
+       on laser and endospheres, on single zones as much as on zone packs. So
+       there is nothing to swap the selection for — the cart simply shows what
+       four sessions of what is already picked would cost under it. The old
+       engine matched hard-coded pack rows; those rows are gone from the price
+       list now, and matching them would have thrown on the first lookup. */
+    var OFFER_PREFIXES = ['depilacion-laser-', 'endospheres-'];
 
     var ELECTRO_MINUTES = {
       'electrodepilacion-30-minutos': 30,
@@ -226,126 +217,45 @@
       'electrodepilacion-120-minutos': 120
     };
 
-    var sameSet = function (a, b) {
-      if (a.length !== b.length || !a.length) return false;
-      var sa = a.slice().sort(), sb = b.slice().sort();
-      return sa.every(function (v, i) { return v === sb[i]; });
-    };
+    var syncSuggestion = function () {
+      var items = read();
+      var ids = items.map(function (i) { return i.id; });
 
-    /* Laser and ендосфера return a swappable {removeIds, addId, standalone};
-       electro is a plain {electro:true} flag, with no numbers attached.
-
-       A pack counts when everything it covers is already selected — it does NOT have
-       to be the whole selection. Picking axilas + ingles + brazos should still hear
-       about the axilas + ingles pack, with brazos simply staying a separate line;
-       requiring an exact set match meant that case said nothing at all. */
-    var findMatch = function (ids) {
-      var laserZones = ids.filter(function (id) {
-        return id.indexOf('depilacion-laser-') === 0 && id.indexOf('-3-1-') === -1;
+      var eligible = items.filter(function (i) {
+        return OFFER_PREFIXES.some(function (pre) { return i.id.indexOf(pre) === 0; });
       });
 
-      var best = null;
-      for (var p = 0; p < LASER_PACKS.length; p++) {
-        var pack = LASER_PACKS[p];
-        if (ids.indexOf(pack.id) !== -1) continue;
-
-        var coversAll = pack.zones.every(function (z) { return laserZones.indexOf(z) !== -1; });
-        if (!coversAll) continue;
-
-        /* the pack is 4 sessions, so the fair comparison is 4 one-off visits, not 1 */
-        var standalone = 4 * pack.zones.reduce(function (s, z) { return s + rowById[z].price; }, 0);
-        var save = standalone - rowById[pack.id].price;
-
-        /* several packs can fit at once (packs 1-3 nest); offer the biggest saving */
-        if (save > 0 && (!best || save > best.save)) {
-          best = {
-            removeIds: pack.zones,
-            addId: pack.id,
-            standalone: standalone,
-            save: save,
-            partial: pack.zones.length < laserZones.length
-          };
-        }
-      }
-      if (best) return best;
-
-      /* No combo pack fits, but a single zone is selected on its own: every real
-         "3 + 1" on the price list is priced as three sessions with the fourth free
-         (Ендосфера 40 -> 120, усе тіло 90 -> 270), so the same arithmetic gives an
-         honest figure for a zone that has no pack row of its own. Nothing invented:
-         it is the studio's own 3 + 1 applied to one zone. */
-      if (laserZones.length === 1) {
-        var zone = rowById[laserZones[0]];
-        var parts = zone.name.split(' · ');
-        return {
-          removeIds: [laserZones[0]],
-          virtual: true,
-          virtualId: 'depilacion-laser-3-1-' + laserZones[0].replace('depilacion-laser-', ''),
-          virtualName: parts[0] + ' · 3 + 1 ' + parts[parts.length - 1],
-          virtualPrice: 3 * zone.price,
-          standalone: 4 * zone.price
-        };
-      }
-
-      for (var single in ENDO_PACKS) {
-        if (ids.indexOf(single) !== -1 && ids.indexOf(ENDO_PACKS[single]) === -1) {
-          return { removeIds: [single], addId: ENDO_PACKS[single], standalone: 4 * rowById[single].price };
-        }
-      }
-
-      var electroIds = ids.filter(function (id) { return ELECTRO_MINUTES.hasOwnProperty(id); });
-      if (electroIds.length) return { electro: true };
-
-      return null;
-    };
-
-    var syncSuggestion = function () {
-      var match = findMatch(read().map(function (i) { return i.id; }));
-
-      if (match && match.electro) {
-        suggestionText.textContent = T.packElectroHint;
-        suggestionBtn.textContent = T.packElectroBtn;
-        suggestion.hidden = false;
-        cartBarEl.classList.add('has-suggestion');
-        return;
-      }
-
-      if (match) {
-        var pack = match.virtual
-          ? { name: match.virtualName, price: match.virtualPrice }
-          : rowById[match.addId];
-        var save = match.standalone - pack.price;
-        if (save > 0) {
-          var label = pack.name.split(' · ').pop();
-          var lead = match.partial ? T.packLeadPartial : T.packLead;
-          suggestionText.textContent = lead + label + ' — ' + fmt(pack.price) + T.packSave + fmt(save);
-          suggestionBtn.textContent = T.packBtn;
+      if (eligible.length) {
+        /* Per-session prices only, and never the first-session rate: that one is
+           an introductory price and does not stack with the offer. */
+        var perVisit = eligible.reduce(function (s, i) { return s + rowById[i.id].price; }, 0);
+        if (perVisit > 0) {
+          suggestionText.textContent = T.offerLead + fmt(3 * perVisit) + T.offerInstead + fmt(4 * perVisit);
+          suggestionBtn.hidden = true;
           suggestion.hidden = false;
           cartBarEl.classList.add('has-suggestion');
           return;
         }
       }
 
+      if (ids.some(function (id) { return ELECTRO_MINUTES.hasOwnProperty(id); })) {
+        suggestionText.textContent = T.packElectroHint;
+        suggestionBtn.textContent = T.packElectroBtn;
+        suggestionBtn.hidden = false;
+        suggestion.hidden = false;
+        cartBarEl.classList.add('has-suggestion');
+        return;
+      }
+
       suggestion.hidden = true;
       cartBarEl.classList.remove('has-suggestion');
     };
 
+    /* The only button left belongs to the electro nudge — 3 + 1 has nothing to
+       swap to, so it shows no button at all. */
     suggestionBtn.addEventListener('click', function () {
-      var items = read();
-      var match = findMatch(items.map(function (i) { return i.id; }));
-      if (!match) return;
-
-      if (match.electro) {
-        document.getElementById('p-electro').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        return;
-      }
-
-      var pack = match.virtual
-        ? { id: match.virtualId, name: match.virtualName, price: match.virtualPrice }
-        : rowById[match.addId];
-      var kept = items.filter(function (i) { return match.removeIds.indexOf(i.id) === -1; });
-      kept.push({ id: pack.id, name: pack.name, price: pack.price, priceFirst: null, note: null });
-      write(kept);
+      var target = document.getElementById('p-electro');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 
     document.addEventListener('s56cartchange', syncSuggestion);
