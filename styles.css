@@ -620,10 +620,13 @@ section{padding:52px 0;}
 }
 .phone-row{display:flex;gap:8px;}
 .phone-row .phone-prefix{
-  flex:0 0 92px;
-  width:92px;
-  padding:14px 24px 14px 12px;
-  background-position:right 8px center;
+  /* Wide enough for the longest option, not for the shortest: at 92 px there
+     were 56 px of room inside, while "UA +380" needs 59 and "MA +212" needs 61,
+     so both lost their last digit. */
+  flex:0 0 104px;
+  width:104px;
+  padding:14px 22px 14px 12px;
+  background-position:right 7px center;
 }
 .phone-row input[type="tel"]{flex:1 1 auto;min-width:0;}
 .field input:focus,.field select:focus{
