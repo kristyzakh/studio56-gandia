@@ -239,18 +239,33 @@
       var veil = document.createElement('div');
       veil.className = 'bono-veil';
       veil.setAttribute('aria-hidden', 'true');
+      var grain = document.createElement('div');
+      grain.className = 'bono-grain';
+      veil.appendChild(grain);
       document.body.appendChild(veil);
 
-      window.setTimeout(function () { veil.classList.add('is-up'); }, 480);
+      /* the screen being left behind moves too, a beat before the curtain */
+      window.setTimeout(function () { openSection.classList.add('is-leaving'); }, 380);
+      window.setTimeout(function () { veil.classList.add('is-up'); }, 420);
 
       window.setTimeout(function () {
         gift.scrollIntoView({ block: 'start' });   // instant: nobody sees it
         veil.classList.remove('is-up');
         veil.classList.add('is-gone');
-        if (window.studio56BonoUpdate) window.studio56BonoUpdate();
-      }, 1020);
 
-      window.setTimeout(function () { veil.remove(); }, 1600);
+        /* The instant scroll fires a scroll event, which reveals the card at
+           once — behind a curtain nobody can see through. Wind it back and let
+           it rise into the opening instead, so the gift arrives rather than
+           having been there all along. */
+        var panels = [].slice.call(gift.querySelectorAll('.reveal'));
+        if (gift.classList.contains('reveal')) panels.push(gift);
+        panels.forEach(function (p) { p.classList.remove('is-in'); });
+        window.setTimeout(function () {
+          if (window.studio56BonoUpdate) window.studio56BonoUpdate();
+        }, 190);
+      }, 1000);
+
+      window.setTimeout(function () { veil.remove(); }, 1680);
     }, { once: true });
   }
 
