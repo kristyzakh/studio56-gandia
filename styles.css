@@ -222,43 +222,13 @@ header{
 }
 .drawer nav a:focus-visible{outline:2px solid var(--rose);outline-offset:3px;}
 
-/* search */
-.drawer-search{
-  position:relative;
-  margin:26px 0 34px;
-}
-.drawer-search input{
-  width:100%;
-  font-family:var(--body);
-  font-size:16px;
-  color:var(--charcoal);
-  background:transparent;
-  border:0;
-  border-bottom:1px solid var(--hairline);
-  border-radius:0;
-  padding:12px 40px 12px 0;
-  min-height:48px;
-  appearance:none;
-}
-.drawer-search input:focus{
-  outline:none;
-  border-bottom-color:var(--rose);
-}
-.drawer-search button{
-  position:absolute;
-  right:0;top:50%;
-  transform:translateY(-50%);
-  width:44px;height:44px;
-  display:flex;align-items:center;justify-content:center;
-  background:none;border:0;padding:0;cursor:pointer;
-  color:var(--navy);
-}
-.drawer-search button:focus-visible{outline:2px solid var(--rose);outline-offset:2px;}
-
 /* gift-voucher badge — a circle, echoing the navy circle of the S mark.
    Cream fill + rose hairline + navy label: the brand's "promotional" style.
    Rose is never a fill here; a solid rose disc was already rejected once. */
 .gift{
+  /* The search box above used to space this off the menu; it is gone, so
+     the gap is stated here instead of being a side effect. */
+  margin-top:34px;
   align-self:flex-start;
   width:154px;height:154px;
   border-radius:50%;
