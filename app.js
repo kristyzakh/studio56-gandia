@@ -114,13 +114,23 @@
      rewrites the amount cells in place. #first-toggle is precios.html's cart
      toggle and cart.js already owns it there; excluded here so the two never
      both attach to the same button. */
-  var uk = document.documentElement.lang === 'uk';
-  var HINT_ON = uk
-    ? 'Показано ціну першого сеансу. Натисніть, щоб побачити звичайну ціну.'
-    : 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.';
-  var HINT_OFF = uk
-    ? 'Показано звичайну ціну. Натисніть, якщо це ваш перший сеанс.'
-    : 'Mostrando el precio normal. Tócalo si es tu primera sesión.';
+  /* Language. document.documentElement.lang is "uk" under /ua/, "ru" under
+     /ru/ and "es" at the root; anything unexpected falls back to Spanish,
+     the language the studio's own city speaks. */
+  var LANG = document.documentElement.lang;
+  var pick = function (t) { return t[LANG] || t.es; };
+  var slavic = LANG === 'uk' || LANG === 'ru';
+
+  var HINT = pick({
+    uk: { on: 'Показано ціну першого сеансу. Натисніть, щоб побачити звичайну ціну.',
+          off: 'Показано звичайну ціну. Натисніть, якщо це ваш перший сеанс.' },
+    ru: { on: 'Показана цена первого сеанса. Нажмите, чтобы увидеть обычную цену.',
+          off: 'Показана обычная цена. Нажмите, если это ваш первый сеанс.' },
+    es: { on: 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.',
+          off: 'Mostrando el precio normal. Tócalo si es tu primera sesión.' }
+  });
+  var HINT_ON = HINT.on;
+  var HINT_OFF = HINT.off;
 
   [].slice.call(document.querySelectorAll('.tag-toggle:not(#first-toggle)')).forEach(function (toggle) {
     var hint = toggle.parentElement.querySelector('.tag-hint');
@@ -185,25 +195,40 @@
   var giftCard = document.getElementById('gift-card');
 
   if (giftCard) {
-    var PRICES = uk ? {
-      endospheres: { unit: 65, first: 52, pack4: 195, pack8: 390, label: 'Ендосфера', detail: 'Тіло, 60 хв за сеанс.' },
-      laser:       { unit: 43, pack4: 120, pack8: 240, label: 'Лазерна епіляція', detail: 'Пахви + глибоке бікіні за сеанс.' }
-    } : {
-      endospheres: { unit: 65, first: 52, pack4: 195, pack8: 390, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
-      laser:       { unit: 43, pack4: 120, pack8: 240, label: 'Depilación Láser', detail: 'Axilas + ingles completas por sesión.' }
-    };
+    var PRICES = pick({
+      uk: {
+        endospheres: { unit: 65, first: 52, pack4: 195, pack8: 390, label: 'Ендосфера', detail: 'Тіло, 60 хв за сеанс.' },
+        laser:       { unit: 43, pack4: 120, pack8: 240, label: 'Лазерна епіляція', detail: 'Пахви + глибоке бікіні за сеанс.' }
+      },
+      ru: {
+        endospheres: { unit: 65, first: 52, pack4: 195, pack8: 390, label: 'Эндосфера', detail: 'Тело, 60 мин за сеанс.' },
+        laser:       { unit: 43, pack4: 120, pack8: 240, label: 'Лазерная эпиляция', detail: 'Подмышки + глубокое бикини за сеанс.' }
+      },
+      es: {
+        endospheres: { unit: 65, first: 52, pack4: 195, pack8: 390, label: 'Endospheres', detail: 'Cuerpo, 60 min por sesión.' },
+        laser:       { unit: 43, pack4: 120, pack8: 240, label: 'Depilación Láser', detail: 'Axilas + ingles completas por sesión.' }
+      }
+    });
 
-    /* сеанс / сеанси / сеансів — the Ukrainian card can show any of the three */
+    /* Both Slavic languages take three forms and share the same rule for
+       choosing between them — only the middle and last words differ:
+       сеанси/сеансів in Ukrainian, сеанса/сеансов in Russian. */
+    var SESSION = pick({
+      uk: ['сеанс', 'сеанси', 'сеансів'],
+      ru: ['сеанс', 'сеанса', 'сеансов'],
+      es: null
+    });
     var sessionWord = function (n) {
-      if (!uk) return n === 1 ? '1 sesión' : n + ' sesiones';
+      if (!slavic) return n === 1 ? '1 sesión' : n + ' sesiones';
       var m10 = n % 10, m100 = n % 100, w;
-      if (m10 === 1 && m100 !== 11) w = 'сеанс';
-      else if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) w = 'сеанси';
-      else w = 'сеансів';
+      if (m10 === 1 && m100 !== 11) w = SESSION[0];
+      else if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) w = SESSION[1];
+      else w = SESSION[2];
       return n + ' ' + w;
     };
 
-    var G = uk ? {
+    var G = pick({
+      uk: {
       /* must match bono.js's own fallback — it is what the card will really show */
       occasion: 'Подарунок для вас',
       msg: 'Побудь трохи для себе.',
@@ -216,7 +241,21 @@
       msgLine: '· Повідомлення: ',
       whenLine: '· Надіслати: ', destLine: '· Куди: ', asap: 'одразу',
       tbc: '(уточнимо)'
-    } : {
+      },
+      ru: {
+      occasion: 'Подарок для вас',
+      msg: 'Побудь немного для себя.',
+      single: 'Один сеанс.',
+      firstOff: function (save) { return 'Цена первого сеанса со скидкой −20 % · экономия ' + save + '.'; },
+      pay: function (billed, n, per) { return 'Платите за ' + sessionWord(billed) + ', дарите ' + n + ' · ' + per + ' за сеанс.'; },
+      save: ' · экономия ',
+      hello: 'Здравствуйте! Хочу подарочный сертификат:',
+      forWhom: '· Кому: ', fromWhom: '· От: ',
+      msgLine: '· Сообщение: ',
+      whenLine: '· Отправить: ', destLine: '· Куда: ', asap: 'сразу',
+      tbc: '(уточним)'
+      },
+      es: {
       occasion: 'Un regalo para ti',
       msg: 'Tómate un rato para ti.',
       single: 'Una sesión suelta.',
@@ -228,7 +267,8 @@
       msgLine: '· Mensaje: ',
       whenLine: '· Enviar: ', destLine: '· A dónde: ', asap: 'cuanto antes',
       tbc: '(por confirmar)'
-    };
+      }
+    });
 
     var state = { treatment: 'endospheres', sessions: '4' };
 
@@ -239,12 +279,13 @@
 
     /* datetime-local hands back 2026-09-05T14:30; the studio reads the order in
        WhatsApp, so it goes out as a written date — with the separator each
-       language actually uses: 05.09.2026 in Ukrainian, 05/09/2026 in Spanish. */
+       language actually uses: 05.09.2026 in Ukrainian and Russian, 05/09/2026
+       in Spanish. */
     var fmtWhen = function (v) {
       var parts = v.split('T');
       if (parts.length !== 2) return v;
       var d = parts[0].split('-');
-      var sep = uk ? '.' : '/';
+      var sep = slavic ? '.' : '/';
       return d[2] + sep + d[1] + sep + d[0] + ', ' + parts[1];
     };
 

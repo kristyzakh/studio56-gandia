@@ -20,9 +20,11 @@
   var root = document.getElementById('booking-widget');
   if (!root) return;
 
-  var UK = document.documentElement.lang === 'uk';
+  var LANG = document.documentElement.lang;
+  var pick = function (t) { return t[LANG] || t.es; };
 
-  var T = UK ? {
+  var T = pick({
+    uk: {
     steps: ['Процедура', 'Майстриня', 'Дата', 'Час', 'Ваші дані'],
     anyStaff: 'Будь-яка вільна',
     anyStaffNote: 'Підберемо, хто вільний у цей час',
@@ -68,7 +70,55 @@
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
              'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
-  } : {
+    },
+    ru: {
+    steps: ['Процедура', 'Мастер', 'Дата', 'Время', 'Ваши данные'],
+    anyStaff: 'Любой свободный',
+    anyStaffNote: 'Подберём, кто свободен в это время',
+    pickService: 'Выберите процедуру',
+    pickDate: 'Выберите день',
+    pickTime: 'Выберите время',
+    noTimes: 'На этот день свободных окон нет. Попробуйте другой.',
+    noDates: 'В ближайшие дни свободных окон нет — напишите нам в WhatsApp, подберём время.',
+    more: 'Показать ещё две недели',
+    change: 'Назад',
+    otherCategories: '← Другие процедуры',
+    optionsWord: function (n) {
+      var m10 = n % 10, m100 = n % 100;
+      if (m10 === 1 && m100 !== 11) return ' услуга';
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return ' услуги';
+      return ' услуг';
+    },
+    name: 'Как вас зовут',
+    namePh: 'Имя и фамилия',
+    phone: 'Телефон',
+    email: 'Почта',
+    optional: '(необязательно)',
+    consent: 'Соглашаюсь с <a href="privacidad.html">политикой конфиденциальности</a> и с тем, чтобы Studio 56 связалась со мной.',
+    submit: 'Записаться',
+    sending: 'Записываем…',
+    from: 'от ',
+    min: ' мин',
+    okTitle: 'Готово, вы записаны',
+    okLead: 'Ждём вас в Studio 56. Подтверждение отправили, а если планы изменятся — просто напишите нам.',
+    okWhen: 'Когда',
+    okWhat: 'Что',
+    okWho: 'Мастер',
+    okNumber: 'Номер записи',
+    again: 'Записаться ещё раз',
+    errBusy: 'Это окно только что заняли. Выберите, пожалуйста, другое время.',
+    errStaff: 'На это время нет свободного мастера. Попробуйте другое время.',
+    errParams: 'Что-то не так с данными записи. Проверьте, пожалуйста, поля.',
+    errEmail: 'Проверьте адрес почты — он нужен для записи.',
+    errPhone: 'Проверьте номер телефона.',
+    errNet: 'Не удалось связаться со студией. Попробуйте ещё раз или напишите в WhatsApp.',
+    errNoProof: 'Не удалось подтвердить, что запись создалась. Напишите нам в WhatsApp, чтобы не вышло двойной записи.',
+    mock: 'Демонстрационный режим: показаны выдуманные окна, запись не создаётся.',
+    days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
+    months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+             'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
+    },
+    es: {
     steps: ['Tratamiento', 'Profesional', 'Día', 'Hora', 'Tus datos'],
     anyStaff: 'La que esté libre',
     anyStaffNote: 'Asignamos a quien esté disponible a esa hora',
@@ -109,7 +159,8 @@
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
     months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
              'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
-  };
+    }
+  });
 
   /* ---------- transport ---------- */
 
@@ -160,24 +211,35 @@
   /* Fixtures shaped exactly like the API's own payloads, so switching to the
      proxy is a change of transport and nothing else. */
   var FIX = {
-    services: UK ? [
+    services: pick({
+      uk: [
       { id: 1, title: 'Ендосфера · Обличчя', price_min: 40, seance_length: 2400 },
       { id: 2, title: 'Ендосфера · Тіло, 60 хв', price_min: 65, seance_length: 3600 },
       { id: 3, title: 'Ендосфера · Тіло, 90 хв', price_min: 95, seance_length: 5400 },
       { id: 4, title: 'Лазерна епіляція', price_min: 10, seance_length: 1800 },
       { id: 5, title: 'Електроепіляція · безкоштовна консультація', price_min: 0, seance_length: 1800 },
       { id: 6, title: 'Віск і шугаринг', price_min: 8, seance_length: 1800 }
-    ] : [
+      ],
+      ru: [
+      { id: 1, title: 'Эндосфера · Лицо', price_min: 40, seance_length: 2400 },
+      { id: 2, title: 'Эндосфера · Тело, 60 мин', price_min: 65, seance_length: 3600 },
+      { id: 3, title: 'Эндосфера · Тело, 90 мин', price_min: 95, seance_length: 5400 },
+      { id: 4, title: 'Лазерная эпиляция', price_min: 10, seance_length: 1800 },
+      { id: 5, title: 'Электроэпиляция · бесплатная консультация', price_min: 0, seance_length: 1800 },
+      { id: 6, title: 'Воск и шугаринг', price_min: 8, seance_length: 1800 }
+      ],
+      es: [
       { id: 1, title: 'Endospheres · Rostro', price_min: 40, seance_length: 2400 },
       { id: 2, title: 'Endospheres · Cuerpo, 60 min', price_min: 65, seance_length: 3600 },
       { id: 3, title: 'Endospheres · Cuerpo, 90 min', price_min: 95, seance_length: 5400 },
       { id: 4, title: 'Depilación Láser', price_min: 10, seance_length: 1800 },
       { id: 5, title: 'Electrodepilación · consulta gratuita', price_min: 0, seance_length: 1800 },
       { id: 6, title: 'Cera y Sugaring', price_min: 8, seance_length: 1800 }
-    ],
+      ]
+    }),
     staff: [
-      { id: 11, name: 'Anna', specialization: UK ? 'Ендосфера, лазер' : 'Endospheres, láser' },
-      { id: 12, name: 'Alina', specialization: UK ? 'Епіляція, депіляція' : 'Depilación' }
+      { id: 11, name: 'Anna', specialization: pick({ uk: 'Ендосфера, лазер', ru: 'Эндосфера, лазер', es: 'Endospheres, láser' }) },
+      { id: 12, name: 'Alina', specialization: pick({ uk: 'Епіляція, депіляція', ru: 'Эпиляция, депиляция', es: 'Depilación' }) }
     ]
   };
 

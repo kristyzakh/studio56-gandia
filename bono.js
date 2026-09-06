@@ -5,10 +5,14 @@
 (function () {
   'use strict';
 
-  /* Same convention as cart.js and app.js: "uk" on the /ua/ pages, "es" elsewhere. */
-  var UK = document.documentElement.lang === 'uk';
+  /* Same convention as cart.js and app.js: "uk" on the /ua/ pages, "ru" on
+     /ru/, "es" elsewhere — with Spanish as the fallback. */
+  var LANG = document.documentElement.lang;
+  var pick = function (t) { return t[LANG] || t.es; };
+  var SLAVIC = LANG === 'uk' || LANG === 'ru';
 
-  var TREATMENTS = UK ? {
+  var TREATMENTS = pick({
+    uk: {
     endospheres: {
       name: 'Ендосфера',
       what: 'Компресійна мікровібрація: активує кровообіг, розганяє застій рідини й повертає шкірі тонус. Без голок, без відновлення, без болю.'
@@ -25,7 +29,26 @@
       name: 'Віск і шугаринг',
       what: 'Видалення волосся з коренем воском або цукровою пастою. Гладенька шкіра того ж дня, зокрема на чутливій шкірі.'
     }
-  } : {
+    },
+    ru: {
+    endospheres: {
+      name: 'Эндосфера',
+      what: 'Компрессионная микровибрация: активирует кровообращение, разгоняет застой жидкости и возвращает коже тонус. Без игл, без восстановления, без боли.'
+    },
+    laser: {
+      name: 'Лазерная эпиляция',
+      what: 'Диодный лазер 808 нм с усиленным охлаждением. Постепенно убирает волосы и остаётся комфортным даже в самых чувствительных зонах.'
+    },
+    electro: {
+      name: 'Электроэпиляция',
+      what: 'Единственный метод окончательного удаления волос, волосок за волоском. Работает с волосами любого цвета, в том числе светлыми и белыми.'
+    },
+    cera: {
+      name: 'Воск и шугаринг',
+      what: 'Удаление волос с корнем воском или сахарной пастой. Гладкая кожа в тот же день, в том числе на чувствительной коже.'
+    }
+    },
+    es: {
     endospheres: {
       name: 'Endospheres',
       what: 'Microvibración compresiva: activa la circulación, moviliza la retención de líquidos y mejora el tono de la piel. Sin agujas, sin bajas, sin dolor.'
@@ -42,9 +65,11 @@
       name: 'Cera y Sugaring',
       what: 'Depilación de raíz con cera tibia o pasta de azúcar. Piel lisa el mismo día, también en pieles sensibles.'
     }
-  };
+    }
+  });
 
-  var T = UK ? {
+  var T = pick({
+    uk: {
     occasion: 'Подарунок для вас',
     to: 'Для вас',
     msg: 'Побудь трохи для себе.',
@@ -54,8 +79,23 @@
     code: 'Код: ',
     onName: 'На імʼя: ',
     validUntil: 'Дійсний до ',
-    locale: 'uk-UA'
-  } : {
+    locale: 'uk-UA',
+    session: ['сеанс', 'сеанси', 'сеансів']
+    },
+    ru: {
+    occasion: 'Подарок для вас',
+    to: 'Для вас',
+    msg: 'Побудь немного для себя.',
+    titleWith: function (name) { return name + ', для вас подарок · Studio 56'; },
+    titlePlain: 'Для вас подарок · Studio 56',
+    hello: 'Здравствуйте! У меня подарочный сертификат Studio 56, хочу записаться.',
+    code: 'Код: ',
+    onName: 'На имя: ',
+    validUntil: 'Действителен до ',
+    locale: 'ru-RU',
+    session: ['сеанс', 'сеанса', 'сеансов']
+    },
+    es: {
     occasion: 'Un regalo para ti',
     to: 'Para ti',
     msg: 'Tómate un rato para ti.',
@@ -65,15 +105,17 @@
     code: 'Código: ',
     onName: 'A nombre de: ',
     validUntil: 'Válido hasta el ',
-    locale: 'es-ES'
-  };
+    locale: 'es-ES',
+    session: null
+    }
+  });
 
   var sessionWord = function (n) {
-    if (!UK) return n === 1 ? '1 sesión' : n + ' sesiones';
+    if (!SLAVIC) return n === 1 ? '1 sesión' : n + ' sesiones';
     var m10 = n % 10, m100 = n % 100, w;
-    if (m10 === 1 && m100 !== 11) w = 'сеанс';
-    else if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) w = 'сеанси';
-    else w = 'сеансів';
+    if (m10 === 1 && m100 !== 11) w = T.session[0];
+    else if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) w = T.session[1];
+    else w = T.session[2];
     return n + ' ' + w;
   };
 
@@ -113,7 +155,7 @@
       var validEl = document.getElementById('bono-valid');
       var pretty = day.toLocaleDateString(T.locale, {
         day: 'numeric', month: 'long', year: 'numeric'
-      }).replace(/\s*р\.$/, '');   // uk-UA appends "р."; too clerical for a gift
+      }).replace(/\s*[рг]\.$/, '');   // uk-UA appends "р.", ru-RU "г." — too clerical for a gift
       setText('bono-valid', T.validUntil + pretty);
       if (validEl) validEl.hidden = false;
     }

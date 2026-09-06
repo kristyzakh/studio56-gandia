@@ -9,9 +9,13 @@
   var BOOKING_ENDPOINT = '';
   var WHATSAPP = '34621070775';
 
-  /* Language table — "uk" on the /ua/ pages, "es" everywhere else. */
-  var UK = document.documentElement.lang === 'uk';
-  var T = UK ? {
+  /* Language tables — "uk" on the /ua/ pages, "ru" on /ru/, "es" at the root.
+     Anything unexpected falls back to Spanish. */
+  var LANG = document.documentElement.lang;
+  var pick = function (t) { return t[LANG] || t.es; };
+  var SLAVIC = LANG === 'uk' || LANG === 'ru';
+  var T = pick({
+    uk: {
     unit: ['послуга', 'послуги', 'послуг'],
     priceFirstOn: 'Показано ціну першого сеансу. Натисніть, щоб побачити звичайну ціну.',
     priceFirstOff: 'Показано звичайну ціну. Натисніть, якщо це ваш перший сеанс.',
@@ -32,7 +36,30 @@
     courseTag: ' · пакет 3 + 1 (4 сеанси)',
     packElectroHint: 'Плануєте кілька сеансів електроепіляції? Пакет годин виходить дешевше за годину.',
     packElectroBtn: 'Переглянути пакети'
-  } : {
+    },
+    ru: {
+    unit: ['услуга', 'услуги', 'услуг'],
+    priceFirstOn: 'Показана цена первого сеанса. Нажмите, чтобы увидеть обычную цену.',
+    priceFirstOff: 'Показана обычная цена. Нажмите, если это ваш первый сеанс.',
+    add: 'Добавить ',
+    remove: 'Убрать ',
+    sending: 'Отправляем…',
+    hello: 'Здравствуйте! Хочу записаться:',
+    total: 'Итого: ',
+    name: 'Имя: ',
+    phone: 'Телефон: ',
+    datePref: 'Желаемая дата: ',
+    saveRe: /экономия|выгода/i,
+    offerLead: 'С пакетом 3 + 1 четыре сеанса — ',
+    offerInstead: ' вместо ',
+    courseOff: 'Пакет 3 + 1 — 4 сеанса по цене 3',
+    courseOn: 'Пакет 3 + 1 — 4 сеанса по цене 3',
+    courseHint: 'Показана цена пакета. Отдельными сеансами вышло бы ',
+    courseTag: ' · пакет 3 + 1 (4 сеанса)',
+    packElectroHint: 'Планируете несколько сеансов электроэпиляции? Пакет часов выходит дешевле за час.',
+    packElectroBtn: 'Посмотреть пакеты'
+    },
+    es: {
     unit: ['servicio', 'servicios', 'servicios'],
     priceFirstOn: 'Mostrando el precio de primera sesión. Tócalo para ver el precio normal.',
     priceFirstOff: 'Mostrando el precio normal. Tócalo si es tu primera sesión.',
@@ -53,11 +80,13 @@
     courseTag: ' · pack 3 + 1 (4 sesiones)',
     packElectroHint: '¿Vas a hacer varias sesiones de electrodepilación? Un pack de horas sale más barato por hora.',
     packElectroBtn: 'Ver los packs'
-  };
+    }
+  });
 
-  /* plural form index: ES is [1 | rest]; UK is [1 | 2-4 | 5-0 & teens]. */
+  /* plural form index: ES is [1 | rest]; Ukrainian and Russian share the same
+     [1 | 2-4 | 5-0 & teens] rule, only the words in `unit` differ. */
   var pluralIdx = function (n) {
-    if (!UK) return n === 1 ? 0 : 1;
+    if (!SLAVIC) return n === 1 ? 0 : 1;
     var m10 = n % 10, m100 = n % 100;
     if (m10 === 1 && m100 !== 11) return 0;
     if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return 1;

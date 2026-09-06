@@ -85,24 +85,37 @@
   };
 
   /* One string table per language. document.documentElement.lang is "uk" on the
-     /ua/ pages and "es" everywhere else; the /ua/ pages sit one level down, so
-     their privacy-policy link is a relative "privacidad.html" all the same. */
-  var UK = document.documentElement.lang === 'uk';
-  var T = UK ? {
-    cookies: 'Куки',
-    text: 'Ми використовуємо аналітичні куки, щоб розуміти, як користуються сайтом, і покращувати його. ' +
-          'Ви можете прийняти або відхилити їх — відмова не вплине на роботу сайту. ',
-    policy: 'Політика конфіденційності',
-    accept: 'Прийняти',
-    reject: 'Відхилити'
-  } : {
-    cookies: 'Cookies',
-    text: 'Usamos cookies de análisis para entender cómo se usa la web y mejorarla. ' +
-          'Puedes aceptarlas o rechazarlas — rechazarlas no afecta al funcionamiento de la web. ',
-    policy: 'Política de privacidad',
-    accept: 'Aceptar',
-    reject: 'Rechazar'
-  };
+     /ua/ pages, "ru" on /ru/ and "es" everywhere else; those pages sit one level
+     down, so their privacy-policy link is a relative "privacidad.html" all the
+     same. Spanish is the fallback for any unexpected value. */
+  var LANG = document.documentElement.lang;
+  var pick = function (t) { return t[LANG] || t.es; };
+  var T = pick({
+    uk: {
+      cookies: 'Куки',
+      text: 'Ми використовуємо аналітичні куки, щоб розуміти, як користуються сайтом, і покращувати його. ' +
+            'Ви можете прийняти або відхилити їх — відмова не вплине на роботу сайту. ',
+      policy: 'Політика конфіденційності',
+      accept: 'Прийняти',
+      reject: 'Відхилити'
+    },
+    ru: {
+      cookies: 'Куки',
+      text: 'Мы используем аналитические куки, чтобы понимать, как пользуются сайтом, и улучшать его. ' +
+            'Вы можете принять или отклонить их — отказ не повлияет на работу сайта. ',
+      policy: 'Политика конфиденциальности',
+      accept: 'Принять',
+      reject: 'Отклонить'
+    },
+    es: {
+      cookies: 'Cookies',
+      text: 'Usamos cookies de análisis para entender cómo se usa la web y mejorarla. ' +
+            'Puedes aceptarlas o rechazarlas — rechazarlas no afecta al funcionamiento de la web. ',
+      policy: 'Política de privacidad',
+      accept: 'Aceptar',
+      reject: 'Rechazar'
+    }
+  });
 
   var showBanner = function () {
     if (document.getElementById('consent-banner')) return;

@@ -26,9 +26,9 @@ def main():
     versions = {a: content_hash(a) for a in ASSETS}
     changed = []
 
-    # Root pages load "styles.css?v=…"; the /ua/ pages one level down load
-    # "../styles.css?v=…". Same content hash, only the path prefix differs.
-    for page in sorted(glob.glob('*.html')) + sorted(glob.glob('ua/*.html')):
+    # Root pages load "styles.css?v=…"; the /ua/ and /ru/ pages one level
+    # down load "../styles.css?v=…". Same hash, only the path prefix differs.
+    for page in sorted(glob.glob('*.html')) + sorted(glob.glob('ua/*.html')) + sorted(glob.glob('ru/*.html')):
         with open(page, encoding='utf-8') as fh:
             before = fh.read()
         after = before
