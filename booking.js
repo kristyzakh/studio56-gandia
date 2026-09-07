@@ -324,6 +324,15 @@
      is "Depilación Láser Hombre" — the source is inconsistent with itself, and
      the category is chain-level, so fixing it there would reach further than
      this site. Normalised on the way out instead. */
+  /* Written by analytics.js on the visitor's first page. Kept as a plain
+     label -- no identifier -- and prefixed so the studio can see at a glance
+     that this booking came through the website rather than the phone. */
+  var source = function () {
+    var v = '';
+    try { v = window.localStorage.getItem('s56-source') || ''; } catch (e) {}
+    return v ? 'Сайт · ' + v : 'Сайт';
+  };
+
   var pretty = function (s) {
     return String(s || '').replace(/\bl([áa])ser\b/g, function (m, a) { return 'L' + a + 'ser'; });
   };
@@ -664,6 +673,13 @@
            list email as not required, so asking for it would be our rule, not
            the studio's — and every required field costs bookings. */
         email: f.querySelector('#bk-email').value.trim(),
+        /* Origin, so the journal can tell an Instagram booking from a Google
+           one. analytics.js catches it on the first page of the visit and
+           keeps the first touch; here it just rides along. Sent as the
+           booking's comment because that is what a person reading the journal
+           actually sees. Absent (storage blocked, or nothing recorded) it is
+           simply left out rather than sent empty or guessed at. */
+        comment: source(),
         appointments: [{
           id: 1,
           services: [state.service.id],

@@ -23,6 +23,52 @@
      ------------------------------------------------------------------ */
   var GA4_ID = 'G-ZKPRWV7WQ8';     // Studio 56 GA4 property
   var CONSENT_KEY = 's56-consent';
+  var SOURCE_KEY = 's56-source';
+
+  /* ------------------------------------------------------------------
+     Where the visitor came from.
+
+     Altegio's journal shows nothing about origin for a booking made through
+     the site's own widget -- the payload only ever carried name, phone and
+     email -- so the studio could not tell an Instagram booking from a Google
+     one. This records a plain channel label; booking.js sends it along with
+     the record, and it shows up in the journal beside the appointment.
+
+     First touch wins and is never overwritten: somebody who arrives from
+     Instagram, leaves, and comes back directly a week later still counts as
+     Instagram. That is the rule the studio already uses for leads.
+
+     It lives here rather than in booking.js because this file loads on every
+     page. Land on the gift page from Instagram and walk to the prices page,
+     and by then the referrer is our own domain -- the origin has to be caught
+     on the first page, whichever page that is.
+
+     No identifier is stored, only the channel: "instagram / bio", "google",
+     "direct".
+     ------------------------------------------------------------------ */
+  var captureSource = function () {
+    try {
+      if (window.localStorage.getItem(SOURCE_KEY)) return;   // first touch already held
+    } catch (e) { return; }                                  // storage blocked: skip quietly
+
+    var label = '';
+    try {
+      var q = new URLSearchParams(window.location.search);
+      var src = q.get('utm_source');
+      if (src) {
+        var med = q.get('utm_medium');
+        var camp = q.get('utm_campaign');
+        label = src + (med ? ' / ' + med : '') + (camp ? ' / ' + camp : '');
+      } else if (document.referrer) {
+        var host = new URL(document.referrer).hostname.replace(/^www\./, '');
+        if (host && host !== window.location.hostname) label = host;
+      }
+    } catch (e) {}
+
+    try { window.localStorage.setItem(SOURCE_KEY, label || 'direct'); } catch (e) {}
+  };
+  captureSource();
+
 
   window.dataLayer = window.dataLayer || [];
   window.s56Events = window.s56Events || [];   // readable in the console while testing
