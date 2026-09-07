@@ -27,8 +27,15 @@ const LOCATION = '1255416';
 
 /* Only these origins may use the proxy. Not a wall -- an Origin header can be
    forged -- but it stops the everyday case of somebody embedding our booking
-   endpoint in their own page. The real limits are the two below it. */
+   endpoint in their own page. The real limits are the two below it.
+
+   2026-09-07: site moved from kristyzakh.github.io/studio56-gandia to the
+   real domain. Keeping the old github.io origin here for now so nothing
+   breaks mid-cutover; drop it once studio56gandia.com is confirmed live
+   everywhere. */
 const ORIGINS = [
+  'https://studio56gandia.com',
+  'https://www.studio56gandia.com',
   'https://kristyzakh.github.io',
   'http://localhost:4056'
 ];

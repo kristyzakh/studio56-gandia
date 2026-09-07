@@ -9,4 +9,4 @@ Disallow: /ua/bono.html
 Disallow: /ru/cita-confirmada.html
 Disallow: /ru/bono.html
 
-Sitemap: https://kristyzakh.github.io/studio56-gandia/sitemap.xml
+Sitemap: https://studio56gandia.com/sitemap.xml
