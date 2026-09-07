@@ -1197,6 +1197,21 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 .empty-note{font-size:15px;opacity:.8;margin:0 0 18px;}
 /* Checkout drops straight into the selection — the full section rhythm left a
    dead gap between the lead and the first service. */
+/* A page someone reaches from an ad has to answer "how much" and "why trust
+   you" before they decide whether to keep reading. Both were out of sight:
+   prices shut inside an accordion, proof nowhere on the page at all. */
+.page-facts{
+  margin:-6px 0 24px;
+  font-size:15px;line-height:1.55;
+  color:var(--charcoal);
+}
+.page-facts strong{color:var(--navy);}
+.page-facts a{
+  color:var(--navy);
+  text-decoration:underline;text-underline-offset:3px;
+  white-space:nowrap;
+}
+
 .page-head-tight{padding-bottom:16px;}
 .page-head-tight .lead{margin-bottom:0;}
 #checkout,#cart-empty{padding-top:8px;}
