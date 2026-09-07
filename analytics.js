@@ -22,6 +22,7 @@
      consent — which is why it ships empty.
      ------------------------------------------------------------------ */
   var GA4_ID = 'G-ZKPRWV7WQ8';     // Studio 56 GA4 property
+  var META_PIXEL_ID = '802801639552754';   // Studio 56 Meta Pixel
   var CONSENT_KEY = 's56-consent';
   var SOURCE_KEY = 's56-source';
 
@@ -112,6 +113,36 @@
     window.gtag('config', GA4_ID, { anonymize_ip: true });
   }
 
+  /* ---------- Meta Pixel ----------
+     GA4 can load in a denied state and backfill later; the pixel has no such
+     mode, so the only compliant option is not to load it at all until consent
+     exists — and to load it mid-session the moment consent is given.
+
+     The ID is deliberately the existing 802801639552754: it already holds the
+     visitor history collected while the site was on Weblium, and a fresh pixel
+     would start that audience from zero. */
+  var loadPixel = function () {
+    if (!META_PIXEL_ID || window.fbq) return;
+
+    /* Meta's own stub, kept verbatim — it queues calls made before the real
+       library finishes loading. */
+    !function (f, b, e, v, n, t, s) {
+      if (f.fbq) return;
+      n = f.fbq = function () {
+        n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+      };
+      if (!f._fbq) f._fbq = n;
+      n.push = n; n.loaded = !0; n.version = '2.0'; n.queue = [];
+      t = b.createElement(e); t.async = !0; t.src = v;
+      s = b.getElementsByTagName(e)[0]; s.parentNode.insertBefore(t, s);
+    }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+
+    window.fbq('init', META_PIXEL_ID);
+    window.fbq('track', 'PageView');
+  };
+
+  if (readConsent() === 'granted') loadPixel();
+
   var setConsent = function (value) {
     try { window.localStorage.setItem(CONSENT_KEY, value); } catch (e) {}
 
@@ -124,6 +155,8 @@
         analytics_storage: state
       });
     }
+
+    if (value === 'granted') loadPixel();
 
     var banner = document.getElementById('consent-banner');
     if (banner) banner.remove();
@@ -199,7 +232,7 @@
     }
   });
 
-  if (GA4_ID && !readConsent()) {
+  if ((GA4_ID || META_PIXEL_ID) && !readConsent()) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', showBanner);
     } else {
@@ -269,6 +302,16 @@
     return { first: readStore(ATTR_FIRST), last: readStore(ATTR_LAST) };
   };
 
+  /* GA4 event names on the left, Meta's standard events on the right. Only
+     standard names can be picked as an optimisation goal in Ads Manager, so
+     anything with a real equivalent is mapped; the rest go through as custom
+     events, which still work for reporting and audiences. */
+  var META_EVENTS = {
+    generate_lead: 'Lead',
+    cart_updated: 'AddToCart',
+    begin_checkout: 'InitiateCheckout'
+  };
+
   /* Fan out to whichever tool is present. All are optional. */
   var send = function (name, params) {
     var payload = params || {};
@@ -278,6 +321,10 @@
 
     if (typeof window.gtag === 'function') window.gtag('event', name, payload);
     if (typeof window.plausible === 'function') window.plausible(name, { props: payload });
+    if (typeof window.fbq === 'function') {
+      if (META_EVENTS[name]) window.fbq('track', META_EVENTS[name], payload);
+      else window.fbq('trackCustom', name, payload);
+    }
   };
 
   window.s56Track = send;

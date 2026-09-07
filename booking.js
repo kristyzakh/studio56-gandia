@@ -265,6 +265,15 @@
     return out;
   };
 
+  /* Altegio takes one service_ids[] parameter per service and works out the
+     combined length itself — two zones came back as one 50-minute slot, three
+     as 80. So the whole chain carries the set, not a single id. */
+  var ids = function (list) {
+    return (list || []).map(function (sv) {
+      return '&service_ids[]=' + (sv.id != null ? sv.id : sv);
+    }).join('');
+  };
+
   var api = {
     services: function () {
       /* The real endpoint answers with { services, category }, not a bare list.
@@ -278,27 +287,27 @@
     staff: function () {
       return MOCK ? Promise.resolve(FIX.staff) : live('/book_staff');
     },
-    dates: function (from, to, serviceId, staffId) {
+    dates: function (from, to, serviceIds, staffId) {
       if (MOCK) {
         var out = [], d = new Date(from + 'T00:00:00'), end = new Date(to + 'T00:00:00');
         for (; d <= end; d.setDate(d.getDate() + 1)) if (mockTimes(ymd(d)).length) out.push(ymd(d));
         return Promise.resolve({ booking_dates: out });
       }
       return live('/book_dates?date_from=' + from + '&date_to=' + to +
-                  '&service_ids[]=' + serviceId + '&staff_id=' + (staffId || 0));
+                  ids(serviceIds) + '&staff_id=' + (staffId || 0));
     },
     /* "Any specialist" has to become a person before the booking is made, or
        the confirmation cannot say who it is with. book_staff filtered by the
        service and the slot answers exactly that. The datetime carries a +02:00
        offset, and a raw + in a query string means a space — hence the encode. */
-    staffAt: function (datetime, serviceId) {
+    staffAt: function (datetime, serviceIds) {
       if (MOCK) return Promise.resolve(FIX.staff);
       return live('/book_staff?datetime=' + encodeURIComponent(String(datetime).slice(0, 19)) +
-                  '&service_ids[]=' + serviceId);
+                  ids(serviceIds));
     },
-    times: function (staffId, date, serviceId) {
+    times: function (staffId, date, serviceIds) {
       if (MOCK) return Promise.resolve(mockTimes(date));
-      return live('/book_times/' + (staffId || 0) + '/' + date + '?service_ids[]=' + serviceId);
+      return live('/book_times/' + (staffId || 0) + '/' + date + '?' + ids(serviceIds).slice(1));
     },
     record: function (payload) {
       if (MOCK) return Promise.resolve([{ id: 0, record_id: 'DEMO-' + Date.now().toString(36).toUpperCase() }]);
@@ -308,7 +317,7 @@
 
   /* ---------- state ---------- */
 
-  var state = { category: null, service: null, staff: null, assigned: null, date: null, time: null, weeks: 2 };
+  var state = { category: null, services: [], staff: null, assigned: null, date: null, time: null, weeks: 2 };
   var cache = { services: [], categories: [], staff: [], dates: [], times: [] };
 
   var el = function (tag, cls, html) {
@@ -388,7 +397,7 @@
 
     /* 1 · service */
     n++;
-    if (!state.service) {
+    if (!state.services.length) {
       var list = el('div', 'bk-list');
 
       if (cache.categories.length && !state.category) {
@@ -421,7 +430,7 @@
                       '<span class="bk-opt-m">' + money(sv.price_min, sv.price_max) +
                       (sv.seance_length ? ' · ' + Math.round(sv.seance_length / 60) + T.min : '') + '</span>';
         b.addEventListener('click', function () {
-          state.service = sv; state.date = null; state.time = null;
+          state.services = [sv]; state.date = null; state.time = null;
           track('booking_service', { service: sv.title });
           loadDates();
         });
@@ -431,8 +440,8 @@
       mount.appendChild(step(n, T.steps[0], state.category ? pretty(state.category.title) : null, state.category ? function () { state.category = null; render(); } : null, list));
       return;
     }
-    mount.appendChild(step(n, T.steps[0], pretty(state.service.title), function () {
-      state.service = null; state.category = null;
+    mount.appendChild(step(n, T.steps[0], chosenTitle(), function () {
+      state.services = []; state.category = null;
       state.staff = null; state.assigned = null; state.date = null; state.time = null; state.assigned = null; render();
     }));
 
@@ -519,7 +528,7 @@
             track('booking_time', { datetime: t.datetime });
             if (state.staff && state.staff.id) { state.assigned = state.staff; render(); return; }
             busy(true);
-            api.staffAt(t.datetime, state.service.id).then(function (list) {
+            api.staffAt(t.datetime, state.services).then(function (list) {
               var free = (list || []).filter(function (s) { return s.bookable !== false; });
               state.assigned = free[0] || null;
             })['catch'](function () { state.assigned = null; })
@@ -550,6 +559,12 @@
      step's "back" link in reach. Not on the first paint: that is page load,
      and nobody asked. */
   var settled = false;
+  /* One line for however many zones were chosen — it goes in the step
+     summary, the analytics event, the confirmation page and the journal. */
+  var chosenTitle = function () {
+    return state.services.map(function (sv) { return pretty(sv.title); }).join(' + ');
+  };
+
   var render = function () {
     paint();
     if (!settled) { settled = true; return; }
@@ -682,13 +697,13 @@
         comment: source(),
         appointments: [{
           id: 1,
-          services: [state.service.id],
+          services: state.services.map(function (sv) { return sv.id; }),
           staff_id: (state.assigned && state.assigned.id) || state.staff.id || 0,
           datetime: state.time.datetime
         }]
       };
 
-      track('booking_submit', { service: state.service.title, datetime: state.time.datetime });
+      track('booking_submit', { service: chosenTitle(), datetime: state.time.datetime });
 
       api.record(payload).then(function (data) {
         var rec = (data && data[0]) || {};
@@ -708,7 +723,7 @@
            studio gets a page view it can actually count. */
         var q = new URLSearchParams({
           when: human(state.date) + ', ' + state.time.time,
-          what: pretty(state.service.title),
+          what: chosenTitle(),
           who: (state.assigned && state.assigned.name) || state.staff.name,
           id: rec.record_id || ''
         });
@@ -741,7 +756,7 @@
       '<p class="bk-done-l">' + T.okLead + '</p>' +
       '<dl class="bk-done-d">' +
       '<dt>' + T.okWhen + '</dt><dd>' + human(state.date) + ', ' + state.time.time + '</dd>' +
-      '<dt>' + T.okWhat + '</dt><dd>' + pretty(state.service.title) + '</dd>' +
+      '<dt>' + T.okWhat + '</dt><dd>' + chosenTitle() + '</dd>' +
       '<dt>' + T.okWho + '</dt><dd>' + state.staff.name + '</dd>' +
       (rec.record_id ? '<dt>' + T.okNumber + '</dt><dd>' + rec.record_id + '</dd>' : '') +
       '</dl>';
@@ -763,7 +778,7 @@
     busy(true);
     var from = ymd(new Date()), to = new Date();
     to.setDate(to.getDate() + state.weeks * 7);
-    api.dates(from, ymd(to), state.service.id, state.staff && state.staff.id)
+    api.dates(from, ymd(to), state.services, state.staff && state.staff.id)
       .then(function (d) { cache.dates = (d && d.booking_dates) || []; })
       ['catch'](function () { cache.dates = []; })
       .then(function () { busy(false); render(); });
@@ -771,7 +786,7 @@
 
   var loadTimes = function () {
     busy(true);
-    api.times(state.staff && state.staff.id, state.date, state.service.id)
+    api.times(state.staff && state.staff.id, state.date, state.services)
       .then(function (t) { cache.times = t || []; })
       ['catch'](function () { cache.times = []; })
       .then(function () { busy(false); render(); });
