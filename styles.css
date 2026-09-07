@@ -1204,13 +1204,38 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   margin:-6px 0 24px;
   font-size:15px;line-height:1.55;
   color:var(--charcoal);
+  /* price and rating are two separate facts, not one sentence: on a narrow
+     phone they stack instead of leaving a stranded separator mid-air */
+  display:flex;flex-wrap:wrap;align-items:baseline;
+  gap:2px 14px;
 }
 .page-facts strong{color:var(--navy);}
 .page-facts a{
   color:var(--navy);
-  text-decoration:underline;text-underline-offset:3px;
+  text-decoration:none;
   white-space:nowrap;
 }
+.page-facts a:hover .gbp-score{text-decoration:underline;text-underline-offset:3px;}
+
+/* Real stars, filled to the real number. Four and eight tenths has to look
+   like four and eight tenths: one row of grey stars, an identical row of gold
+   clipped to --fill on top of it. Rounding five stars up to five would be the
+   kind of small lie a visitor can check in one tap. */
+.gbp-stars{
+  position:relative;display:inline-block;vertical-align:-1px;
+  margin-right:5px;
+  color:var(--hairline);
+  letter-spacing:1px;
+}
+.gbp-stars::before{
+  content:'★★★★★';
+  position:absolute;top:0;left:0;
+  width:var(--fill,100%);overflow:hidden;
+  color:#e8a33d;
+  letter-spacing:1px;
+  white-space:nowrap;
+}
+.gbp-score{font-weight:700;color:var(--navy);}
 
 .page-head-tight{padding-bottom:16px;}
 .page-head-tight .lead{margin-bottom:0;}
