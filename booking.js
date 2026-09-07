@@ -373,7 +373,7 @@
     return s;
   };
 
-  var render = function () {
+  var paint = function () {
     mount.innerHTML = '';
     var n = 0;
 
@@ -528,6 +528,29 @@
     /* 5 · details */
     n++;
     mount.appendChild(step(n, T.steps[4], null, null, form()));
+  };
+
+  /* Every answer collapses the step above it into one line, so the page gets
+     shorter the moment a choice is made. On a phone the visitor is usually
+     scrolled to the bottom of a long list (33 laser zones) when they tap;
+     the document shrinks out from under them and the browser lands them on
+     the footer, with the next question somewhere above. So after every
+     repaint, scroll so the question now being asked sits at the top of the
+     screen -- with the one-line summary of the choice just made kept above
+     it, so the visitor reads "you chose X, now pick Y" and still has that
+     step's "back" link in reach. Not on the first paint: that is page load,
+     and nobody asked. */
+  var settled = false;
+  var render = function () {
+    paint();
+    if (!settled) { settled = true; return; }
+    /* paint() has already put the new nodes in the document, and
+       scrollIntoView forces layout itself -- no need to wait a frame. */
+    var steps = mount.querySelectorAll('.bk-step');
+    if (!steps.length) return;
+    var anchor = steps.length > 1 ? steps[steps.length - 2] : steps[0];
+    var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    anchor.scrollIntoView({ block: 'start', behavior: calm ? 'auto' : 'smooth' });
   };
 
   var form = function () {
