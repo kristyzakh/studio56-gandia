@@ -1850,6 +1850,55 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   font-size:16px;line-height:1.4;color:var(--charcoal);
 }
 
+/* body-part heading inside the zone list */
+.bk-group{
+  margin:18px 0 6px;
+  font-size:12px;font-weight:700;
+  letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--navy);opacity:.5;
+}
+.bk-list .bk-group:first-child{margin-top:2px;}
+
+/* a ticked zone in the multi-select */
+.bk-opt.is-on{
+  border-color:var(--navy);
+  background:var(--cream-deep);
+}
+.bk-opt.is-on .bk-opt-t::after{
+  content:'✓';
+  margin-left:8px;font-weight:700;color:var(--navy);
+}
+
+/* running total for several zones — it sits under the list and only exists
+   once something is ticked */
+.bk-basket{
+  margin-top:14px;padding:14px;
+  border:1px solid var(--hairline);border-radius:var(--radius-sm);
+  background:var(--cream-deep);
+}
+.bk-basket-row{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:12px;margin-bottom:12px;
+}
+.bk-basket-n{font-size:14px;color:var(--charcoal);}
+.bk-basket-sum{font-size:20px;font-weight:700;color:var(--navy);}
+.bk-combo{
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;
+  margin:0 0 12px;padding:10px 12px;
+  border-radius:var(--radius-sm);
+  background:rgba(186,156,164,.20);
+  font-size:14px;line-height:1.45;color:var(--charcoal);
+}
+.bk-combo b{color:var(--navy);}
+.bk-combo-take{
+  margin-left:auto;border:0;background:none;padding:2px;
+  font-family:var(--body);font-size:13px;font-weight:700;
+  letter-spacing:0.04em;text-transform:uppercase;
+  color:var(--navy);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;
+}
+.bk-go{margin:0;}
+
 /* options carry the same shape as an input: same ground, same border, same radius */
 .bk-list{display:flex;flex-direction:column;gap:8px;margin-top:9px;}
 

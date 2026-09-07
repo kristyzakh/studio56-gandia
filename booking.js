@@ -67,6 +67,18 @@
     errNet: 'Не вдалося звʼязатися зі студією. Спробуйте ще раз або напишіть у WhatsApp.',
     errNoProof: 'Не вдалося підтвердити, що запис створився. Напишіть нам у WhatsApp, щоб не вийшло подвійного запису.',
     mock: 'Демонстраційний режим: показані вигадані вікна, запис не створюється.',
+    pick: 'Що обираємо',
+    one: 'Одна зона', oneNote: 'Обираєте одну ділянку',
+    many: 'Кілька зон', manyNote: 'Позначте всі, порахуємо разом',
+    packs: 'Пакети 3 + 1', packsNote: 'Чотири сеанси за ціною трьох',
+    groups: { cara: 'Обличчя', bikini: 'Бікіні', piernas: 'Ноги', brazos: 'Руки', cuerpo: 'Тіло' },
+    total: 'Разом', next: 'Далі', chosenWord: function (n) {
+      var m10 = n % 10, m100 = n % 100;
+      if (m10 === 1 && m100 !== 11) return n + ' зона';
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return n + ' зони';
+      return n + ' зон';
+    },
+    comboLead: 'Разом дешевше: ', comboInstead: ' замість ', comboTake: 'Взяти',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
              'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
@@ -114,6 +126,18 @@
     errNet: 'Не удалось связаться со студией. Попробуйте ещё раз или напишите в WhatsApp.',
     errNoProof: 'Не удалось подтвердить, что запись создалась. Напишите нам в WhatsApp, чтобы не вышло двойной записи.',
     mock: 'Демонстрационный режим: показаны выдуманные окна, запись не создаётся.',
+    pick: 'Что выбираем',
+    one: 'Одна зона', oneNote: 'Выбираете один участок',
+    many: 'Несколько зон', manyNote: 'Отметьте все, посчитаем вместе',
+    packs: 'Пакеты 3 + 1', packsNote: 'Четыре сеанса по цене трёх',
+    groups: { cara: 'Лицо', bikini: 'Бикини', piernas: 'Ноги', brazos: 'Руки', cuerpo: 'Тело' },
+    total: 'Итого', next: 'Далее', chosenWord: function (n) {
+      var m10 = n % 10, m100 = n % 100;
+      if (m10 === 1 && m100 !== 11) return n + ' зона';
+      if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return n + ' зоны';
+      return n + ' зон';
+    },
+    comboLead: 'Вместе дешевле: ', comboInstead: ' вместо ', comboTake: 'Взять',
     days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
              'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
@@ -156,6 +180,13 @@
     errNet: 'No hemos podido conectar con el estudio. Inténtalo otra vez o escríbenos por WhatsApp.',
     errNoProof: 'No hemos podido confirmar que la cita se haya creado. Escríbenos por WhatsApp para no duplicarla.',
     mock: 'Modo demostración: los huecos son inventados y no se crea ninguna reserva.',
+    pick: 'Qué eliges',
+    one: 'Una zona', oneNote: 'Eliges una sola zona',
+    many: 'Varias zonas', manyNote: 'Marca todas y te sumamos el precio',
+    packs: 'Packs 3 + 1', packsNote: 'Cuatro sesiones al precio de tres',
+    groups: { cara: 'Cara', bikini: 'Bikini', piernas: 'Piernas', brazos: 'Brazos', cuerpo: 'Cuerpo' },
+    total: 'Total', next: 'Seguir', chosenWord: function (n) { return n === 1 ? '1 zona' : n + ' zonas'; },
+    comboLead: 'Juntas salen mejor: ', comboInstead: ' en vez de ', comboTake: 'Cambiar',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
     months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
              'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
@@ -317,7 +348,7 @@
 
   /* ---------- state ---------- */
 
-  var state = { category: null, services: [], staff: null, assigned: null, date: null, time: null, weeks: 2 };
+  var state = { category: null, mode: null, basket: [], services: [], staff: null, assigned: null, date: null, time: null, weeks: 2 };
   var cache = { services: [], categories: [], staff: [], dates: [], times: [] };
 
   var el = function (tag, cls, html) {
@@ -419,25 +450,111 @@
         return;
       }
 
-      var pool = state.category
-        ? cache.services.filter(function (s) { return s.category_id === state.category.id; })
-        : cache.services;
+      var pool = inCategory();
+      var zones = pool.filter(isZone), packs = pool.filter(isPack);
+      var backToCategory = state.category ? function () {
+        state.category = null; state.mode = null; state.basket = []; render();
+      } : null;
+      var catTitle = state.category ? pretty(state.category.title) : null;
 
-      pool.forEach(function (sv) {
-        var b = el('button', 'bk-opt');
-        b.type = 'button';
-        b.innerHTML = '<span class="bk-opt-t">' + pretty(sv.title) + '</span>' +
-                      '<span class="bk-opt-m">' + money(sv.price_min, sv.price_max) +
-                      (sv.seance_length ? ' · ' + Math.round(sv.seance_length / 60) + T.min : '') + '</span>';
-        b.addEventListener('click', function () {
-          state.services = [sv]; state.date = null; state.time = null;
-          track('booking_service', { service: sv.title });
+      /* A short category is still a short list — the extra question would only
+         be in the way. The long ones (33 laser zones, 20 for wax) are the
+         reason this step exists at all. */
+      if (zones.length <= 8) {
+        pool.forEach(function (sv) { list.appendChild(cascade(optionFor(sv), list.children.length)); });
+        mount.appendChild(step(n, T.steps[0], catTitle, backToCategory, list));
+        return;
+      }
+
+      /* 1b · one zone, several, or a pack */
+      if (!state.mode) {
+        var routes = [['one', T.one, T.oneNote], ['many', T.many, T.manyNote]];
+        if (packs.length) routes.push(['packs', T.packs, T.packsNote]);
+        routes.forEach(function (r) {
+          var b = el('button', 'bk-opt');
+          b.type = 'button';
+          b.innerHTML = '<span class="bk-opt-t">' + r[1] + '</span>' +
+                        '<span class="bk-opt-m">' + r[2] + '</span>';
+          b.addEventListener('click', function () {
+            state.mode = r[0]; state.basket = [];
+            track('booking_mode', { mode: r[0] });
+            render();
+          });
+          list.appendChild(cascade(b, list.children.length));
+        });
+        mount.appendChild(step(n, T.steps[0], catTitle, backToCategory, list));
+        return;
+      }
+
+      var backToMode = function () { state.mode = null; state.basket = []; render(); };
+
+      if (state.mode === 'packs') {
+        packs.forEach(function (sv) { list.appendChild(cascade(optionFor(sv), list.children.length)); });
+        mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.packs, backToMode, list));
+        return;
+      }
+
+      if (state.mode === 'one') {
+        groupedInto(list, zones, function (sv) { return optionFor(sv); });
+        mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.one, backToMode, list));
+        return;
+      }
+
+      /* several zones: tick as many as you like, priced as you go */
+      var basketBox = el('div', 'bk-basket');
+      var refresh = function () {
+        var total = sumOf(state.basket);
+        var combo = comboFor(state.basket);
+        basketBox.innerHTML = '';
+        if (!state.basket.length) { basketBox.hidden = true; return; }
+        basketBox.hidden = false;
+        var row = el('div', 'bk-basket-row');
+        row.appendChild(el('span', 'bk-basket-n', T.chosenWord(state.basket.length)));
+        row.appendChild(el('span', 'bk-basket-sum', total + ' €'));
+        basketBox.appendChild(row);
+        if (combo) {
+          var hint = el('div', 'bk-combo');
+          hint.innerHTML = '<span>' + T.comboLead + '<b>' + priceOf(combo) + ' €</b>' +
+                           T.comboInstead + total + ' €</span>';
+          var take = el('button', 'bk-combo-take', T.comboTake);
+          take.type = 'button';
+          take.addEventListener('click', function () {
+            state.services = [combo]; state.date = null; state.time = null;
+            track('booking_combo', { service: combo.title, saved: total - priceOf(combo) });
+            loadDates();
+          });
+          hint.appendChild(take);
+          basketBox.appendChild(hint);
+        }
+        var go = el('button', 'btn btn-primary btn-block bk-go', T.next);
+        go.type = 'button';
+        go.addEventListener('click', function () {
+          state.services = state.basket.slice(); state.date = null; state.time = null;
+          track('booking_service', { service: chosenTitle(), zones: state.basket.length });
           loadDates();
         });
-        list.appendChild(cascade(b, list.children.length));
+        basketBox.appendChild(go);
+      };
+
+      groupedInto(list, zones, function (sv) {
+        var b = optionFor(sv, true);
+        var on = function () { return state.basket.indexOf(sv) !== -1; };
+        var paint = function () {
+          b.classList.toggle('is-on', on());
+          b.setAttribute('aria-pressed', on() ? 'true' : 'false');
+        };
+        b.addEventListener('click', function () {
+          if (on()) state.basket.splice(state.basket.indexOf(sv), 1);
+          else state.basket.push(sv);
+          paint(); refresh();          /* no re-render: ticking must not move the page */
+        });
+        paint();
+        return b;
       });
 
-      mount.appendChild(step(n, T.steps[0], state.category ? pretty(state.category.title) : null, state.category ? function () { state.category = null; render(); } : null, list));
+      mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.many, backToMode, list));
+      mount.appendChild(basketBox);
+      refresh();
       return;
     }
     mount.appendChild(step(n, T.steps[0], chosenTitle(), function () {
@@ -559,6 +676,89 @@
      step's "back" link in reach. Not on the first paint: that is page load,
      and nobody asked. */
   var settled = false;
+  /* One option button, used by every branch of the first step. */
+  var optionFor = function (sv, quiet) {
+    var b = el('button', 'bk-opt');
+    b.type = 'button';
+    b.innerHTML = '<span class="bk-opt-t">' + pretty(sv.title) + '</span>' +
+                  '<span class="bk-opt-m">' + money(sv.price_min, sv.price_max) + '</span>';
+    if (!quiet) b.addEventListener('click', function () {
+      state.services = [sv]; state.date = null; state.time = null;
+      track('booking_service', { service: sv.title });
+      loadDates();
+    });
+    return b;
+  };
+
+  /* Zones under body-part headings, in the order the studio lists them. */
+  var groupedInto = function (list, zones, make) {
+    ['cara', 'bikini', 'piernas', 'brazos', 'cuerpo'].forEach(function (key) {
+      var inGroup = zones.filter(function (sv) { return groupOf(sv) === key; });
+      if (!inGroup.length) return;
+      list.appendChild(el('p', 'bk-group', T.groups[key]));
+      inGroup.forEach(function (sv) { list.appendChild(cascade(make(sv), list.children.length)); });
+    });
+  };
+
+  /* ---------- reading the catalogue ----------
+     Altegio holds zones, ready-made combinations and 3+1 packs in one flat
+     list of 33 items, told apart only by how the titles are written. Matching
+     on the wording rather than on ids means a service renamed in Altegio still
+     lands in the right place instead of vanishing from the form. */
+  var isPack  = function (sv) { return /3\s*\+\s*1|promo|paquete/i.test(sv.title); };
+  var isCombo = function (sv) { return !isPack(sv) && /\s\+\s/.test(sv.title); };
+  var isZone  = function (sv) { return !isPack(sv) && !isCombo(sv); };
+
+  /* Body part, by the words the studio actually uses. Anything unrecognised
+     falls into "cuerpo" rather than disappearing. */
+  var GROUPS = [
+    ['cara',    /entrecejo|entresejo|p[oó]mulo|patilla|ment[oó]n|facial|labio|ceja|oreja|rostro/i],
+    ['bikini',  /ingle|pubis|intergl[uú]tea|bikini|brasile/i],
+    ['piernas', /pierna|muslo|pies|gemelo/i],
+    ['brazos',  /brazo|antebrazo|manos|hombro/i],
+    ['cuerpo',  /./]
+  ];
+  var groupOf = function (sv) {
+    for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i][1].test(sv.title)) return GROUPS[i][0];
+    return 'cuerpo';
+  };
+
+  var inCategory = function () {
+    return cache.services.filter(function (sv) {
+      return !state.category || sv.category_id === state.category.id;
+    });
+  };
+  var priceOf = function (sv) { return sv.price_min || 0; };
+  var sumOf = function (list) {
+    return list.reduce(function (t, sv) { return t + priceOf(sv); }, 0);
+  };
+
+  /* A combination is worth suggesting only when the visitor has hand-picked
+     exactly the zones it contains. Compare on the words, since that is all
+     the title gives us: "Axilas + Ingles Completas" against the two zones
+     named Axilas and Ingles Completas. */
+  var norm = function (t) {
+    return String(t).toLowerCase().replace(/\|.*$/, '')
+      .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
+      .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/[^a-z0-9 ]/g,' ')
+      .replace(/\s+/g,' ').trim();
+  };
+  /* Split on the plus BEFORE normalising — norm() strips punctuation, so
+     splitting afterwards would leave one run-on string and never match. */
+  var comboParts = function (title) {
+    return String(title).replace(/\|.*$/, '').split('+')
+      .map(norm).filter(Boolean).sort().join('|');
+  };
+  var comboFor = function (picked) {
+    if (picked.length < 2) return null;
+    var want = picked.map(function (sv) { return norm(sv.title); }).sort().join('|');
+    var found = null;
+    inCategory().filter(isCombo).forEach(function (cb) {
+      if (comboParts(cb.title) === want && priceOf(cb) < sumOf(picked)) found = cb;
+    });
+    return found;
+  };
+
   /* One line for however many zones were chosen — it goes in the step
      summary, the analytics event, the confirmation page and the journal. */
   var chosenTitle = function () {
