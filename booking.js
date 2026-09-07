@@ -348,6 +348,12 @@
 
   /* ---------- state ---------- */
 
+  /* A treatment page is about one treatment. When the page has already
+     answered "which service", that answer is not the visitor's to undo here —
+     there is no route back to the full list, because on this page there is no
+     full list. */
+  var locked = false;
+
   var state = { category: null, mode: null, basket: [], services: [], staff: null, assigned: null, date: null, time: null, weeks: 2 };
   var cache = { services: [], categories: [], staff: [], dates: [], times: [] };
 
@@ -452,7 +458,7 @@
 
       var pool = inCategory();
       var zones = pool.filter(isZone), packs = pool.filter(isPack);
-      var backToCategory = state.category ? function () {
+      var backToCategory = (state.category && !locked) ? function () {
         state.category = null; state.mode = null; state.basket = []; render();
       } : null;
       var catTitle = state.category ? pretty(state.category.title) : null;
@@ -558,8 +564,12 @@
       return;
     }
     mount.appendChild(step(n, T.steps[0], chosenTitle(), function () {
-      state.services = []; state.category = null;
-      state.staff = null; state.assigned = null; state.date = null; state.time = null; state.assigned = null; render();
+      /* back into the same list, ticks intact — going all the way out to the
+         categories threw away a choice the visitor had just made */
+      state.services = [];
+      state.staff = null; state.assigned = null; state.date = null; state.time = null;
+      if (!state.mode && !locked) state.category = null;
+      render();
     }));
 
     /* 2 · staff */
@@ -1007,7 +1017,7 @@
       cache.categories.forEach(function (c) {
         if (!hit && String(c.title || '').toLowerCase().indexOf(want) !== -1) hit = c;
       });
-      if (hit) state.category = hit;
+      if (hit) { state.category = hit; locked = true; }
     }
     track('booking_open', {});
     render();
