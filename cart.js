@@ -248,6 +248,11 @@
             name: btn.dataset.name,
             price: Number(btn.dataset.price),
             priceFirst: btn.dataset.priceFirst ? Number(btn.dataset.priceFirst) : null,
+            /* The Altegio service id, where the page carries one. It is what
+               lets a basket built from photo cards be handed to the booking
+               form instead of being retyped there. Absent on pages that have
+               no booking form, and the handoff simply does not appear. */
+            altegio: btn.dataset.altegio || null,
             note: note
           });
         }
@@ -383,6 +388,34 @@
         }
       }
     };
+
+    /* ---------- hand the basket to the booking form ----------
+       Opt-in, and only where both halves exist: data-book on the bar names
+       what to scroll to, and every line needs an Altegio id to travel with.
+       Pages without it keep the WhatsApp button exactly as it was.
+
+       The cart is emptied on a successful handoff on purpose. The selection
+       now lives in the booking form, and two places holding the same basket
+       is the problem this is here to solve — a stale bar floating over the
+       form would just re-open it. */
+    var book = document.getElementById('cart-book');
+    var bookTarget = bar.getAttribute('data-book');
+
+    if (book) {
+      book.addEventListener('click', function () {
+        var items = read();
+        var ids = items.map(function (i) { return i.altegio; }).filter(Boolean);
+        var scroll = function () {
+          var t = bookTarget && document.querySelector(bookTarget);
+          if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        };
+        if (!window.s56Booking || ids.length !== items.length) { scroll(); return; }
+        window.s56Booking.open(ids).then(function (ok) {
+          if (ok) write([]);
+          scroll();
+        });
+      });
+    }
 
     document.addEventListener('s56cartchange', syncBar);
     syncBar();

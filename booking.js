@@ -1290,7 +1290,7 @@
       .then(function () { busy(false); render(); });
   };
 
-  Promise.all([api.services(), api.staff()]).then(function (r) {
+  var ready = Promise.all([api.services(), api.staff()]).then(function (r) {
     cache.services = (r[0] && r[0].services) || [];
     cache.categories = (r[0] && r[0].categories) || [];
     cache.staff = r[1] || [];
@@ -1309,9 +1309,41 @@
     }
     track('booking_open', {});
     render();
-  })['catch'](function () {
+  });
+
+  ready['catch'](function () {
     /* if we cannot even list services we cannot book: hand the page back */
     mount.remove();
     if (fallback) fallback.hidden = false;
   });
+
+  /* ---------- prefill from elsewhere on the page ----------
+     The offer page lets somebody choose zones from photo cards long before
+     they ever reach this form. Making them choose the same zones a second
+     time here is the surest way to lose them, so cart.js hands the selection
+     over and the widget opens on the day instead of on step one.
+
+     What travels is Altegio service ids, read from data-altegio in the
+     markup — nothing here matches on titles, which would break the first time
+     a zone is renamed in Altegio. Returns whether the handoff took, so the
+     caller can tell a prefill from a plain scroll. */
+  window.s56Booking = {
+    open: function (altegioIds) {
+      return ready.then(function () {
+        var want = (altegioIds || []).map(String), svcs = [];
+        want.forEach(function (id) {
+          cache.services.forEach(function (sv) { if (String(sv.id) === id) svcs.push(sv); });
+        });
+        if (!svcs.length) return false;
+        state.mode = svcs.length > 1 ? 'many' : 'one';
+        state.basket = svcs.slice();
+        state.services = svcs.slice();
+        state.pack = false;
+        state.date = null; state.time = null; state.staff = null; state.assigned = null;
+        track('booking_prefill', { service: chosenTitle(), zones: svcs.length });
+        loadStaff();
+        return true;
+      })['catch'](function () { return false; });
+    }
+  };
 })();
