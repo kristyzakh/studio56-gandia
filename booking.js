@@ -72,7 +72,7 @@
     many: 'Кілька зон', manyNote: 'Позначте всі, порахуємо разом',
     packs: 'Пакети 3 + 1', packsNote: 'Чотири сеанси за ціною трьох',
     groups: { cara: 'Обличчя', bikini: 'Бікіні', piernas: 'Ноги', brazos: 'Руки', cuerpo: 'Тіло' },
-    total: 'Разом', next: 'Далі', chosenWord: function (n) {
+    total: 'Разом', next: 'Далі', packWord: '1 пакет', chosenWord: function (n) {
       var m10 = n % 10, m100 = n % 100;
       if (m10 === 1 && m100 !== 11) return n + ' зона';
       if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return n + ' зони';
@@ -136,7 +136,7 @@
     many: 'Несколько зон', manyNote: 'Отметьте все, посчитаем вместе',
     packs: 'Пакеты 3 + 1', packsNote: 'Четыре сеанса по цене трёх',
     groups: { cara: 'Лицо', bikini: 'Бикини', piernas: 'Ноги', brazos: 'Руки', cuerpo: 'Тело' },
-    total: 'Итого', next: 'Далее', chosenWord: function (n) {
+    total: 'Итого', next: 'Далее', packWord: '1 пакет', chosenWord: function (n) {
       var m10 = n % 10, m100 = n % 100;
       if (m10 === 1 && m100 !== 11) return n + ' зона';
       if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return n + ' зоны';
@@ -195,7 +195,7 @@
     many: 'Varias zonas', manyNote: 'Marca todas y te sumamos el precio',
     packs: 'Packs 3 + 1', packsNote: 'Cuatro sesiones al precio de tres',
     groups: { cara: 'Cara', bikini: 'Bikini', piernas: 'Piernas', brazos: 'Brazos', cuerpo: 'Cuerpo' },
-    total: 'Total', next: 'Seguir', chosenWord: function (n) { return n === 1 ? '1 zona' : n + ' zonas'; },
+    total: 'Total', next: 'Seguir', packWord: '1 pack', chosenWord: function (n) { return n === 1 ? '1 zona' : n + ' zonas'; },
     comboLead: 'Juntas salen mejor: ', comboInstead: ' en vez de ', comboTake: 'Cambiar',
     perSession: 'por sesión', removeIt: 'Quitar',
     packSave: 'Ahorras ', packTake: 'Coger el pack', packDrop: 'Una sesión',
@@ -534,24 +534,22 @@
 
       var backToMode = function () { state.mode = null; state.basket = []; render(); };
 
-      if (state.mode === 'men') {
-        var men = menCategory();
-        cache.services.filter(function (sv) { return men && sv.category_id === men.id; })
-          .forEach(function (sv) { list.appendChild(cascade(optionFor(sv), list.children.length)); });
-        mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.men, backToMode, list));
-        return;
-      }
+      /* All four routes go through the same basket: whatever was tapped is
+         shown with its price, and nothing moves the visitor forward until they
+         press the button themselves. Packs and the men's packages used to skip
+         it and jump straight to the calendar -- two routes with a basket and
+         two without, which reads as broken from the visitor's side.
 
-      if (state.mode === 'packs') {
-        packs.forEach(function (sv) { list.appendChild(cascade(optionFor(sv), list.children.length)); });
-        mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.packs, backToMode, list));
-        return;
-      }
-
-      /* one zone and several zones share the same basket — the difference is
-         only that picking a second zone replaces the first here. Nothing moves
-         the visitor forward until they press the button themselves. */
-      var single = state.mode === 'one';
+         "single" is the selection rule, not the route: one zone, one pack or
+         one men's package at a time, so picking another replaces the first.
+         Only "several zones" accumulates. */
+      var men = menCategory();
+      var menServices = cache.services.filter(function (sv) { return men && sv.category_id === men.id; });
+      var items = state.mode === 'packs' ? packs
+                : state.mode === 'men'   ? menServices
+                : zones;
+      var modeLabel = { one: T.one, many: T.many, packs: T.packs, men: T.men }[state.mode];
+      var single = state.mode !== 'many';
 
       var basketBox = el('div', 'bk-basket');
       var refresh = function () {
@@ -570,8 +568,10 @@
         state.basket.forEach(function (sv) {
           var line = el('div', 'bk-line');
           var name = el('span', 'bk-line-t', pretty(sv.title));
+          /* A 3 + 1 pack is priced for four sessions, so "per session" would
+             be wrong on it. The men's packages really are per session. */
           var cost = el('span', 'bk-line-p', priceOf(sv) + ' € ' +
-                        '<small>' + T.perSession + '</small>');
+                        (state.mode === 'packs' ? '' : '<small>' + T.perSession + '</small>'));
           var x = el('button', 'bk-line-x', '×');
           x.type = 'button';
           x.setAttribute('aria-label', T.removeIt + ' ' + pretty(sv.title));
@@ -591,7 +591,7 @@
            holds are all combinations — so the booking stays one session and
            the journal note says which pack it belongs to. Same arrangement the
            price list already runs on: four sessions, pay for three. */
-        if (single && state.basket.length === 1) {
+        if (state.mode === 'one' && state.basket.length === 1) {
           var one = state.basket[0];
           var apart = 4 * priceOf(one), packPrice = 3 * priceOf(one);
           var offer = el('div', 'bk-pack' + (state.pack ? ' is-on' : ''));
@@ -610,7 +610,9 @@
 
         var row = el('div', 'bk-basket-row');
         row.appendChild(el('span', 'bk-basket-n',
-          (single && state.pack) ? T.packOn : T.chosenWord(state.basket.length)));
+          state.pack ? T.packOn
+          : state.mode === 'one' || state.mode === 'many' ? T.chosenWord(state.basket.length)
+          : T.packWord));
         row.appendChild(el('span', 'bk-basket-sum', total + ' €'));
         basketBox.appendChild(row);
         if (combo) {
@@ -656,7 +658,7 @@
       };
 
       var buttons = [];
-      groupedInto(list, zones, function (sv) {
+      var make = function (sv) {
         var b = optionFor(sv, true);
         b.__sv = sv;
         buttons.push(b);
@@ -682,9 +684,14 @@
         });
         paint();
         return b;
-      });
+      };
+      if (state.mode === 'one' || state.mode === 'many') {
+        groupedInto(list, zones, make);
+      } else {
+        items.forEach(function (sv) { list.appendChild(cascade(make(sv), list.children.length)); });
+      }
 
-      mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + (single ? T.one : T.many), backToMode, list));
+      mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + modeLabel, backToMode, list));
       mount.appendChild(basketBox);
       refresh();
       return;
