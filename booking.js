@@ -82,6 +82,7 @@
     perSession: 'за сеанс', removeIt: 'Прибрати',
     packSave: 'Заощадите ', packTake: 'Взяти пакет', packDrop: 'Один сеанс',
     packOn: 'Пакет 3 + 1 · 4 сеанси',
+    men: 'Для чоловіків', menNote: 'Пакети зон, ціна за сеанс',
     packApart: 'окремо ',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
@@ -145,6 +146,7 @@
     perSession: 'за сеанс', removeIt: 'Убрать',
     packSave: 'Сэкономите ', packTake: 'Взять пакет', packDrop: 'Один сеанс',
     packOn: 'Пакет 3 + 1 · 4 сеанса',
+    men: 'Для мужчин', menNote: 'Пакеты зон, цена за сеанс',
     packApart: 'отдельно ',
     days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
@@ -198,6 +200,7 @@
     perSession: 'por sesión', removeIt: 'Quitar',
     packSave: 'Ahorras ', packTake: 'Coger el pack', packDrop: 'Una sesión',
     packOn: 'Pack 3 + 1 · 4 sesiones',
+    men: 'Para hombres', menNote: 'Paquetes de zonas, precio por sesión',
     packApart: 'por separado ',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
     months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -506,6 +509,13 @@
       if (!state.mode) {
         var routes = [['one', T.one, T.oneNote], ['many', T.many, T.manyNote]];
         if (packs.length) routes.push(['packs', T.packs, T.packsNote]);
+        /* Men's packages are their own route rather than a block inside
+           "Packs 3 + 1", because they are not 3 + 1: they are several zones at
+           one session's price. Filing them under a heading promising four
+           sessions for three would be a lie about what is being bought. Single
+           zones stay open to everybody, so nobody loses a booking by not
+           coming through here. */
+        if (menCategory()) routes.push(['men', T.men, T.menNote]);
         routes.forEach(function (r) {
           var b = el('button', 'bk-opt');
           b.type = 'button';
@@ -523,6 +533,14 @@
       }
 
       var backToMode = function () { state.mode = null; state.basket = []; render(); };
+
+      if (state.mode === 'men') {
+        var men = menCategory();
+        cache.services.filter(function (sv) { return men && sv.category_id === men.id; })
+          .forEach(function (sv) { list.appendChild(cascade(optionFor(sv), list.children.length)); });
+        mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.men, backToMode, list));
+        return;
+      }
 
       if (state.mode === 'packs') {
         packs.forEach(function (sv) { list.appendChild(cascade(optionFor(sv), list.children.length)); });
@@ -839,6 +857,25 @@
   var groupOf = function (sv) {
     for (var i = 0; i < GROUPS.length; i++) if (GROUPS[i][1].test(sv.title)) return GROUPS[i][0];
     return 'cuerpo';
+  };
+
+  /* Altegio keeps the men's packages in a category named after this one --
+     "Depilación Láser" -> "Depilación Láser Hombre" -- so it is found by that
+     relationship rather than by an id. If the category is ever renamed the
+     route simply stops being offered, which is the safe way to fail: the
+     alternative is a button that books the wrong thing. */
+  var MEN = /hombre|чолов|мужск/i;
+  var menCategory = function () {
+    var base = state.category && String(state.category.title || '').toLowerCase();
+    if (!base || MEN.test(base)) return null;
+    var hit = null;
+    cache.categories.forEach(function (c) {
+      var t = String(c.title || '').toLowerCase();
+      if (!hit && t !== base && t.indexOf(base) === 0 && MEN.test(t)) hit = c;
+    });
+    if (!hit) return null;
+    return cache.services.filter(function (sv) { return sv.category_id === hit.id; }).length
+      ? hit : null;
   };
 
   var inCategory = function () {
