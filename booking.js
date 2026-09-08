@@ -457,6 +457,9 @@
 
   var paint = function () {
     mount.innerHTML = '';
+    /* The basket only floats on the step that builds it. Clearing here means no
+       later step can inherit a bar with nothing behind it. */
+    document.body.classList.remove('has-bk');
     var n = 0;
 
     /* 1 · service */
@@ -537,11 +540,15 @@
         var total = sumOf(state.basket);
         var combo = single ? null : comboFor(state.basket);
         basketBox.innerHTML = '';
-        if (!state.basket.length) { basketBox.hidden = true; return; }
+        if (!state.basket.length) { basketBox.hidden = true; float_(); return; }
         basketBox.hidden = false;
 
         /* Every chosen zone as its own line: what it is, what a session
-           costs, and a way to take it back out. */
+           costs, and a way to take it back out. Wrapped, so that when the box
+           is pinned to the bottom of the screen it is the lines that scroll --
+           the total and the button stay put where a thumb expects them. */
+        var lines = el('div', 'bk-lines');
+        basketBox.appendChild(lines);
         state.basket.forEach(function (sv) {
           var line = el('div', 'bk-line');
           var name = el('span', 'bk-line-t', pretty(sv.title));
@@ -559,7 +566,7 @@
             refresh();
           });
           line.appendChild(name); line.appendChild(cost); line.appendChild(x);
-          basketBox.appendChild(line);
+          lines.appendChild(line);
         });
 
         /* 3 + 1 on a single zone. Altegio has no service for it — the packs it
@@ -610,6 +617,24 @@
           loadDates();
         });
         basketBox.appendChild(go);
+        float_();
+      };
+
+      /* The zone list is 27 items -- close to four phone screens. A basket
+         sitting after it fills up entirely out of sight: you tick a zone, look,
+         and nothing has visibly happened. So while zones are being chosen the
+         basket is pinned to the bottom of the screen, the same answer the price
+         page already uses for the same problem.
+
+         Its height goes out as a custom property because it changes with every
+         tick, and the widget needs that much bottom padding or the last zones
+         sit underneath it with no way to reach them. */
+      var float_ = function () {
+        var on = !basketBox.hidden;
+        basketBox.classList.toggle('is-float', on);
+        document.body.classList.toggle('has-bk', on);
+        document.body.style.setProperty('--bk-h',
+          (on ? basketBox.offsetHeight : 0) + 'px');
       };
 
       var buttons = [];

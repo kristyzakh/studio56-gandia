@@ -1150,6 +1150,7 @@ body.has-cart .sticky-cta{display:none;}
   font-size:14px;
 }
 /* keep the bottom bars reachable while the banner is up */
+body.consent-open .bk-basket.is-float,
 body.consent-open .cart-bar,
 body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 
@@ -1876,6 +1877,32 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   border:1px solid var(--hairline);border-radius:var(--radius-sm);
   background:var(--cream-deep);
 }
+/* Pinned to the bottom of the screen while zones are being chosen. The list
+   runs to 27 items, so a basket that only lives after it is invisible at the
+   moment it fills. Sits above the WhatsApp bar (70) and the price cart (75),
+   below the consent banner (120), which still owns the bottom of the screen. */
+.bk-basket.is-float{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:76;
+  margin:0;
+  border:0;border-top:1px solid var(--hairline);border-radius:0;
+  padding:12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+  box-shadow:0 -8px 26px rgba(44,60,75,0.14);
+}
+.bk-basket.is-float > *{max-width:var(--maxw);margin-left:auto;margin-right:auto;}
+.bk-basket.is-float .bk-lines{max-height:30vh;overflow-y:auto;margin-bottom:10px;}
+/* Two bottom bars is one too many, and the second is a competing CTA. Same
+   rule the price page already applies to its own cart. */
+/* The price page carries its own bottom cart. Two stacked bars is nobody's
+   idea of a booking form, and the visitor is clearly mid-booking, so its bar
+   steps aside -- its contents are untouched and it returns the moment the
+   basket empties or the visitor moves on to the calendar. */
+body.has-bk .sticky-cta,
+body.has-bk .cart-bar{display:none;}
+/* Room for it, or the last zones sit underneath with no way to reach them. */
+body.has-bk #booking-widget{padding-bottom:calc(var(--bk-h,0px) + 16px);}
+
 /* one chosen zone: what it is, what a session costs, and a way out */
 .bk-line{
   display:flex;align-items:baseline;gap:10px;
