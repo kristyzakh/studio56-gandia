@@ -164,7 +164,7 @@
     noTimes: 'Ese día no queda hueco. Prueba con otro.',
     noDates: 'No quedan huecos en estos días — escríbenos por WhatsApp y buscamos hora.',
     more: 'Ver dos semanas más',
-    change: 'Atrás',
+    change: 'Editar',
     otherCategories: '← Otros tratamientos',
     optionsWord: function (n) { return n === 1 ? ' servicio' : ' servicios'; },
     name: 'Cómo te llamas',
