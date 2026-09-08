@@ -108,6 +108,11 @@
 .zcard .row-add[aria-pressed="true"] .zcard-cta{background:var(--rose);}
 /* The WhatsApp route stays, one step quieter than booking: on a paid offer
    page the appointment is the conversion and the message is the fallback. */
+/* The total is the number she acts on, so the saving belongs beside it rather
+   than on the line items: it is the one that adds up when she picks three
+   zones, and it sits directly under the button. */
+.cart-bar-sum{display:flex;align-items:baseline;gap:8px;}
+.cart-bar-was{font-size:14px;opacity:.6;}
 .cart-alt{flex:0 0 100%;order:9;margin:0;padding:0 8px 4px;text-align:center;}
 .cart-alt a{color:var(--cream);opacity:.7;font-size:12.5px;text-decoration-thickness:1px;}
 
@@ -508,10 +513,6 @@ body.zsheet-open{overflow:hidden;}
 
 <div class="cart-bar" id="cart-bar" data-book="#cita" hidden>
   <div class="cart-bar-inner">
-    <p class="pack-suggestion" id="pack-suggestion" hidden>
-      <span id="pack-suggestion-text"></span>
-      <button type="button" class="pack-suggestion-btn" id="pack-suggestion-btn"></button>
-    </p>
     <button type="button" class="cart-peek-handle" id="cart-peek-toggle" aria-expanded="true" aria-controls="cart-peek">
       <span class="cart-peek-chevron" aria-hidden="true"></span>
       <span class="sr-only">Mostrar u ocultar los servicios elegidos</span>
@@ -519,7 +520,10 @@ body.zsheet-open{overflow:hidden;}
     <ul class="cart-peek" id="cart-peek" hidden></ul>
     <div class="cart-bar-info">
       <span class="cart-bar-count" id="cart-bar-count">0 servicios</span>
-      <span class="cart-bar-total" id="cart-bar-total">0 €</span>
+      <span class="cart-bar-sum">
+        <s class="cart-bar-was" id="cart-bar-was" hidden></s>
+        <span class="cart-bar-total" id="cart-bar-total">0 €</span>
+      </span>
         </div>
     <button type="button" class="btn" id="cart-book" data-track="begin_checkout" data-track-label="barra del carrito">Reservar mi cita</button>
     <p class="cart-alt"><a id="cart-send" href="https://wa.me/34621070775" rel="noopener" target="_blank" data-track="whatsapp_click" data-track-label="barra del carrito">&iquest;Prefieres escribirnos? WhatsApp</a></p>
@@ -542,7 +546,7 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
 </script>
 <script src="app.js?v=c374224234" defer></script>
 
-<script src="cart.js?v=ebb7f12a11" defer></script>
+<script src="cart.js?v=e0feca9e80" defer></script>
 <script src="analytics.js?v=6803227a20" defer></script>
 <script src="booking.js?v=3951598556" defer></script>
 

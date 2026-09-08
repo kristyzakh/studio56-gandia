@@ -373,6 +373,11 @@
        change, so the tap is an ordinary navigation that nothing can block. */
     var send = document.getElementById('cart-send');
 
+    /* Opt-in, and only where a page has a discount worth showing: an offer page
+       whose total carries no "before" makes the visitor do the subtraction
+       herself, right where she is deciding. Absent everywhere else. */
+    var barWas = document.getElementById('cart-bar-was');
+
     var syncBar = function () {
       var items = read();
       bar.hidden = items.length === 0;
@@ -380,6 +385,12 @@
       if (items.length) {
         barCount.textContent = plural(items.length);
         barTotal.textContent = fmt(total(items));
+        if (barWas) {
+          var full = items.reduce(function (sum, i) { return sum + i.price; }, 0);
+          var off = full > total(items);
+          barWas.textContent = off ? fmt(full) : '';
+          barWas.hidden = !off;
+        }
         if (send) {
           var lines = [T.hello];
           items.forEach(function (i) { lines.push('· ' + lineName(i) + ' — ' + fmt(linePrice(i))); });
