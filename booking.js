@@ -79,6 +79,10 @@
       return n + ' зон';
     },
     comboLead: 'Разом дешевше: ', comboInstead: ' замість ', comboTake: 'Взяти',
+    perSession: 'за сеанс', removeIt: 'Прибрати',
+    packSave: 'Заощадите ', packTake: 'Взяти пакет', packDrop: 'Один сеанс',
+    packOn: 'Пакет 3 + 1 · 4 сеанси', packTag: 'пакет 3 + 1 (4 сеанси)',
+    packApart: 'окремо ',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
              'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня']
@@ -138,6 +142,10 @@
       return n + ' зон';
     },
     comboLead: 'Вместе дешевле: ', comboInstead: ' вместо ', comboTake: 'Взять',
+    perSession: 'за сеанс', removeIt: 'Убрать',
+    packSave: 'Сэкономите ', packTake: 'Взять пакет', packDrop: 'Один сеанс',
+    packOn: 'Пакет 3 + 1 · 4 сеанса', packTag: 'пакет 3 + 1 (4 сеанса)',
+    packApart: 'отдельно ',
     days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
              'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
@@ -187,6 +195,10 @@
     groups: { cara: 'Cara', bikini: 'Bikini', piernas: 'Piernas', brazos: 'Brazos', cuerpo: 'Cuerpo' },
     total: 'Total', next: 'Seguir', chosenWord: function (n) { return n === 1 ? '1 zona' : n + ' zonas'; },
     comboLead: 'Juntas salen mejor: ', comboInstead: ' en vez de ', comboTake: 'Cambiar',
+    perSession: 'por sesión', removeIt: 'Quitar',
+    packSave: 'Ahorras ', packTake: 'Coger el pack', packDrop: 'Una sesión',
+    packOn: 'Pack 3 + 1 · 4 sesiones', packTag: 'pack 3 + 1 (4 sesiones)',
+    packApart: 'por separado ',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
     months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
              'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre']
@@ -354,7 +366,7 @@
      full list. */
   var locked = false;
 
-  var state = { category: null, mode: null, basket: [], services: [], staff: null, assigned: null, date: null, time: null, weeks: 2 };
+  var state = { category: null, mode: null, pack: false, basket: [], services: [], staff: null, assigned: null, date: null, time: null, weeks: 2 };
   var cache = { services: [], categories: [], staff: [], dates: [], times: [] };
 
   var el = function (tag, cls, html) {
@@ -500,22 +512,65 @@
         return;
       }
 
-      if (state.mode === 'one') {
-        groupedInto(list, zones, function (sv) { return optionFor(sv); });
-        mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.one, backToMode, list));
-        return;
-      }
+      /* one zone and several zones share the same basket — the difference is
+         only that picking a second zone replaces the first here. Nothing moves
+         the visitor forward until they press the button themselves. */
+      var single = state.mode === 'one';
 
-      /* several zones: tick as many as you like, priced as you go */
       var basketBox = el('div', 'bk-basket');
       var refresh = function () {
         var total = sumOf(state.basket);
-        var combo = comboFor(state.basket);
+        var combo = single ? null : comboFor(state.basket);
         basketBox.innerHTML = '';
         if (!state.basket.length) { basketBox.hidden = true; return; }
         basketBox.hidden = false;
+
+        /* Every chosen zone as its own line: what it is, what a session
+           costs, and a way to take it back out. */
+        state.basket.forEach(function (sv) {
+          var line = el('div', 'bk-line');
+          var name = el('span', 'bk-line-t', pretty(sv.title));
+          var cost = el('span', 'bk-line-p', priceOf(sv) + ' € ' +
+                        '<small>' + T.perSession + '</small>');
+          var x = el('button', 'bk-line-x', '×');
+          x.type = 'button';
+          x.setAttribute('aria-label', T.removeIt + ' ' + pretty(sv.title));
+          x.addEventListener('click', function () {
+            state.basket.splice(state.basket.indexOf(sv), 1);
+            state.pack = false;
+            [].slice.call(list.querySelectorAll('.bk-opt.is-on')).forEach(function (b) {
+              if (b.__sv === sv) { b.classList.remove('is-on'); b.setAttribute('aria-pressed', 'false'); }
+            });
+            refresh();
+          });
+          line.appendChild(name); line.appendChild(cost); line.appendChild(x);
+          basketBox.appendChild(line);
+        });
+
+        /* 3 + 1 on a single zone. Altegio has no service for it — the packs it
+           holds are all combinations — so the booking stays one session and
+           the journal note says which pack it belongs to. Same arrangement the
+           price list already runs on: four sessions, pay for three. */
+        if (single && state.basket.length === 1) {
+          var one = state.basket[0];
+          var apart = 4 * priceOf(one), packPrice = 3 * priceOf(one);
+          var offer = el('div', 'bk-pack' + (state.pack ? ' is-on' : ''));
+          offer.innerHTML =
+            '<span class="bk-pack-t">' + T.packs + '</span>' +
+            '<span class="bk-pack-p"><s>' + T.packApart + apart + ' €</s>' +
+            '<b>' + packPrice + ' €</b></span>' +
+            '<span class="bk-pack-s">' + T.packSave + (apart - packPrice) + ' €</span>';
+          var take = el('button', 'bk-pack-go', state.pack ? T.packDrop : T.packTake);
+          take.type = 'button';
+          take.addEventListener('click', function () { state.pack = !state.pack; refresh(); });
+          offer.appendChild(take);
+          basketBox.appendChild(offer);
+          total = state.pack ? packPrice : priceOf(one);
+        }
+
         var row = el('div', 'bk-basket-row');
-        row.appendChild(el('span', 'bk-basket-n', T.chosenWord(state.basket.length)));
+        row.appendChild(el('span', 'bk-basket-n',
+          (single && state.pack) ? T.packOn : T.chosenWord(state.basket.length)));
         row.appendChild(el('span', 'bk-basket-sum', total + ' €'));
         basketBox.appendChild(row);
         if (combo) {
@@ -542,23 +597,36 @@
         basketBox.appendChild(go);
       };
 
+      var buttons = [];
       groupedInto(list, zones, function (sv) {
         var b = optionFor(sv, true);
+        b.__sv = sv;
+        buttons.push(b);
         var on = function () { return state.basket.indexOf(sv) !== -1; };
         var paint = function () {
           b.classList.toggle('is-on', on());
           b.setAttribute('aria-pressed', on() ? 'true' : 'false');
         };
+        b.__paint = paint;
         b.addEventListener('click', function () {
-          if (on()) state.basket.splice(state.basket.indexOf(sv), 1);
-          else state.basket.push(sv);
-          paint(); refresh();          /* no re-render: ticking must not move the page */
+          if (single) {
+            state.basket = on() ? [] : [sv];
+            state.pack = false;
+            buttons.forEach(function (o) { o.__paint(); });
+          } else if (on()) {
+            state.basket.splice(state.basket.indexOf(sv), 1);
+            paint();
+          } else {
+            state.basket.push(sv);
+            paint();
+          }
+          refresh();          /* no re-render: ticking must not move the page */
         });
         paint();
         return b;
       });
 
-      mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + T.many, backToMode, list));
+      mount.appendChild(step(n, T.steps[0], catTitle + ' · ' + (single ? T.one : T.many), backToMode, list));
       mount.appendChild(basketBox);
       refresh();
       return;
@@ -904,7 +972,7 @@
            booking's comment because that is what a person reading the journal
            actually sees. Absent (storage blocked, or nothing recorded) it is
            simply left out rather than sent empty or guessed at. */
-        comment: source(),
+        comment: source() + (state.pack ? ' · ' + T.packTag : ''),
         appointments: [{
           id: 1,
           services: state.services.map(function (sv) { return sv.id; }),

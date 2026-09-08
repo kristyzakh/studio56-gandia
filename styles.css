@@ -1876,6 +1876,48 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   border:1px solid var(--hairline);border-radius:var(--radius-sm);
   background:var(--cream-deep);
 }
+/* one chosen zone: what it is, what a session costs, and a way out */
+.bk-line{
+  display:flex;align-items:baseline;gap:10px;
+  padding:8px 0;border-bottom:1px solid var(--hairline);
+}
+.bk-line:first-child{padding-top:0;}
+.bk-line-t{flex:1;font-size:15px;color:var(--charcoal);}
+.bk-line-p{font-size:15px;font-weight:700;color:var(--navy);white-space:nowrap;}
+.bk-line-p small{font-weight:400;font-size:12px;opacity:.6;margin-left:4px;}
+.bk-line-x{
+  flex:0 0 auto;width:28px;height:28px;
+  border:0;background:none;padding:0;cursor:pointer;
+  font-size:20px;line-height:1;color:var(--navy);opacity:.45;
+  align-self:center;
+}
+.bk-line-x:hover{opacity:1;}
+
+/* the 3 + 1 offer on a single zone — the one place on this form where a
+   number is crossed out, so it should look like an offer and not like a row */
+.bk-pack{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;
+  margin:12px 0;padding:12px 14px;
+  border:1px solid var(--rose);border-radius:var(--radius-sm);
+  background:rgba(186,156,164,.14);
+}
+.bk-pack.is-on{background:rgba(186,156,164,.30);}
+.bk-pack-t{
+  flex:1 0 100%;
+  font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+  color:var(--navy);
+}
+.bk-pack-p s{color:var(--charcoal);opacity:.55;margin-right:8px;}
+.bk-pack-p b{font-size:18px;color:var(--navy);}
+.bk-pack-s{font-size:13px;color:var(--charcoal);}
+.bk-pack-go{
+  margin-left:auto;border:0;background:none;padding:2px;
+  font-family:var(--body);font-size:13px;font-weight:700;
+  letter-spacing:0.04em;text-transform:uppercase;
+  color:var(--navy);cursor:pointer;
+  text-decoration:underline;text-underline-offset:3px;
+}
+
 .bk-basket-row{
   display:flex;align-items:baseline;justify-content:space-between;
   gap:12px;margin-bottom:12px;
