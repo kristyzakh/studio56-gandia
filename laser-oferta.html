@@ -517,10 +517,6 @@ body.zsheet-open{overflow:hidden;}
       <span class="sr-only">Mostrar u ocultar los servicios elegidos</span>
     </button>
     <ul class="cart-peek" id="cart-peek" hidden></ul>
-    <button type="button" class="cart-course" id="cart-course" aria-pressed="false">
-      <span class="cart-course-box" aria-hidden="true"></span>
-      <span id="cart-course-label">Pack 3 + 1 — 4 sesiones al precio de 3</span>
-    </button>
     <div class="cart-bar-info">
       <span class="cart-bar-count" id="cart-bar-count">0 servicios</span>
       <span class="cart-bar-total" id="cart-bar-total">0 €</span>
@@ -536,6 +532,13 @@ body.zsheet-open{overflow:hidden;}
    sessionStorage and is shared with precios.html, where somebody may well
    have turned it off. Pinned before cart.js reads it. */
 try { window.sessionStorage.removeItem('s56-cart-first'); } catch (e) {}
+/* Same reason, one storage worse: the 3 + 1 toggle is gone from this bar, but
+   the flag it wrote lives in localStorage and so survives whole visits, not
+   just this one. Left set from precios.html it would price this basket as a
+   pack -- 135 € beside a button that books a 31 € first session -- with no
+   control on the page to turn it off. The pack hint under the total stays: it
+   only tells her the deal exists, which is what the cards do too. */
+try { window.localStorage.removeItem('s56-course'); } catch (e) {}
 </script>
 <script src="app.js?v=c374224234" defer></script>
 
