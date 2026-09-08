@@ -330,8 +330,10 @@
         return { services: (d && d.services) || [], categories: (d && d.category) || [] };
       });
     },
-    staff: function () {
-      return MOCK ? Promise.resolve(FIX.staff) : live('/book_staff');
+    staff: function (serviceIds) {
+      if (MOCK) return Promise.resolve(FIX.staff);
+      var q = ids(serviceIds);
+      return live('/book_staff' + (q ? '?' + q.slice(1) : ''));
     },
     dates: function (from, to, serviceIds, staffId) {
       if (MOCK) {
@@ -623,8 +625,9 @@
           take.type = 'button';
           take.addEventListener('click', function () {
             state.services = [combo]; state.date = null; state.time = null;
+            state.staff = null; state.assigned = null;
             track('booking_combo', { service: combo.title, saved: total - priceOf(combo) });
-            loadDates();
+            loadStaff();
           });
           hint.appendChild(take);
           basketBox.appendChild(hint);
@@ -633,8 +636,9 @@
         go.type = 'button';
         go.addEventListener('click', function () {
           state.services = state.basket.slice(); state.date = null; state.time = null;
+          state.staff = null; state.assigned = null;
           track('booking_service', { service: chosenTitle(), zones: state.basket.length });
-          loadDates();
+          loadStaff();
         });
         basketBox.appendChild(go);
         float_();
@@ -707,6 +711,10 @@
 
     /* 2 · staff */
     n++;
+    /* Named, so the visitor knows who they are seeing, but not asked -- there
+       is nothing to choose between. Set here rather than in loadStaff so that
+       stepping back from the calendar does not resurrect a one-option list. */
+    if (!state.staff && cache.staff.length === 1) state.staff = cache.staff[0];
     if (!state.staff) {
       var slist = el('div', 'bk-list');
       var any = el('button', 'bk-opt');
@@ -732,9 +740,10 @@
       mount.appendChild(step(n, T.steps[1], null, null, slist));
       return;
     }
-    mount.appendChild(step(n, T.steps[1], (state.assigned && state.assigned.name) || state.staff.name, function () {
-      state.staff = null; state.assigned = null; state.date = null; state.time = null; state.assigned = null; render();
-    }));
+    mount.appendChild(step(n, T.steps[1], (state.assigned && state.assigned.name) || state.staff.name,
+      cache.staff.length > 1 ? function () {
+        state.staff = null; state.assigned = null; state.date = null; state.time = null; render();
+      } : null));
 
     /* 3 · date */
     n++;
@@ -827,8 +836,9 @@
                   '<span class="bk-opt-m">' + money(sv.price_min, sv.price_max) + '</span>';
     if (!quiet) b.addEventListener('click', function () {
       state.services = [sv]; state.date = null; state.time = null;
+      state.staff = null; state.assigned = null;
       track('booking_service', { service: sv.title });
-      loadDates();
+      loadStaff();
     });
     return b;
   };
@@ -1145,6 +1155,20 @@
   /* ---------- loaders ---------- */
 
   var busy = function (on) { mount.setAttribute('aria-busy', on ? 'true' : 'false'); };
+
+  /* Altegio knows who performs what, so ask it instead of hard-coding names:
+     electrodepilación and sugaring are Alina's alone, laser and Endospheres are
+     shared. Offering a choice of one person is a step that asks nothing, so the
+     answer comes from the API and paint() drops the question when there is only
+     one possible answer. Asked with every chosen service at once, so a
+     multi-zone booking only offers someone who can do all of them. */
+  var loadStaff = function () {
+    busy(true);
+    return api.staff(state.services)
+      .then(function (list) { cache.staff = list || []; })
+      ['catch'](function () { /* keep whoever we already knew about */ })
+      .then(function () { busy(false); loadDates(); });
+  };
 
   var loadDates = function () {
     busy(true);
