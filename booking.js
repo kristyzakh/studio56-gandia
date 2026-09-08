@@ -591,7 +591,7 @@
            holds are all combinations — so the booking stays one session and
            the journal note says which pack it belongs to. Same arrangement the
            price list already runs on: four sessions, pay for three. */
-        if (state.mode === 'one' && state.basket.length === 1) {
+        if (state.mode === 'one' && state.basket.length === 1 && offersPack()) {
           var one = state.basket[0];
           var apart = 4 * priceOf(one), packPrice = 3 * priceOf(one);
           var offer = el('div', 'bk-pack' + (state.pack ? ' is-on' : ''));
@@ -883,6 +883,16 @@
     if (!hit) return null;
     return cache.services.filter(function (sv) { return sv.category_id === hit.id; }).length
       ? hit : null;
+  };
+
+  /* 3 + 1 exists for laser (and Endospheres) only. Wax is sold per zone, per
+     session -- no packs, no discounts -- so the offer must never appear there.
+     Same rule the price page's cart.js already applies. Matched on the category
+     title like everything else here, so a rename withdraws the offer rather
+     than inventing one. */
+  var offersPack = function () {
+    return !!state.category &&
+      /l[aá]ser|лазер|endosph|ендосф|эндосф/i.test(String(state.category.title || ''));
   };
 
   var inCategory = function () {
