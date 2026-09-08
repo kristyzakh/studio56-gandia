@@ -84,8 +84,6 @@
     <dl class="bk-done-d" id="cc-details"></dl>
 
     <div class="cc-notes">
-      <p>Подтверждение записи должно прийти в WhatsApp в течение 30 минут. Если вы его не получили &mdash;
-        <a id="cc-wa-missing" href="https://wa.me/34621070775" rel="noopener" data-track="whatsapp_click" data-track-label="cita confirmada · sin confirmacion">напишите нам</a>.</p>
       <p>Планы изменились? Перенесём запись &mdash;
         <a id="cc-wa-cancel" href="https://wa.me/34621070775" rel="noopener" data-track="whatsapp_click" data-track-label="cita confirmada · cancelar">напишите нам в WhatsApp</a>.</p>
     </div>
@@ -147,7 +145,6 @@
     var a = document.getElementById(id);
     if (a) a.href = "https://wa.me/34621070775?text=" + encodeURIComponent(text + ref + ".");
   };
-  wa("cc-wa-missing", 'Здравствуйте! Я записалась на сайте');
   wa("cc-wa-cancel", 'Здравствуйте! Хочу перенести запись');
 })();
 </script>
