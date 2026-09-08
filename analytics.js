@@ -308,6 +308,7 @@
      events, which still work for reporting and audiences. */
   var META_EVENTS = {
     generate_lead: 'Lead',
+    booking_success: 'Schedule',
     cart_updated: 'AddToCart',
     begin_checkout: 'InitiateCheckout'
   };
