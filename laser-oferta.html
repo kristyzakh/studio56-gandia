@@ -59,6 +59,73 @@
 .cart-alt{flex:0 0 100%;order:9;margin:0;padding:0 8px 4px;text-align:center;}
 .cart-alt a{color:var(--cream);opacity:.7;font-size:12.5px;text-decoration-thickness:1px;}
 .zsub{font-size:14px;color:var(--charcoal);opacity:.75;margin:-6px 0 16px;}
+
+/* ---- sticky offer row ----
+   Inside <header>, so it travels with the brand bar instead of needing to
+   know how tall that bar is. It carries the offer down all fifteen screens
+   and puts booking one tap away the whole way, which nothing else on the
+   page did until the total appeared. Scrolls sideways on narrow phones
+   rather than wrapping into two rows of chrome. */
+.offerbar{border-top:1px solid var(--hairline);background:var(--cream);}
+.offerbar-in{
+  max-width:var(--maxw);margin:0 auto;
+  padding:8px var(--gutter);
+  display:flex;align-items:center;gap:6px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+}
+.offerbar-in::-webkit-scrollbar{display:none;}
+.offerbar-tag,.offerbar-pill{
+  flex:0 0 auto;white-space:nowrap;
+  font-size:12px;font-weight:700;line-height:1;
+  border-radius:999px;padding:9px 11px;
+}
+.offerbar-tag{background:var(--navy);color:var(--cream);}
+.offerbar-pill{border:1px solid var(--hairline);color:var(--navy);text-decoration:none;}
+.offerbar-go{background:var(--rose);border-color:var(--rose);color:#fff;}
+
+/* ---- the one claim worth making above the fold ----
+   The machine's model name is not it: nobody here has heard of it, and the
+   only thing naming it invites is a comparison. What is ours is the
+   mechanism, so that is what this says. */
+.vstrip{
+  display:flex;gap:12px;align-items:flex-start;
+  margin:18px 0 0;font-size:15px;line-height:1.5;color:var(--charcoal);
+}
+.vstrip-i{
+  flex:0 0 auto;width:30px;height:30px;border-radius:50%;
+  background:var(--rose);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;
+}
+.vstrip strong{color:var(--navy);}
+.vstrip a{white-space:nowrap;font-weight:700;}
+
+/* ---- collapsible zone groups ----
+   The long list is 25 of the 34 zones and it used to sit between the photo
+   cards and everything that answers a first-timer's real questions. Closed,
+   it hands those screens back. */
+/* The header and the offer row are both sticky, so anything jumped to needs
+   to clear them or it lands underneath. */
+#todas,#cita,#como{scroll-margin-top:126px;}
+.zgroup{margin:0 0 8px;}
+.zgroup + .zgroup{border-top:1px solid var(--hairline);padding-top:6px;}
+.zgroup-h{
+  list-style:none;cursor:pointer;
+  display:flex;align-items:center;gap:8px;
+  padding:14px 0;margin:0;
+  font-size:17px;font-weight:700;color:var(--navy);
+  -webkit-tap-highlight-color:transparent;
+}
+.zgroup-h::-webkit-details-marker{display:none;}
+.zgroup-h::after{
+  content:"";width:9px;height:9px;margin-left:auto;
+  border-right:2px solid var(--navy);border-bottom:2px solid var(--navy);
+  transform:rotate(45deg) translateY(-2px);transition:transform .15s ease;
+}
+.zgroup[open] > .zgroup-h::after{transform:rotate(-135deg) translateY(-2px);}
+.zgroup-n{
+  font-size:12px;font-weight:700;color:var(--charcoal);opacity:.6;
+  border:1px solid var(--hairline);border-radius:999px;padding:2px 8px;
+}
 </style>
 </head>
 <body>
@@ -76,6 +143,13 @@
       <span class="logo-word">Studio 56</span>
     </a>
     </div>
+  <div class="offerbar">
+    <div class="offerbar-in">
+      <span class="offerbar-tag">Depilaci&oacute;n l&aacute;ser &minus;30&nbsp;%</span>
+      <a class="offerbar-pill" href="#todas" id="go-todas" data-track="offerbar_zonas" data-track-label="barra fija">Todas las zonas</a>
+      <a class="offerbar-pill offerbar-go" href="#cita" data-track="offerbar_cita" data-track-label="barra fija">Pedir cita</a>
+    </div>
+  </div>
 </header>
 
 <!-- ============ MENU ============ -->
@@ -112,8 +186,13 @@
       <div class="page-head page-head-tight">
         <p class="eyebrow">Depilación láser · Gandía</p>
         <h1 class="display">Empieza tu curso con &minus;30&nbsp;% en la primera sesión</h1>
-        <p class="lead">Láser de diodo con refrigeración avanzada: el cabezal enfría la piel en cada disparo, así que la sesión se lleva bien &mdash; también en ingles.</p>
       </div>
+
+      <p class="vstrip">
+        <span class="vstrip-i" aria-hidden="true">&#10022;</span>
+        <span><strong>L&aacute;ser de diodo con el fr&iacute;o en el cabezal.</strong> Se lleva bien &mdash; tambi&eacute;n en ingles.
+          <a href="#como">C&oacute;mo funciona &rsaquo;</a></span>
+      </p>
 
       <div class="offer-note">
         <p><strong>Un curso no se paga de golpe.</strong> Las sesiones van espaciadas, así que el gasto se reparte a lo largo de los meses que dura.</p>
@@ -125,7 +204,6 @@
   <section class="price-section" id="p-laser">
     <div class="wrap">
       <div class="section-head">
-        <p class="eyebrow">Más solicitadas</p>
         <h2 class="display">Elige tus zonas</h2>
         <div class="tag-row">
           <button type="button" class="tag tag-toggle" id="first-toggle" aria-pressed="true">Primera sesión &minus;30&nbsp;%</button>
@@ -133,6 +211,8 @@
         </div>
       </div>
       <p class="zsub">Toca las zonas que te interesan y verás el total abajo. Puedes cambiarlo cuando quieras.</p>
+      <details class="zgroup" open>
+        <summary class="zgroup-h">M&aacute;s solicitadas</summary>
       <ul class="zgrid">
         <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-axilas" data-altegio="13332967" data-name="Depilación Láser · Axilas" data-price-first="10" data-price="15" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-axilas.jpg" alt="Depilación láser de axilas" width="725" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas</span><span class="amount"><s class="was">15 €</s><span class="now">10 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
         <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-ingles-completas" data-altegio="13333037" data-name="Depilación Láser · Ingles completas" data-price-first="19" data-price="28" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-ingles-completas.jpg" alt="Depilación láser de ingles completas" width="700" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Ingles completas</span><span class="amount"><s class="was">28 €</s><span class="now">19 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
@@ -142,14 +222,20 @@
         <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-facial-completo" data-altegio="13332974" data-name="Depilación Láser · Facial completo" data-price-first="14" data-price="20" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-facial-completo.jpg" alt="Depilación láser facial completo" width="725" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Facial completo</span><span class="amount"><s class="was">20 €</s><span class="now">14 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
       </ul>
 
-      <p class="price-lead" style="margin-top:30px"><strong>Packs de zonas para mujer &mdash; precio por sesión</strong></p>
+      </details>
+
+      <details class="zgroup" open>
+        <summary class="zgroup-h">Packs de zonas para mujer &mdash; precio por sesi&oacute;n</summary>
       <ul class="zgrid">
         <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-mujer-1" data-altegio="13362656" data-name="Depilación Láser · Axilas + ingles completas" data-price-first="28" data-price="40" aria-pressed="false"><span class="zcard-media"><img src="images/laser-pack-axilas-ingles.jpg" alt="Pack de depilación láser: axilas e ingles completas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas<span class="note">por separado 43&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">40 €</s><span class="now">28 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
         <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-mujer-2" data-altegio="13362663" data-name="Depilación Láser · Axilas + ingles completas + medias piernas" data-price-first="42" data-price="60" aria-pressed="false"><span class="zcard-media"><img src="images/laser-pack-axilas-ingles-medias.jpg" alt="Pack de depilación láser: axilas, ingles completas y medias piernas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas + medias piernas<span class="note">por separado 71&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">60 €</s><span class="now">42 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
         <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-mujer-3" data-altegio="13362670" data-name="Depilación Láser · Axilas + ingles completas + piernas completas" data-price-first="49" data-price="70" aria-pressed="false"><span class="zcard-media"><img src="images/laser-pack-axilas-ingles-piernas.jpg" alt="Pack de depilación láser: axilas, ingles completas y piernas completas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas + piernas completas<span class="note">por separado 88&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">70 €</s><span class="now">49 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
       </ul>
 
-      <p class="price-lead" style="margin-top:34px"><strong>Todas las zonas</strong></p>
+      </details>
+
+      <details class="zgroup" id="todas">
+        <summary class="zgroup-h">Todas las zonas <span class="zgroup-n">34</span></summary>
 <ul class="rows">
           <li><button type="button" class="row-add" data-id="depilacion-laser-manos" data-altegio="13332959" data-name="Depilación Láser · Manos" data-price-first="7" data-price="10" aria-pressed="false"><span class="row-label">Manos</span><span class="amount"><s class="was">10 €</s><span class="now">7 €</span></span><span class="row-tick" aria-hidden="true"></span></button></li>
           <li><button type="button" class="row-add" data-id="depilacion-laser-entrecejo" data-altegio="13332956" data-name="Depilación Láser · Entrecejo" data-price-first="7" data-price="10" aria-pressed="false"><span class="row-label">Entrecejo</span><span class="amount"><s class="was">10 €</s><span class="now">7 €</span></span><span class="row-tick" aria-hidden="true"></span></button></li>
@@ -192,10 +278,11 @@
           <li><button type="button" class="row-add" data-id="depilacion-laser-hombre-3" data-altegio="13333112" data-name="Depilación Láser · Paquete Nº3 (hombre): espalda completa + hombros + nuca" data-price-first="38" data-price="55" aria-pressed="false"><span class="row-label">Nº3 · Espalda completa + hombros + nuca<span class="note">por separado 75&nbsp;€ · ahorras 20&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">55 €</s><span class="now">38 €</span></span><span class="row-tick" aria-hidden="true"></span></button></li>
           <li><button type="button" class="row-add" data-id="depilacion-laser-hombre-4" data-altegio="13333116" data-name="Depilación Láser · Paquete Nº4 (hombre): pecho + abdomen + espalda completa + hombros + nuca" data-price-first="56" data-price="80" aria-pressed="false"><span class="row-label">Nº4 · Pecho + abdomen + espalda + hombros + nuca<span class="note">por separado 131&nbsp;€ · ahorras 51&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">80 €</s><span class="now">56 €</span></span><span class="row-tick" aria-hidden="true"></span></button></li>
         </ul>
+      </details>
     </div>
   </section>
 
-  <section>
+  <section id="como">
     <div class="wrap">
       <div class="section-head">
         <p class="eyebrow">Cómo se siente</p>
@@ -313,6 +400,16 @@
 <script src="cart.js?v=ebb7f12a11" defer></script>
 <script src="analytics.js?v=6803227a20" defer></script>
 <script src="booking.js?v=3951598556" defer></script>
+
+<script>
+/* A link into a closed <details> lands on a heading with nothing under it,
+   so the pill opens the group before the browser scrolls to it. */
+(function () {
+  var pill = document.getElementById('go-todas');
+  var group = document.getElementById('todas');
+  if (pill && group) pill.addEventListener('click', function () { group.open = true; });
+})();
+</script>
 
 </body>
 </html>
