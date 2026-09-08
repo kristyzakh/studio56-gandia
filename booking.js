@@ -83,6 +83,7 @@
     packSave: 'Заощадите ', packTake: 'Взяти пакет', packDrop: 'Один сеанс',
     packOn: 'Пакет 3 + 1 · 4 сеанси',
     men: 'Для чоловіків', menNote: 'Пакети зон, ціна за сеанс',
+    free: 'Безкоштовно',
     packApart: 'окремо ',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
@@ -147,6 +148,7 @@
     packSave: 'Сэкономите ', packTake: 'Взять пакет', packDrop: 'Один сеанс',
     packOn: 'Пакет 3 + 1 · 4 сеанса',
     men: 'Для мужчин', menNote: 'Пакеты зон, цена за сеанс',
+    free: 'Бесплатно',
     packApart: 'отдельно ',
     days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
@@ -201,6 +203,7 @@
     packSave: 'Ahorras ', packTake: 'Coger el pack', packDrop: 'Una sesión',
     packOn: 'Pack 3 + 1 · 4 sesiones',
     men: 'Para hombres', menNote: 'Paquetes de zonas, precio por sesión',
+    free: 'Gratis',
     packApart: 'por separado ',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
     months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -420,8 +423,13 @@
     return node;
   };
 
+  /* A price of zero is a real answer, not a missing one -- saying nothing next
+     to "free consultation" reads as a field somebody forgot to fill in. Any
+     service left without a price in Altegio will also read as free, which is
+     the right way round for a booking form: nothing paid should ever be
+     listed without its price. */
   var money = function (lo, hi) {
-    if (!lo && !hi) return '';
+    if (!lo && !hi) return T.free;
     if (hi && hi !== lo) return lo + '–' + hi + ' €';
     return lo + ' €';
   };
