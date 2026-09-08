@@ -19,7 +19,7 @@
    running total all keep working untouched. */
 .zgrid{list-style:none;padding:0;margin:0;display:grid;gap:14px;}
 @media(min-width:620px){.zgrid{grid-template-columns:1fr 1fr;gap:18px;}}
-.zcard{margin:0;}
+.zcard{margin:0;position:relative;}
 .zcard .row-add{
   position:relative;width:100%;display:block;text-align:left;
   border:1px solid var(--hairline);border-radius:var(--radius);
@@ -30,19 +30,31 @@
 .zcard-media img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;}
 .zcard-badge{
   position:absolute;top:12px;right:12px;z-index:2;
-  font-size:11.5px;font-weight:700;letter-spacing:.04em;
-  background:var(--rose);color:#fff;border-radius:999px;padding:4px 10px;
+  font-size:15px;font-weight:700;letter-spacing:.02em;
+  background:var(--rose);color:#fff;border-radius:999px;padding:7px 14px;
+  box-shadow:0 1px 4px rgba(44,60,75,.18);
 }
-.zcard .row-tick{
-  position:absolute;top:12px;left:12px;z-index:2;
-  background:rgba(255,255,255,.92);border-color:rgba(44,60,75,.35);
+.zcard .row-tick{display:none;}
+
+/* Its own control, so it sits outside the card button -- a button inside a
+   button is not markup a browser will keep. */
+.zcard-i{
+  position:absolute;top:12px;left:12px;z-index:3;
+  width:34px;height:34px;border-radius:50%;
+  border:0;background:rgba(255,255,255,.94);color:var(--navy);
+  font-family:var(--display);font-size:18px;font-weight:700;font-style:italic;
+  line-height:1;cursor:pointer;
+  box-shadow:0 1px 4px rgba(44,60,75,.18);
+  -webkit-tap-highlight-color:transparent;
 }
 .zcard .row-label{display:block;font-size:17px;font-weight:700;color:var(--navy);
   margin:14px 18px 10px;line-height:1.25;}
 .zcard .row-label .note{display:block;font-size:12.5px;font-weight:400;
   color:var(--charcoal);opacity:.72;margin-top:4px;line-height:1.45;}
-.zcard .amount{display:block;margin:0 18px 14px;}
-.zcard .amount .was{display:block;font-size:14px;color:var(--charcoal);opacity:.55;}
+.zcard .amount{display:block;margin:0 18px 2px;}
+.zcard-note{display:block;margin:0 18px 14px;font-size:12.5px;
+  color:var(--charcoal);opacity:.7;line-height:1.4;}
+.zcard .amount .was{display:block;font-size:16px;color:var(--charcoal);opacity:.85;}
 .zcard .amount .now{display:block;font-family:var(--display);font-weight:700;
   font-size:28px;color:var(--navy);line-height:1.1;}
 .zcard-cta{
@@ -106,6 +118,43 @@
    next. Two stacked sections put 90px between them, which read as an empty
    screen once the monthly-cost box that used to sit there was removed. */
 .hero-offer{padding-bottom:4px;}
+
+/* ---- "qué incluye" sheet ----
+   One panel for all nine cards, filled from the card that opened it. Nine
+   copies of this markup would be nine places to keep in step with the prices
+   the cart is already rewriting. */
+.zsheet{position:fixed;inset:0;z-index:120;}
+.zsheet[hidden]{display:none;}
+.zsheet-scrim{position:absolute;inset:0;background:rgba(22,17,15,.45);opacity:0;
+  transition:opacity .22s ease;}
+.zsheet-panel{
+  position:absolute;left:0;right:0;bottom:0;
+  max-width:var(--maxw);margin:0 auto;
+  max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  background:var(--cream);border-radius:22px 22px 0 0;
+  padding:26px 22px calc(26px + env(safe-area-inset-bottom));
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.22,.61,.36,1);
+}
+.zsheet.is-on .zsheet-scrim{opacity:1;}
+.zsheet.is-on .zsheet-panel{transform:translateY(0);}
+.zsheet-x{
+  position:absolute;top:16px;right:16px;
+  width:34px;height:34px;border-radius:50%;border:0;
+  background:rgba(44,60,75,.08);color:var(--navy);font-size:19px;line-height:1;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.zsheet-eyebrow{margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--rose);}
+.zsheet-t{font-family:var(--display);font-size:27px;font-weight:700;color:var(--navy);
+  margin:0 40px 10px 0;line-height:1.15;}
+.zsheet-d{margin:0 0 18px;font-size:15.5px;line-height:1.55;color:var(--charcoal);}
+.zsheet-was{display:block;font-size:16px;color:var(--charcoal);opacity:.85;}
+.zsheet-now{display:block;font-family:var(--display);font-weight:700;font-size:32px;
+  color:var(--navy);line-height:1.1;}
+.zsheet-n{margin:2px 0 18px;font-size:12.5px;color:var(--charcoal);opacity:.7;}
+.zsheet-img{display:block;width:100%;height:auto;border-radius:var(--radius);
+  margin-top:20px;}
+body.zsheet-open{overflow:hidden;}
 
 /* The header and the offer row are both sticky, so anything jumped to needs
    to clear them or it lands underneath. */
@@ -209,12 +258,12 @@
       <details class="zgroup" open>
         <summary class="zgroup-h">M&aacute;s solicitadas</summary>
       <ul class="zgrid">
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-axilas" data-altegio="13332967" data-name="Depilación Láser · Axilas" data-price-first="10" data-price="15" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-axilas.jpg" alt="Depilación láser de axilas" width="725" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas</span><span class="amount"><s class="was">15 €</s><span class="now">10 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-ingles-completas" data-altegio="13333037" data-name="Depilación Láser · Ingles completas" data-price-first="19" data-price="28" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-ingles-completas.jpg" alt="Depilación láser de ingles completas" width="700" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Ingles completas</span><span class="amount"><s class="was">28 €</s><span class="now">19 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-piernas-completas" data-altegio="13333044" data-name="Depilación Láser · Piernas completas" data-price-first="31" data-price="45" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-piernas-completas.jpg" alt="Depilación láser de piernas completas" width="900" height="672" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Piernas completas</span><span class="amount"><s class="was">45 €</s><span class="now">31 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-medias-piernas" data-altegio="13333043" data-name="Depilación Láser · Medias piernas" data-price-first="19" data-price="28" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-medias-piernas.jpg" alt="Depilación láser de medias piernas" width="700" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Medias piernas</span><span class="amount"><s class="was">28 €</s><span class="now">19 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-ingles-normales" data-altegio="13332976" data-name="Depilación Láser · Ingles normales" data-price-first="14" data-price="20" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-ingles-normales.jpg" alt="Depilación láser de ingles normales" width="900" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Ingles normales</span><span class="amount"><s class="was">20 €</s><span class="now">14 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-facial-completo" data-altegio="13332974" data-name="Depilación Láser · Facial completo" data-price-first="14" data-price="20" aria-pressed="false"><span class="zcard-media"><img src="images/laser-zona-facial-completo.jpg" alt="Depilación láser facial completo" width="725" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Facial completo</span><span class="amount"><s class="was">20 €</s><span class="now">14 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-axilas" data-altegio="13332967" data-name="Depilación Láser · Axilas" data-price-first="10" data-price="15" aria-pressed="false" data-desc="Toda la axila, de lado a lado."><span class="zcard-media"><img src="images/laser-zona-axilas.jpg" alt="Depilación láser de axilas" width="725" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas</span><span class="amount"><s class="was">15 €</s><span class="now">10 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-ingles-completas" data-altegio="13333037" data-name="Depilación Láser · Ingles completas" data-price-first="19" data-price="28" aria-pressed="false" data-desc="Toda la zona íntima: ingles, pubis y labios. Si prefieres, se deja una franja."><span class="zcard-media"><img src="images/laser-zona-ingles-completas.jpg" alt="Depilación láser de ingles completas" width="700" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Ingles completas</span><span class="amount"><s class="was">28 €</s><span class="now">19 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-piernas-completas" data-altegio="13333044" data-name="Depilación Láser · Piernas completas" data-price-first="31" data-price="45" aria-pressed="false" data-desc="De la ingle al tobillo — muslos, rodillas y gemelos."><span class="zcard-media"><img src="images/laser-zona-piernas-completas.jpg" alt="Depilación láser de piernas completas" width="900" height="672" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Piernas completas</span><span class="amount"><s class="was">45 €</s><span class="now">31 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-medias-piernas" data-altegio="13333043" data-name="Depilación Láser · Medias piernas" data-price-first="19" data-price="28" aria-pressed="false" data-desc="De la rodilla al tobillo, rodillas incluidas."><span class="zcard-media"><img src="images/laser-zona-medias-piernas.jpg" alt="Depilación láser de medias piernas" width="700" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Medias piernas</span><span class="amount"><s class="was">28 €</s><span class="now">19 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-ingles-normales" data-altegio="13332976" data-name="Depilación Láser · Ingles normales" data-price-first="14" data-price="20" aria-pressed="false" data-desc="Lo que queda fuera del bañador: las ingles a los lados, sin el centro."><span class="zcard-media"><img src="images/laser-zona-ingles-normales.jpg" alt="Depilación láser de ingles normales" width="900" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Ingles normales</span><span class="amount"><s class="was">20 €</s><span class="now">14 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-facial-completo" data-altegio="13332974" data-name="Depilación Láser · Facial completo" data-price-first="14" data-price="20" aria-pressed="false" data-desc="Toda la cara: entrecejo, pómulos, patillas, mentón y labio superior."><span class="zcard-media"><img src="images/laser-zona-facial-completo.jpg" alt="Depilación láser facial completo" width="725" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Facial completo</span><span class="amount"><s class="was">20 €</s><span class="now">14 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
       </ul>
 
       </details>
@@ -222,9 +271,9 @@
       <details class="zgroup" open>
         <summary class="zgroup-h">Packs de zonas para mujer &mdash; precio por sesi&oacute;n</summary>
       <ul class="zgrid">
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-mujer-1" data-altegio="13362656" data-name="Depilación Láser · Axilas + ingles completas" data-price-first="28" data-price="40" aria-pressed="false"><span class="zcard-media"><img src="images/laser-pack-axilas-ingles.jpg" alt="Pack de depilación láser: axilas e ingles completas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas<span class="note">por separado 43&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">40 €</s><span class="now">28 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-mujer-2" data-altegio="13362663" data-name="Depilación Láser · Axilas + ingles completas + medias piernas" data-price-first="42" data-price="60" aria-pressed="false"><span class="zcard-media"><img src="images/laser-pack-axilas-ingles-medias.jpg" alt="Pack de depilación láser: axilas, ingles completas y medias piernas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas + medias piernas<span class="note">por separado 71&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">60 €</s><span class="now">42 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
-        <li class="zcard"><button type="button" class="row-add" data-id="depilacion-laser-mujer-3" data-altegio="13362670" data-name="Depilación Láser · Axilas + ingles completas + piernas completas" data-price-first="49" data-price="70" aria-pressed="false"><span class="zcard-media"><img src="images/laser-pack-axilas-ingles-piernas.jpg" alt="Pack de depilación láser: axilas, ingles completas y piernas completas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas + piernas completas<span class="note">por separado 88&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">70 €</s><span class="now">49 €</span></span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-mujer-1" data-altegio="13362656" data-name="Depilación Láser · Axilas + ingles completas" data-price-first="28" data-price="40" aria-pressed="false" data-desc="Las dos zonas que casi nadie deja a medias, en la misma sesión. Con una zona XS de regalo."><span class="zcard-media"><img src="images/laser-pack-axilas-ingles.jpg" alt="Pack de depilación láser: axilas e ingles completas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas<span class="note">por separado 43&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">40 €</s><span class="now">28 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-mujer-2" data-altegio="13362663" data-name="Depilación Láser · Axilas + ingles completas + medias piernas" data-price-first="42" data-price="60" aria-pressed="false" data-desc="Axilas e ingles completas más de rodilla a tobillo. Con una zona XS de regalo."><span class="zcard-media"><img src="images/laser-pack-axilas-ingles-medias.jpg" alt="Pack de depilación láser: axilas, ingles completas y medias piernas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas + medias piernas<span class="note">por separado 71&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">60 €</s><span class="now">42 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
+        <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-mujer-3" data-altegio="13362670" data-name="Depilación Láser · Axilas + ingles completas + piernas completas" data-price-first="49" data-price="70" aria-pressed="false" data-desc="Axilas e ingles completas más la pierna entera, de la ingle al tobillo. Con una zona XS de regalo."><span class="zcard-media"><img src="images/laser-pack-axilas-ingles-piernas.jpg" alt="Pack de depilación láser: axilas, ingles completas y piernas completas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas + piernas completas<span class="note">por separado 88&nbsp;€ · +1 zona XS de regalo</span></span><span class="amount"><s class="was">70 €</s><span class="now">49 €</span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
       </ul>
 
       </details>
@@ -413,5 +462,77 @@ try { window.sessionStorage.removeItem('s56-cart-first'); } catch (e) {}
 })();
 </script>
 
+<div class="zsheet" id="zsheet" hidden>
+  <div class="zsheet-scrim" data-zclose></div>
+  <div class="zsheet-panel" role="dialog" aria-modal="true" aria-labelledby="zsheet-t">
+    <button type="button" class="zsheet-x" data-zclose aria-label="Cerrar">&times;</button>
+    <p class="zsheet-eyebrow">Depilaci&oacute;n l&aacute;ser</p>
+    <h3 class="zsheet-t" id="zsheet-t"></h3>
+    <p class="zsheet-d" id="zsheet-d"></p>
+    <p><s class="zsheet-was" id="zsheet-was"></s><span class="zsheet-now" id="zsheet-now"></span></p>
+    <p class="zsheet-n">*Precio de la primera sesi&oacute;n</p>
+    <button type="button" class="btn btn-primary btn-block" id="zsheet-go">Elegir esta zona</button>
+    <img class="zsheet-img" id="zsheet-img" alt="" width="725" height="900">
+  </div>
+</div>
+
+<script>
+/* The "i" on a card opens what the card has no room to say: what the zone
+   actually covers. Everything in the sheet is read off the card that opened
+   it -- including the prices, which cart.js rewrites whenever the offer state
+   changes, so copying them at open time is the only way they cannot drift. */
+(function () {
+  var sheet = document.getElementById('zsheet');
+  if (!sheet) return;
+  var elT = document.getElementById('zsheet-t'), elD = document.getElementById('zsheet-d'),
+      elW = document.getElementById('zsheet-was'), elN = document.getElementById('zsheet-now'),
+      elI = document.getElementById('zsheet-img'), go = document.getElementById('zsheet-go');
+  var card = null, opener = null;
+
+  var open = function (btn, add) {
+    card = add; opener = btn;
+    var label = add.querySelector('.row-label');
+    var name = label ? (label.childNodes[0].textContent || '').trim() : '';
+    var was = add.querySelector('.amount .was'), now = add.querySelector('.amount .now');
+    var img = add.querySelector('img');
+    elT.textContent = name;
+    elD.textContent = add.getAttribute('data-desc') || '';
+    elW.textContent = was ? was.textContent : '';
+    elN.textContent = now ? now.textContent : (add.querySelector('.amount') || {}).textContent || '';
+    if (img) { elI.src = img.src; elI.alt = img.alt; }
+    go.textContent = add.getAttribute('aria-pressed') === 'true' ? 'Quitar esta zona' : 'Elegir esta zona';
+    sheet.hidden = false;
+    document.body.classList.add('zsheet-open');
+    /* one frame with the panel still off-screen, or the transition has
+       nothing to move from */
+    requestAnimationFrame(function () { sheet.classList.add('is-on'); });
+    document.getElementById('zsheet-t').setAttribute('tabindex', '-1');
+    document.getElementById('zsheet-t').focus();
+  };
+
+  var close = function () {
+    sheet.classList.remove('is-on');
+    document.body.classList.remove('zsheet-open');
+    window.setTimeout(function () { sheet.hidden = true; }, 260);
+    if (opener) opener.focus();
+    card = null; opener = null;
+  };
+
+  [].slice.call(document.querySelectorAll('.zcard-i')).forEach(function (btn) {
+    var add = btn.parentNode.querySelector('.row-add');
+    if (!add) return;
+    btn.setAttribute('aria-label', 'Qu\u00e9 incluye: ' + (add.querySelector('.row-label') || {}).textContent);
+    btn.addEventListener('click', function () { open(btn, add); });
+  });
+
+  sheet.addEventListener('click', function (e) {
+    if (e.target.hasAttribute && e.target.hasAttribute('data-zclose')) close();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !sheet.hidden) close();
+  });
+  go.addEventListener('click', function () { if (card) card.click(); close(); });
+})();
+</script>
 </body>
 </html>
