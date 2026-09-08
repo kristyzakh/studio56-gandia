@@ -1195,6 +1195,57 @@
     mount.appendChild(box);
   };
 
+  /* ---------- the shared cabinet ----------
+     Anna and Alina work out of ONE room. Their calendars are therefore not
+     independent: whoever is in it, nobody else can be. Altegio models exactly
+     this with Resources, and the resource is set up correctly — "Cabina",
+     quantity 1, attached to all 85 beauty services, and the appointments do
+     hold it. Its online-booking engine simply ignores resources. Verified
+     2026-09-08: with Anna booked at 10:00 and her record showing
+     "Ресурсы: Cabina #1", book_check still answered success for Alina at the
+     same 10:00. The resource only bites in the admin journal, so the block
+     has to be built here.
+
+     book_times cannot tell "off shift" apart from "booked" — both come back
+     simply as a time that is not offered. So the only sound rule is to offer a
+     slot when EVERY cabinet specialist offers it. That is deliberately
+     conservative: it also drops hours when just one of them is on, which is
+     why the real fix is disjoint schedules in Altegio and this is the stopgap.
+
+     Elena is not in this list. She is a hairdresser and works somewhere else
+     entirely, so her calendar has nothing to do with this room. */
+  var CABINET = [2979218, 2979219];   /* Anna Churashkina · Alina Isajeva */
+
+  /* Only the cabinet people who can actually perform what was chosen. A
+     service just one of them does leaves nothing to share, and the plain
+     single-staff call stands. */
+  var cabinetStaff = function () {
+    return (cache.staff || [])
+      .map(function (st) { return Number(st.id); })
+      .filter(function (id) { return CABINET.indexOf(id) !== -1; });
+  };
+
+  /* Keep the first list's entries — they carry the datetime and seance_length
+     the rest of the flow needs — and drop every time the others do not also
+     offer. */
+  var sharedTimes = function (lists) {
+    var rest = lists.slice(1).map(function (l) {
+      return (l || []).reduce(function (m, t) { m[t.time] = 1; return m; }, {});
+    });
+    return (lists[0] || []).filter(function (t) {
+      return rest.every(function (m) { return m[t.time]; });
+    });
+  };
+
+  var sharedDates = function (lists) {
+    var rest = lists.slice(1).map(function (d) {
+      return ((d && d.booking_dates) || []).reduce(function (m, x) { m[x] = 1; return m; }, {});
+    });
+    return { booking_dates: (((lists[0] || {}).booking_dates) || []).filter(function (x) {
+      return rest.every(function (m) { return m[x]; });
+    }) };
+  };
+
   /* ---------- loaders ---------- */
 
   var busy = function (on) { mount.setAttribute('aria-busy', on ? 'true' : 'false'); };
@@ -1217,7 +1268,11 @@
     busy(true);
     var from = ymd(new Date()), to = new Date();
     to.setDate(to.getDate() + state.weeks * 7);
-    api.dates(from, ymd(to), state.services, state.staff && state.staff.id)
+    var share = cabinetStaff();
+    var forStaff = function (id) { return api.dates(from, ymd(to), state.services, id); };
+    (share.length < 2
+      ? forStaff(state.staff && state.staff.id)
+      : Promise.all(share.map(forStaff)).then(sharedDates))
       .then(function (d) { cache.dates = (d && d.booking_dates) || []; })
       ['catch'](function () { cache.dates = []; })
       .then(function () { busy(false); render(); });
@@ -1225,7 +1280,11 @@
 
   var loadTimes = function () {
     busy(true);
-    api.times(state.staff && state.staff.id, state.date, state.services)
+    var share = cabinetStaff();
+    var forStaff = function (id) { return api.times(id, state.date, state.services); };
+    (share.length < 2
+      ? forStaff(state.staff && state.staff.id)
+      : Promise.all(share.map(forStaff)).then(sharedTimes))
       .then(function (t) { cache.times = t || []; })
       ['catch'](function () { cache.times = []; })
       .then(function () { busy(false); render(); });
