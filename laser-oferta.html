@@ -206,10 +206,6 @@
     <div class="wrap">
       <div class="section-head">
         <h2 class="display">Elige tus zonas</h2>
-        <div class="tag-row">
-          <button type="button" class="tag tag-toggle" id="first-toggle" aria-pressed="true">Primera sesión &minus;30&nbsp;%</button>
-          <span class="tag-hint" id="first-hint"></span>
-        </div>
       </div>
       <p class="zsub">Toca las zonas que te interesan y verás el total abajo. Puedes cambiarlo cuando quieras.</p>
       <details class="zgroup" open>
@@ -396,6 +392,13 @@
   </div>
 </div>
 
+<script>
+/* The offer price is the whole page, so it is not a preference here. The
+   toggle that used to switch it is gone; the flag it wrote lives in
+   sessionStorage and is shared with precios.html, where somebody may well
+   have turned it off. Pinned before cart.js reads it. */
+try { window.sessionStorage.removeItem('s56-cart-first'); } catch (e) {}
+</script>
 <script src="app.js?v=c374224234" defer></script>
 
 <script src="cart.js?v=ebb7f12a11" defer></script>
