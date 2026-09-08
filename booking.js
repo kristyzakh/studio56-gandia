@@ -81,7 +81,7 @@
     comboLead: 'Разом дешевше: ', comboInstead: ' замість ', comboTake: 'Взяти',
     perSession: 'за сеанс', removeIt: 'Прибрати',
     packSave: 'Заощадите ', packTake: 'Взяти пакет', packDrop: 'Один сеанс',
-    packOn: 'Пакет 3 + 1 · 4 сеанси', packTag: 'пакет 3 + 1 (4 сеанси)',
+    packOn: 'Пакет 3 + 1 · 4 сеанси',
     packApart: 'окремо ',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
@@ -144,7 +144,7 @@
     comboLead: 'Вместе дешевле: ', comboInstead: ' вместо ', comboTake: 'Взять',
     perSession: 'за сеанс', removeIt: 'Убрать',
     packSave: 'Сэкономите ', packTake: 'Взять пакет', packDrop: 'Один сеанс',
-    packOn: 'Пакет 3 + 1 · 4 сеанса', packTag: 'пакет 3 + 1 (4 сеанса)',
+    packOn: 'Пакет 3 + 1 · 4 сеанса',
     packApart: 'отдельно ',
     days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
     months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
@@ -197,7 +197,7 @@
     comboLead: 'Juntas salen mejor: ', comboInstead: ' en vez de ', comboTake: 'Cambiar',
     perSession: 'por sesión', removeIt: 'Quitar',
     packSave: 'Ahorras ', packTake: 'Coger el pack', packDrop: 'Una sesión',
-    packOn: 'Pack 3 + 1 · 4 sesiones', packTag: 'pack 3 + 1 (4 sesiones)',
+    packOn: 'Pack 3 + 1 · 4 sesiones',
     packApart: 'por separado ',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
     months: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
@@ -389,6 +389,21 @@
     var v = '';
     try { v = window.localStorage.getItem('s56-source') || ''; } catch (e) {}
     return v ? 'Сайт · ' + v : 'Сайт';
+  };
+
+  /* The pack the visitor ticked, written for the one person who acts on it:
+     the master at the till. So it is in Russian whatever language the site was
+     read in -- the CRM, the staff guide and the people selling are Russian, and
+     a Spanish visitor asking for a pack must not produce a note the person
+     selling it cannot use.
+
+     Nothing is bought here. Altegio has no service for a single-zone 3 + 1, and
+     the pack itself is an abonement, not a service -- so the booking stays one
+     session and this says what the visitor asked for. The master confirms it in
+     person, prices it and issues the abonement. */
+  var packNote = function () {
+    if (!state.pack || !state.services.length) return '';
+    return ' · ПАКЕТ 3+1: ' + pretty(state.services[0].title) + ' — 4 сеанса';
   };
 
   var pretty = function (s) {
@@ -972,7 +987,7 @@
            booking's comment because that is what a person reading the journal
            actually sees. Absent (storage blocked, or nothing recorded) it is
            simply left out rather than sent empty or guessed at. */
-        comment: source() + (state.pack ? ' · ' + T.packTag : ''),
+        comment: source() + packNote(),
         appointments: [{
           id: 1,
           services: state.services.map(function (sv) { return sv.id; }),
