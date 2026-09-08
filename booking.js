@@ -482,7 +482,16 @@
 
       if (cache.categories.length && !state.category) {
         cache.categories.forEach(function (c) {
-          var count = cache.services.filter(function (s) { return s.category_id === c.id; }).length;
+          /* A men's category is not a treatment of its own: it is offered as a
+             route inside its parent. Listing it here as well would split men
+             off before they ever reach the laser page, and put the same four
+             packages behind two different doors. Its services are counted
+             towards the parent, because that is where they are reached. */
+          if (menParent(c)) return;
+          var count = countIn(c.id);
+          cache.categories.forEach(function (m) {
+            if (menParent(m) === c) count += countIn(m.id);
+          });
           if (!count) return;
           var b = el('button', 'bk-opt');
           b.type = 'button';
@@ -890,17 +899,34 @@
      route simply stops being offered, which is the safe way to fail: the
      alternative is a button that books the wrong thing. */
   var MEN = /hombre|чолов|мужск/i;
+  var countIn = function (id) {
+    return cache.services.filter(function (sv) { return sv.category_id === id; }).length;
+  };
+
+  /* Altegio names the men's category after its parent -- "Depilación Láser"
+     -> "Depilación Láser Hombre" -- so the relationship is read from the
+     title rather than an id, and a rename quietly ends it instead of
+     pointing somewhere wrong. Returns the parent, or null when this is an
+     ordinary category. */
+  var menParent = function (c) {
+    var t = String(c.title || '').toLowerCase();
+    if (!MEN.test(t) || !countIn(c.id)) return null;
+    var hit = null;
+    cache.categories.forEach(function (p) {
+      var pt = String(p.title || '').toLowerCase();
+      if (!hit && pt && pt !== t && t.indexOf(pt) === 0) hit = p;
+    });
+    return hit;
+  };
+
+  /* The men's category as seen from its parent -- the "for men" route. */
   var menCategory = function () {
-    var base = state.category && String(state.category.title || '').toLowerCase();
-    if (!base || MEN.test(base)) return null;
+    if (!state.category) return null;
     var hit = null;
     cache.categories.forEach(function (c) {
-      var t = String(c.title || '').toLowerCase();
-      if (!hit && t !== base && t.indexOf(base) === 0 && MEN.test(t)) hit = c;
+      if (!hit && menParent(c) === state.category) hit = c;
     });
-    if (!hit) return null;
-    return cache.services.filter(function (sv) { return sv.category_id === hit.id; }).length
-      ? hit : null;
+    return hit;
   };
 
   /* 3 + 1 exists for laser (and Endospheres) only. Wax is sold per zone, per
