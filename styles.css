@@ -1211,6 +1211,16 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   gap:2px 14px;
 }
 .page-facts strong{color:var(--navy);}
+/* Endospheres is the one treatment whose "from" price is a first-visit rate.
+   The cards already say so; this qualifier keeps the two places identical, so
+   nobody arrives expecting 32 € on their second session. */
+.page-facts strong small{
+  font-weight:400;
+  font-size:12.5px;
+  color:var(--charcoal);
+  opacity:.7;
+  margin-left:3px;
+}
 .page-facts a{
   color:var(--navy);
   text-decoration:none;
