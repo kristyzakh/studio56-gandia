@@ -136,7 +136,9 @@
   border-radius:999px;padding:9px 11px;
 }
 .offerbar-tag{background:var(--rose);color:#fff;}
-.offerbar-pill{border:1px solid var(--hairline);color:var(--navy);text-decoration:none;}
+.offerbar-pill{border:1px solid var(--hairline);color:var(--navy);text-decoration:none;
+  font:inherit;font-size:12px;font-weight:700;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;}
 .offerbar-go{background:var(--navy);border-color:var(--navy);color:var(--cream);}
 
 /* ---- the one claim worth making above the fold ----
@@ -201,6 +203,8 @@
   background:rgba(186,156,164,.14);border-radius:var(--radius);padding:12px 14px;}
 .zsheet-img{display:block;width:100%;height:auto;border-radius:var(--radius);
   margin-top:20px;}
+#bsheet .zsheet-panel{max-height:94vh;}
+#bsheet .zsheet-t{margin-bottom:18px;}
 body.zsheet-open{overflow:hidden;}
 
 /* The header and the offer row are both sticky, so anything jumped to needs
@@ -247,7 +251,7 @@ body.zsheet-open{overflow:hidden;}
     <div class="offerbar-in">
       <span class="offerbar-tag">Depilaci&oacute;n l&aacute;ser &minus;30&nbsp;%</span>
       <a class="offerbar-pill" href="#todas" id="go-todas" data-track="offerbar_zonas" data-track-label="barra fija">Todas las zonas</a>
-      <a class="offerbar-pill offerbar-go" href="#cita" data-track="offerbar_cita" data-track-label="barra fija">Pedir cita</a>
+      <button type="button" class="offerbar-pill offerbar-go" id="go-cita" data-track="offerbar_cita" data-track-label="barra fija">Pedir cita</button>
     </div>
   </div>
 </header>
@@ -466,19 +470,6 @@ body.zsheet-open{overflow:hidden;}
     </div>
   </section>
 
-  <section class="booking" id="cita">
-    <div class="wrap">
-      <div class="section-head"><p class="eyebrow">Reserva</p><h2 class="display">Pide tu cita con &minus;30&nbsp;%</h2></div>
-      <div class="form">
-        <div id="booking-widget" data-preselect="láser" data-skip-staff></div>
-        <div id="booking-fallback">
-          <p class="form-note" style="margin-top:0">Escríbenos y buscamos hora el mismo día.</p>
-          <a class="btn btn-whatsapp btn-block" href="https://wa.me/34621070775" rel="noopener" data-track="whatsapp_click" data-track-label="oferta cita">Escríbenos por WhatsApp</a>
-          <a class="btn btn-secondary btn-block" href="https://n1465552.alteg.io" rel="noopener" target="_blank" data-track="online_booking_click" data-track-label="oferta cita">Reservar online</a>
-        </div>
-      </div>
-    </div>
-  </section>
 
 </main>
 
@@ -575,22 +566,85 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
   </div>
 </div>
 
+<div class="zsheet" id="bsheet" hidden>
+  <div class="zsheet-scrim" data-zclose></div>
+  <div class="zsheet-panel" role="dialog" aria-modal="true" aria-labelledby="bsheet-t">
+    <button type="button" class="zsheet-x" data-zclose aria-label="Cerrar">&times;</button>
+    <p class="zsheet-eyebrow">Reserva</p>
+    <h3 class="zsheet-t" id="bsheet-t">Pide tu cita con &minus;30&nbsp;%</h3>
+    <div class="form" id="cita">
+      <div id="booking-widget" data-preselect="láser" data-skip-staff></div>
+      <div id="booking-fallback">
+        <p class="form-note" style="margin-top:0">Escr&iacute;benos y buscamos hora el mismo d&iacute;a.</p>
+        <a class="btn btn-whatsapp btn-block" href="https://wa.me/34621070775" rel="noopener" data-track="whatsapp_click" data-track-label="oferta cita">Escr&iacute;benos por WhatsApp</a>
+        <a class="btn btn-secondary btn-block" href="https://n1465552.alteg.io" rel="noopener" target="_blank" data-track="online_booking_click" data-track-label="oferta cita">Reservar online</a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* The "i" on a card opens what the card has no room to say: what the zone
    actually covers. Everything in the sheet is read off the card that opened
    it -- including the prices, which cart.js rewrites whenever the offer state
    changes, so copying them at open time is the only way they cannot drift. */
 (function () {
+  /* Two sheets on this page now -- what a zone covers, and the booking form --
+     so opening, closing and Escape are written once. */
+  var opener = null;
+  var show = function (sheet, title, from) {
+    opener = from || null;
+    sheet.hidden = false;
+    document.body.classList.add('zsheet-open');
+    /* one frame with the panel still off-screen, or the transition has
+       nothing to move from */
+    requestAnimationFrame(function () { sheet.classList.add('is-on'); });
+    if (title) { title.setAttribute('tabindex', '-1'); title.focus(); }
+  };
+  var hide = function (sheet) {
+    sheet.classList.remove('is-on');
+    document.body.classList.remove('zsheet-open');
+    window.setTimeout(function () { sheet.hidden = true; }, 260);
+    if (opener) opener.focus();
+    opener = null;
+  };
+  var wire = function (sheet) {
+    sheet.addEventListener('click', function (e) {
+      if (e.target.hasAttribute && e.target.hasAttribute('data-zclose')) hide(sheet);
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !sheet.hidden) hide(sheet);
+    });
+  };
+
+  /* ---- the booking form ----
+     It used to sit at the bottom of the page, five screens past the last card,
+     which meant the tap that finished the choosing started a scroll. It opens
+     over the page now, on the same two controls: the cart's button and "Pedir
+     cita" in the sticky row. cart.js still prefills it first -- that is its own
+     handler, and it runs on the same click. */
+  var bsheet = document.getElementById('bsheet');
+  if (bsheet) {
+    wire(bsheet);
+    var openBooking = function (from) {
+      show(bsheet, document.getElementById('bsheet-t'), from);
+    };
+    ['go-cita', 'cart-book'].forEach(function (id) {
+      var btn = document.getElementById(id);
+      if (btn) btn.addEventListener('click', function () { openBooking(btn); });
+    });
+  }
+
   var sheet = document.getElementById('zsheet');
   if (!sheet) return;
   var elT = document.getElementById('zsheet-t'), elD = document.getElementById('zsheet-d'),
       elW = document.getElementById('zsheet-was'), elN = document.getElementById('zsheet-now'),
       elI = document.getElementById('zsheet-img'), go = document.getElementById('zsheet-go'),
       elC = document.getElementById('zsheet-c');
-  var card = null, opener = null;
+  var card = null;
 
   var open = function (btn, add) {
-    card = add; opener = btn;
+    card = add;
     var label = add.querySelector('.row-label');
     var name = label ? (label.childNodes[0].textContent || '').trim() : '';
     var was = add.querySelector('.amount .was'), now = add.querySelector('.amount .now');
@@ -612,22 +666,10 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
         'cuotas ni financiaci\u00f3n.'
       : '';
     go.textContent = add.getAttribute('aria-pressed') === 'true' ? 'Quitar esta zona' : 'Elegir esta zona';
-    sheet.hidden = false;
-    document.body.classList.add('zsheet-open');
-    /* one frame with the panel still off-screen, or the transition has
-       nothing to move from */
-    requestAnimationFrame(function () { sheet.classList.add('is-on'); });
-    document.getElementById('zsheet-t').setAttribute('tabindex', '-1');
-    document.getElementById('zsheet-t').focus();
+    show(sheet, elT, btn);
   };
 
-  var close = function () {
-    sheet.classList.remove('is-on');
-    document.body.classList.remove('zsheet-open');
-    window.setTimeout(function () { sheet.hidden = true; }, 260);
-    if (opener) opener.focus();
-    card = null; opener = null;
-  };
+  var close = function () { hide(sheet); card = null; };
 
   [].slice.call(document.querySelectorAll('.zcard-i')).forEach(function (btn) {
     var add = btn.parentNode.querySelector('.row-add');
@@ -636,12 +678,7 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
     btn.addEventListener('click', function () { open(btn, add); });
   });
 
-  sheet.addEventListener('click', function (e) {
-    if (e.target.hasAttribute && e.target.hasAttribute('data-zclose')) close();
-  });
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !sheet.hidden) close();
-  });
+  wire(sheet);
   go.addEventListener('click', function () { if (card) card.click(); close(); });
 })();
 </script>
