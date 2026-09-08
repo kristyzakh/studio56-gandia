@@ -727,7 +727,14 @@
     }));
 
     /* 2 · staff */
-    n++;
+    /* A page aimed at people who have never been here can opt out of the choice
+       with data-skip-staff. A stranger cannot choose between names they do not
+       know, and every step is a place to leave; Altegio assigns whoever is free
+       and the confirmation page names them, which is when the name means
+       something. Opt-in, so every other page keeps the picker. */
+    var skipStaff = root.hasAttribute('data-skip-staff');
+    if (skipStaff && !state.staff) state.staff = { id: 0, name: T.anyStaff };
+    if (!skipStaff) n++;
     /* Named, so the visitor knows who they are seeing, but not asked -- there
        is nothing to choose between. Set here rather than in loadStaff so that
        stepping back from the calendar does not resurrect a one-option list. */
@@ -757,10 +764,12 @@
       mount.appendChild(step(n, T.steps[1], null, null, slist));
       return;
     }
-    mount.appendChild(step(n, T.steps[1], (state.assigned && state.assigned.name) || state.staff.name,
-      cache.staff.length > 1 ? function () {
-        state.staff = null; state.assigned = null; state.date = null; state.time = null; render();
-      } : null));
+    if (!skipStaff) {
+      mount.appendChild(step(n, T.steps[1], (state.assigned && state.assigned.name) || state.staff.name,
+        cache.staff.length > 1 ? function () {
+          state.staff = null; state.assigned = null; state.date = null; state.time = null; render();
+        } : null));
+    }
 
     /* 3 · date */
     n++;
