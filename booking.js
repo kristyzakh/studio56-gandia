@@ -29,6 +29,28 @@
   var HIDDEN = (root.getAttribute('data-hide-routes') || '').split(/[,\s]+/);
   var hidden = function (name) { return HIDDEN.indexOf(name) !== -1; };
 
+  /* An offer price is the page's, not Altegio's. A -30 % first session is
+     applied in the studio, so the API answers with the normal price list and a
+     form quoting it contradicts the card the visitor just tapped.
+
+     data-offer-prices reads the numbers off the page's own zone buttons, which
+     already carry the Altegio id and the offer price side by side. A second
+     price list here would be a second thing to keep in step with Precios.pdf;
+     this is a lookup into the one the page already renders. Empty everywhere
+     else, and empty leaves every price exactly as Altegio sent it. */
+  var OFFER = {};
+  if (root.hasAttribute('data-offer-prices')) {
+    [].slice.call(document.querySelectorAll('.row-add[data-altegio][data-price-first]'))
+      .forEach(function (b) {
+        var id = b.getAttribute('data-altegio'), v = Number(b.getAttribute('data-price-first'));
+        if (id && v > 0) OFFER[id] = v;
+      });
+  }
+  var offerOf = function (sv) {
+    var v = OFFER[String(sv && sv.id)];
+    return v > 0 ? v : 0;
+  };
+
   var LANG = document.documentElement.lang;
   var pick = function (t) { return t[LANG] || t.es; };
 
@@ -598,7 +620,7 @@
           var name = el('span', 'bk-line-t', pretty(sv.title));
           /* A 3 + 1 pack is priced for four sessions, so "per session" would
              be wrong on it. The men's packages really are per session. */
-          var cost = el('span', 'bk-line-p', priceOf(sv) + ' € ' +
+          var cost = el('span', 'bk-line-p', struck(sv) + priceOf(sv) + ' € ' +
                         (state.mode === 'packs' ? '' : '<small>' + T.perSession + '</small>'));
           var x = el('button', 'bk-line-x', '×');
           x.type = 'button';
@@ -641,7 +663,9 @@
           state.pack ? T.packOn
           : state.mode === 'one' || state.mode === 'many' ? T.chosenWord(state.basket.length)
           : T.packWord));
-        row.appendChild(el('span', 'bk-basket-sum', total + ' €'));
+        var wasSum = state.basket.reduce(function (t, sv) { return t + (wasOf(sv) || priceOf(sv)); }, 0);
+        row.appendChild(el('span', 'bk-basket-sum',
+          (!state.pack && wasSum > total ? '<s class="bk-was">' + wasSum + ' €</s> ' : '') + total + ' €'));
         basketBox.appendChild(row);
         if (combo) {
           var hint = el('div', 'bk-combo');
@@ -879,7 +903,8 @@
     var b = el('button', 'bk-opt');
     b.type = 'button';
     b.innerHTML = '<span class="bk-opt-t">' + pretty(sv.title) + '</span>' +
-                  '<span class="bk-opt-m">' + money(sv.price_min, sv.price_max) + '</span>';
+                  '<span class="bk-opt-m">' + struck(sv) +
+                  money(offerOf(sv) || sv.price_min, offerOf(sv) ? 0 : sv.price_max) + '</span>';
     if (!quiet) b.addEventListener('click', function () {
       state.services = [sv]; state.date = null; state.time = null;
       state.staff = null; state.assigned = null;
@@ -973,7 +998,19 @@
       return !state.category || sv.category_id === state.category.id;
     });
   };
-  var priceOf = function (sv) { return sv.price_min || 0; };
+  var listPrice = function (sv) { return sv.price_min || 0; };
+  /* Everything downstream -- the basket sum, the pack maths, the combo
+     comparison -- already goes through here, so they all follow the offer
+     without knowing about it. */
+  var priceOf = function (sv) { return offerOf(sv) || listPrice(sv); };
+  /* The price it was, when there is an offer to strike it through. */
+  var wasOf = function (sv) {
+    var off = offerOf(sv), full = listPrice(sv);
+    return off && full > off ? full : 0;
+  };
+  var struck = function (sv) {
+    return wasOf(sv) ? '<s class="bk-was">' + wasOf(sv) + ' €</s> ' : '';
+  };
   var sumOf = function (list) {
     return list.reduce(function (t, sv) { return t + priceOf(sv); }, 0);
   };

@@ -2026,6 +2026,9 @@ body.has-bk #booking-widget{padding-bottom:calc(var(--bk-h,0px) + 16px);}
 .bk-day-w{font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.55;}
 .bk-day-n{font-family:var(--display);font-size:20px;line-height:1.1;}
 .bk-day.is-off{opacity:.28;cursor:default;}
+/* The price before an offer. Only rendered where a page declares offer
+   prices, so it never appears on a form quoting the plain price list. */
+.bk-was{opacity:.5;font-weight:400;margin-right:2px;}
 /* A day strip that is still loading. Same box, no content, so the step keeps
    its height and nothing jumps when the real days arrive. */
 .bk-day-wait{background:rgba(44,60,75,.06);border-color:transparent;cursor:default;
