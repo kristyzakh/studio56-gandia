@@ -1106,8 +1106,8 @@
       '<option value="+33">FR +33</option><option value="+40">RO +40</option>' +
       '<option value="+212">MA +212</option></select>' +
       '<input type="tel" id="bk-phone" inputmode="tel" autocomplete="tel-national" placeholder="600 000 000" required></div></div>' +
-      '<div class="field"><label for="bk-email">' + T.email + ' <span class="optional">' + T.optional + '</span></label>' +
-      '<input type="email" id="bk-email" autocomplete="email"></div>' +
+      '<div class="field"><label for="bk-email">' + T.email + '</label>' +
+      '<input type="email" id="bk-email" autocomplete="email" required></div>' +
       '<label class="consent"><input type="checkbox" id="bk-consent" required><span>' + T.consent + '</span></label>' +
       '<p class="bk-error" id="bk-error" hidden></p>' +
       '<button type="submit" class="btn btn-primary btn-block" id="bk-submit" disabled>' + T.submit + '</button>';
@@ -1178,10 +1178,19 @@
 
     var submit = f.querySelector('#bk-submit');
     var required = [f.querySelector('#bk-first'), f.querySelector('#bk-last'),
-                    f.querySelector('#bk-phone'), f.querySelector('#bk-consent')];
+                    f.querySelector('#bk-phone'), f.querySelector('#bk-email'),
+                    f.querySelector('#bk-consent')];
+    /* Requiring the field only guarantees it is filled. "asdf" would pass a
+       not-empty test and reach the studio as an address nobody can write to,
+       and the form carries noValidate so the browser will not check it either.
+       Deliberately loose -- one @, a dot after it, no spaces. Anything
+       stricter starts rejecting addresses that work. */
+    var EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
     var sync = function () {
       submit.disabled = !required.every(function (x) {
-        return x.type === 'checkbox' ? x.checked : x.value.trim() !== '';
+        if (x.type === 'checkbox') return x.checked;
+        if (x.type === 'email') return EMAIL.test(x.value.trim());
+        return x.value.trim() !== '';
       });
     };
     required.forEach(function (x) {
