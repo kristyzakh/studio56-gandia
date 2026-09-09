@@ -440,6 +440,26 @@
      the pack itself is an abonement, not a service -- so the booking stays one
      session and this says what the visitor asked for. The master confirms it in
      person, prices it and issues the abonement. */
+  /* Written for the one person who acts on it: the specialist reading the
+     журнал. Russian for the same reason packNote is -- the CRM, the staff
+     guide and the people at the till are Russian whatever language the site
+     was read in.
+
+     It exists because the price differs. Altegio holds the normal price list
+     and always will: a -30 % first session is applied in the studio, not sold
+     as a service. So without this the appointment would arrive quoting a
+     number nobody is going to charge. No flag gates it -- if nothing chosen
+     carries an offer price there is nothing to say, and it says nothing. */
+  var offerNote = function () {
+    var off = state.services.filter(function (sv) { return wasOf(sv); });
+    if (!off.length) return '';
+    var now = off.reduce(function (t, sv) { return t + priceOf(sv); }, 0);
+    var was = off.reduce(function (t, sv) { return t + wasOf(sv); }, 0);
+    return ' · ⚡ ПЕРВЫЙ СЕАНС −30 %: ' +
+           off.map(function (sv) { return pretty(sv.title); }).join(' + ') +
+           ' — ' + now + ' € (вместо ' + was + ' €)';
+  };
+
   var packNote = function () {
     if (!state.pack || !state.services.length) return '';
     return ' · ПАКЕТ 3+1: ' + pretty(state.services[0].title) + ' — 4 сеанса';
@@ -1176,7 +1196,7 @@
            booking's comment because that is what a person reading the journal
            actually sees. Absent (storage blocked, or nothing recorded) it is
            simply left out rather than sent empty or guessed at. */
-        comment: source() + packNote(),
+        comment: source() + offerNote() + packNote(),
         appointments: [{
           id: 1,
           services: state.services.map(function (sv) { return sv.id; }),
