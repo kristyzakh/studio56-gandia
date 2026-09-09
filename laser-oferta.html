@@ -147,6 +147,18 @@
   font:inherit;font-size:12px;font-weight:700;cursor:pointer;
   -webkit-tap-highlight-color:transparent;}
 .offerbar-go{background:var(--navy);border-color:var(--navy);color:var(--cream);}
+/* Measured on the live page: at 375px the three pills fit exactly, at 360px
+   -- most Androids sold here -- "Pedir cita" loses its right edge, at 320px
+   most of it. The row scrolls sideways so it is reachable, but a CTA you have
+   to discover by swiping is not a CTA. Same words, less air. */
+@media (max-width:374px){
+  .offerbar-in{padding:8px 14px;gap:5px;}
+  .offerbar-tag,.offerbar-pill{font-size:11.5px;padding:8px 10px;}
+}
+@media (max-width:339px){
+  .offerbar-in{padding:8px 12px;gap:4px;}
+  .offerbar-tag,.offerbar-pill{font-size:11px;padding:8px 8px;}
+}
 
 /* ---- the one claim worth making above the fold ----
    The machine's model name is not it: nobody here has heard of it, and the
