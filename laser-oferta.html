@@ -135,7 +135,14 @@
   font-size:12px;font-weight:700;line-height:1;
   border-radius:999px;padding:9px 11px;
 }
-.offerbar-tag{background:var(--rose);color:#fff;}
+/* The chip is the offer and the way back to it: on a page this long, the one
+   thing somebody scrolling past the mechanism wants is the zones again. */
+.offerbar-tag{background:var(--rose);color:#fff;text-decoration:none;}
+
+/* No burger on this page. Paid traffic arrives for one thing and the drawer's
+   only job would be to lead it somewhere else. The bar's three columns become
+   one, or the logo would sit where the burger used to be. */
+.bar{grid-template-columns:1fr;justify-items:center;}
 .offerbar-pill{border:1px solid var(--hairline);color:var(--navy);text-decoration:none;
   font:inherit;font-size:12px;font-weight:700;cursor:pointer;
   -webkit-tap-highlight-color:transparent;}
@@ -227,7 +234,7 @@ body.zsheet-open{overflow:hidden;}
 
 /* The header and the offer row are both sticky, so anything jumped to needs
    to clear them or it lands underneath. */
-#todas,#cita,#como{scroll-margin-top:126px;}
+#p-laser,#todas,#cita,#como{scroll-margin-top:126px;}
 .zgroup{margin:0 0 8px;}
 .zgroup + .zgroup{border-top:1px solid var(--hairline);padding-top:6px;}
 .zgroup-h{
@@ -255,11 +262,6 @@ body.zsheet-open{overflow:hidden;}
 <!-- ============ HEADER ============ -->
 <header>
   <div class="bar">
-    <button class="icon-btn" id="menu-open" aria-label="Abrir menú" aria-expanded="false" aria-controls="drawer">
-      <svg width="22" height="14" viewBox="0 0 22 14" fill="none" aria-hidden="true">
-        <path d="M0 1h22M0 7h22M0 13h22" stroke="currentColor" stroke-width="1.5"/>
-      </svg>
-    </button>
     <a class="logo" href="index.html" aria-label="Studio 56 — inicio">
       <span class="logo-mark" aria-hidden="true">S</span>
       <span class="logo-word">Studio 56</span>
@@ -267,39 +269,13 @@ body.zsheet-open{overflow:hidden;}
     </div>
   <div class="offerbar">
     <div class="offerbar-in">
-      <span class="offerbar-tag">Depilaci&oacute;n l&aacute;ser &minus;30&nbsp;%</span>
+      <a class="offerbar-tag" href="#p-laser" data-track="offerbar_zonas" data-track-label="chip oferta">Depilaci&oacute;n l&aacute;ser &minus;30&nbsp;%</a>
       <a class="offerbar-pill" href="#todas" id="go-todas" data-track="offerbar_zonas" data-track-label="barra fija">Todas las zonas</a>
       <button type="button" class="offerbar-pill offerbar-go" id="go-cita" data-track="offerbar_cita" data-track-label="barra fija">Pedir cita</button>
     </div>
   </div>
 </header>
 
-<!-- ============ MENU ============ -->
-<div class="drawer" id="drawer" data-open="false" role="dialog" aria-modal="true" aria-label="Menú">
-  <div class="drawer-inner">
-    <div class="drawer-top">
-      <a class="logo" href="index.html" aria-label="Studio 56 — inicio">
-        <span class="logo-mark" aria-hidden="true">S</span>
-        <span class="logo-word">Studio 56</span>
-      </a>
-      <button class="icon-btn" id="menu-close" aria-label="Cerrar menú">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <path d="M1 1l18 18M19 1L1 19" stroke="currentColor" stroke-width="1.5"/>
-        </svg>
-      </button>
-    </div>
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="tratamientos.html">Tratamientos</a>
-      <a href="precios.html">Precios</a>
-      <a href="contacto.html">Contacto</a>
-    </nav>
-    <a class="gift" href="bono-regalo.html">
-      <span>Regala<br>un bono</span>
-      <span class="heart" aria-hidden="true">&#9825;</span>
-    </a>
-    </div>
-</div>
 
 <main>
 
