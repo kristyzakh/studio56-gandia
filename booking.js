@@ -776,7 +776,18 @@
     if (!state.date) {
       var wrap = el('div');
       if (!cache.dates.length) {
-        wrap.appendChild(el('p', 'bk-empty', T.noDates));
+        /* Altegio takes three seconds to answer with the days. Saying "no
+           quedan huecos" for those three seconds is a lie the visitor has no
+           reason to doubt, so an empty-and-busy step shows the shape of the
+           answer instead. No words: nothing to translate, nothing to read
+           and then have replaced. */
+        if (mount.getAttribute('aria-busy') === 'true') {
+          var wait = el('div', 'bk-days');
+          for (var wi = 0; wi < 5; wi++) wait.appendChild(el('span', 'bk-day bk-day-wait'));
+          wrap.appendChild(wait);
+        } else {
+          wrap.appendChild(el('p', 'bk-empty', T.noDates));
+        }
       } else {
         var strip = el('div', 'bk-days');
         var d = new Date(), end = new Date();
@@ -1270,7 +1281,7 @@
     to.setDate(to.getDate() + state.weeks * 7);
     var share = cabinetStaff();
     var forStaff = function (id) { return api.dates(from, ymd(to), state.services, id); };
-    (share.length < 2
+    return (share.length < 2
       ? forStaff(state.staff && state.staff.id)
       : Promise.all(share.map(forStaff)).then(sharedDates))
       .then(function (d) { cache.dates = (d && d.booking_dates) || []; })
@@ -1341,8 +1352,29 @@
         state.pack = false;
         state.date = null; state.time = null; state.staff = null; state.assigned = null;
         track('booking_prefill', { service: chosenTitle(), zones: svcs.length });
-        loadStaff();
-        return true;
+
+        /* The zones are known the instant this is called; only the calendar is
+           three seconds away. Painting first means the sheet opens on the right
+           form -- chosen zones, waiting day strip -- instead of showing the
+           step-one it was left on until the network catches up.
+
+           And the two calls no longer queue. loadStaff -> loadDates was six
+           seconds of Altegio, one wave after the other, when neither needs the
+           other's answer: which cabinet staff to intersect is already known
+           from the full list fetched at page load. If the service-filtered
+           list turns out to disagree -- a zone only one of them performs --
+           the days are fetched again, which is the rare case paying the cost
+           instead of every booking. */
+        busy(true);
+        render();
+        var assumed = cabinetStaff().join();
+        var days = loadDates();
+        var who = api.staff(state.services)
+          .then(function (list) { if (list && list.length) cache.staff = list; })
+          ['catch'](function () { /* keep whoever we already knew about */ });
+        return Promise.all([days, who]).then(function () {
+          return cabinetStaff().join() === assumed ? true : loadDates().then(function () { return true; });
+        });
       })['catch'](function () { return false; });
     }
   };
