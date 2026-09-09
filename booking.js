@@ -619,7 +619,7 @@
            holds are all combinations — so the booking stays one session and
            the journal note says which pack it belongs to. Same arrangement the
            price list already runs on: four sessions, pay for three. */
-        if (state.mode === 'one' && state.basket.length === 1 && offersPack()) {
+        if (state.mode === 'one' && state.basket.length === 1 && offersPack() && !hidden('packs')) {
           var one = state.basket[0];
           var apart = 4 * priceOf(one), packPrice = 3 * priceOf(one);
           var offer = el('div', 'bk-pack' + (state.pack ? ' is-on' : ''));
