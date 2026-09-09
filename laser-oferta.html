@@ -273,14 +273,31 @@ body.zsheet-open{overflow:hidden;}
    what a pack is instead of leaving her to infer it from the cards. */
 .zgroup-packs{
   background:var(--cream-deep);
-  margin:0 calc(var(--gutter) * -1) 18px;
-  padding:0 var(--gutter) 14px;
+  margin:34px calc(var(--gutter) * -1) 22px;
+  padding:4px var(--gutter) 18px;
 }
-/* The tint already separates it; the hairline on top would just be noise. */
-.zgroup + .zgroup-packs{border-top:0;padding-top:0;}
+/* The tint alone was too faint to read as a boundary. Air above it, a ruled
+   edge and a heading in the display face do the work the colour could not. */
+.zgroup + .zgroup-packs{
+  border-top:1px solid var(--hairline);
+  border-bottom:1px solid var(--hairline);
+  padding-top:4px;
+}
+.zgroup-packs > .zgroup-h{
+  font-family:var(--display);
+  font-size:22px;line-height:1.2;letter-spacing:-0.01em;
+  padding:20px 0 8px;align-items:flex-start;
+}
+.zgroup-packs > .zgroup-h::after{margin-top:7px;}
 .zgroup-sub{
-  margin:-6px 0 14px;
+  margin:0 0 16px;
   font-size:13.5px;line-height:1.45;color:var(--charcoal);opacity:.75;
+}
+/* Three lines of Playfair is a wall on a 320px phone. Must sit after the
+   rules above: a media query carries no extra weight, only source order. */
+@media (max-width:374px){
+  .zgroup-packs > .zgroup-h{font-size:19px;padding:18px 0 6px;}
+  .zgroup-packs > .zgroup-h::after{margin-top:5px;}
 }
 </style>
 </head>
