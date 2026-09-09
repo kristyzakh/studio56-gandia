@@ -204,6 +204,24 @@
 .zsheet-img{display:block;width:100%;height:auto;border-radius:var(--radius);
   margin-top:20px;}
 #bsheet .zsheet-panel{max-height:94vh;}
+
+/* The panel is transformed to slide up, and a transformed ancestor turns
+   position:fixed into position:absolute against it -- so the widget's floating
+   basket stopped pinning to the screen and scrolled away up the zone list,
+   leaving zones below a "Seguir" that was supposed to be last. Sticky ignores
+   transforms and is the right tool inside a scroll container anyway. */
+#bsheet .bk-basket.is-float{
+  position:sticky;
+  bottom:0;
+  z-index:2;
+  margin:14px 0 0;
+  border:1px solid var(--hairline);border-radius:var(--radius-sm);
+  padding:12px 14px;
+  box-shadow:0 -6px 20px rgba(44,60,75,.16);
+}
+/* The pinned bar reserved room for itself on a page that scrolls under it.
+   Sticky takes its own room, so that reservation is dead space here. */
+body.has-bk #bsheet #booking-widget{padding-bottom:0;}
 #bsheet .zsheet-t{margin-bottom:18px;}
 body.zsheet-open{overflow:hidden;}
 
