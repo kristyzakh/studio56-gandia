@@ -267,6 +267,21 @@ body.zsheet-open{overflow:hidden;}
   font-size:12px;font-weight:700;color:var(--charcoal);opacity:.6;
   border:1px solid var(--hairline);border-radius:999px;padding:2px 8px;
 }
+/* A pack is a different kind of thing from a single zone, but stacked in the
+   same list of identical headings it just reads as more zones. A tinted band
+   is the plainest way to say "new shelf", and the line under the heading says
+   what a pack is instead of leaving her to infer it from the cards. */
+.zgroup-packs{
+  background:var(--cream-deep);
+  margin:0 calc(var(--gutter) * -1) 18px;
+  padding:0 var(--gutter) 14px;
+}
+/* The tint already separates it; the hairline on top would just be noise. */
+.zgroup + .zgroup-packs{border-top:0;padding-top:0;}
+.zgroup-sub{
+  margin:-6px 0 14px;
+  font-size:13.5px;line-height:1.45;color:var(--charcoal);opacity:.75;
+}
 </style>
 </head>
 <body>
@@ -326,8 +341,9 @@ body.zsheet-open{overflow:hidden;}
 
       </details>
 
-      <details class="zgroup" open>
+      <details class="zgroup zgroup-packs" open>
         <summary class="zgroup-h">Packs de zonas para mujer &mdash; precio por sesi&oacute;n</summary>
+        <p class="zgroup-sub">Varias zonas en la misma sesi&oacute;n y m&aacute;s baratas que por separado.</p>
       <ul class="zgrid">
         <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-mujer-1" data-altegio="13362656" data-name="Depilación Láser · Axilas + ingles completas" data-price-first="28" data-price="40" aria-pressed="false" data-course="240" data-mes="21" data-desc="Las dos zonas que casi nadie deja a medias, en la misma sesión. La zona XS de regalo la eliges tú: entrecejo, pómulos, patillas, mentón, escote, nuca, línea alba, manos o pies."><span class="zcard-media"><img src="images/laser-pack-axilas-ingles.jpg" alt="Pack de depilación láser: axilas e ingles completas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas<span class="note">por separado 43&nbsp;€ · +1 zona XS de regalo</span></span><span class="zcard-prices"><span class="amount"><s class="was">40 €</s><span class="now">28 €</span></span><span class="zcard-mo"><span class="zcard-mo-l">8 sesiones</span><span class="zcard-mo-v">&asymp;&nbsp;21&nbsp;&euro;/mes</span></span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
         <li class="zcard"><button type="button" class="zcard-i" aria-label="Qué incluye esta zona">i</button><button type="button" class="row-add" data-id="depilacion-laser-mujer-2" data-altegio="13362663" data-name="Depilación Láser · Axilas + ingles completas + medias piernas" data-price-first="42" data-price="60" aria-pressed="false" data-course="360" data-mes="32" data-desc="Axilas e ingles completas más de rodilla a tobillo. La zona XS de regalo la eliges tú: entrecejo, pómulos, patillas, mentón, escote, nuca, línea alba, manos o pies."><span class="zcard-media"><img src="images/laser-pack-axilas-ingles-medias.jpg" alt="Pack de depilación láser: axilas, ingles completas y medias piernas" width="514" height="900" loading="lazy" decoding="async"></span><span class="zcard-badge">&minus;30&nbsp;%</span><span class="row-label">Axilas + ingles completas + medias piernas<span class="note">por separado 71&nbsp;€ · +1 zona XS de regalo</span></span><span class="zcard-prices"><span class="amount"><s class="was">60 €</s><span class="now">42 €</span></span><span class="zcard-mo"><span class="zcard-mo-l">8 sesiones</span><span class="zcard-mo-v">&asymp;&nbsp;32&nbsp;&euro;/mes</span></span></span><span class="zcard-note">*Precio de la primera sesión</span><span class="row-tick" aria-hidden="true"></span><span class="zcard-cta"><span class="zc-off">Elegir</span><span class="zc-on">Elegida &#10003;</span></span></button></li>
