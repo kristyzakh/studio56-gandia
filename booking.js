@@ -536,7 +536,7 @@
       /* 1b · one zone, several, or a pack */
       if (!state.mode) {
         var routes = [['one', T.one, T.oneNote], ['many', T.many, T.manyNote]];
-        if (packs.length) routes.push(['packs', T.packs, T.packsNote]);
+        if (packs.length && !hidden('packs')) routes.push(['packs', T.packs, T.packsNote]);
         /* Men's packages are their own route rather than a block inside
            "Packs 3 + 1", because they are not 3 + 1: they are several zones at
            one session's price. Filing them under a heading promising four
