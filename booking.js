@@ -73,8 +73,8 @@
       if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return ' послуги';
       return ' послуг';
     },
-    name: 'Як вас звати',
-    namePh: 'Імʼя та прізвище',
+    first: 'Імʼя',
+    last: 'Прізвище',
     phone: 'Телефон',
     email: 'Пошта',
     optional: '(необовʼязково)',
@@ -138,8 +138,8 @@
       if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) return ' услуги';
       return ' услуг';
     },
-    name: 'Как вас зовут',
-    namePh: 'Имя и фамилия',
+    first: 'Имя',
+    last: 'Фамилия',
     phone: 'Телефон',
     email: 'Почта',
     optional: '(необязательно)',
@@ -198,8 +198,8 @@
     change: 'Editar',
     otherCategories: '← Otros tratamientos',
     optionsWord: function (n) { return n === 1 ? ' servicio' : ' servicios'; },
-    name: 'Cómo te llamas',
-    namePh: 'Nombre y apellidos',
+    first: 'Nombre',
+    last: 'Apellidos',
     phone: 'Teléfono',
     email: 'Email',
     optional: '(opcional)',
@@ -1083,8 +1083,10 @@
     var f = el('form', 'bk-form');
     f.noValidate = true;
     f.innerHTML =
-      '<div class="field"><label for="bk-name">' + T.name + '</label>' +
-      '<input type="text" id="bk-name" autocomplete="name" placeholder="' + T.namePh + '" required></div>' +
+      '<div class="field"><label for="bk-first">' + T.first + '</label>' +
+      '<input type="text" id="bk-first" autocomplete="given-name" required></div>' +
+      '<div class="field"><label for="bk-last">' + T.last + '</label>' +
+      '<input type="text" id="bk-last" autocomplete="family-name" required></div>' +
       '<div class="field"><label for="bk-phone">' + T.phone + '</label><div class="phone-row">' +
       '<select id="bk-prefix" class="phone-prefix" aria-label="' + T.phone + '">' +
       '<option value="+34" selected>ES +34</option><option value="+380">UA +380</option>' +
@@ -1163,8 +1165,8 @@
     });
 
     var submit = f.querySelector('#bk-submit');
-    var required = [f.querySelector('#bk-name'), f.querySelector('#bk-phone'),
-                    f.querySelector('#bk-consent')];
+    var required = [f.querySelector('#bk-first'), f.querySelector('#bk-last'),
+                    f.querySelector('#bk-phone'), f.querySelector('#bk-consent')];
     var sync = function () {
       submit.disabled = !required.every(function (x) {
         return x.type === 'checkbox' ? x.checked : x.value.trim() !== '';
@@ -1182,7 +1184,8 @@
 
       var payload = {
         phone: f.querySelector('#bk-prefix').value + f.querySelector('#bk-phone').value.replace(/\s+/g, ''),
-        fullname: f.querySelector('#bk-name').value.trim(),
+        fullname: (f.querySelector('#bk-first').value.trim() + ' ' +
+                   f.querySelector('#bk-last').value.trim()).trim(),
         /* Always send the key, even empty. book_record checks that email was
            passed, not that it holds anything: omit it and the API answers 422
            "The required parameter email was not passed", send "" and it moves
