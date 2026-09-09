@@ -64,7 +64,7 @@
     pickTime: 'Оберіть час',
     noTimes: 'На цей день вільних вікон немає. Спробуйте інший.',
     noDates: 'Найближчими днями вільних вікон немає — напишіть нам у WhatsApp, підберемо час.',
-    more: 'Показати ще два тижні',
+    more: 'Показати ще тиждень',
     change: 'Змінити',
     otherCategories: '← Інші процедури',
     optionsWord: function (n) {
@@ -129,7 +129,7 @@
     pickTime: 'Выберите время',
     noTimes: 'На этот день свободных окон нет. Попробуйте другой.',
     noDates: 'В ближайшие дни свободных окон нет — напишите нам в WhatsApp, подберём время.',
-    more: 'Показать ещё две недели',
+    more: 'Показать ещё неделю',
     change: 'Изменить',
     otherCategories: '← Другие процедуры',
     optionsWord: function (n) {
@@ -194,7 +194,7 @@
     pickTime: 'Elige la hora',
     noTimes: 'Ese día no queda hueco. Prueba con otro.',
     noDates: 'No quedan huecos en estos días — escríbenos por WhatsApp y buscamos hora.',
-    more: 'Ver dos semanas más',
+    more: 'Ver una semana más',
     change: 'Editar',
     otherCategories: '← Otros tratamientos',
     optionsWord: function (n) { return n === 1 ? ' servicio' : ' servicios'; },
@@ -861,7 +861,19 @@
         if (state.weeks < 8) {
           var more = el('button', 'bk-more', T.more);
           more.type = 'button';
-          more.addEventListener('click', function () { state.weeks += 2; loadDates(); });
+          more.addEventListener('click', function () {
+            /* The strip scrolls sideways, so a week added past its right edge
+               is a week nobody sees: the button loaded fourteen new days and
+               looked broken because scrollLeft stayed at 0. Land on the first
+               of them. */
+            var shown = strip.children.length;
+            state.weeks += 1;
+            loadDates().then(function () {
+              var s = mount.querySelector('.bk-days');
+              var first = s && s.children[shown];
+              if (first) s.scrollLeft = first.offsetLeft - s.children[0].offsetLeft;
+            });
+          });
           wrap.appendChild(more);
         }
       }
