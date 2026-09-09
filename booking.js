@@ -20,6 +20,15 @@
   var root = document.getElementById('booking-widget');
   if (!root) return;
 
+  /* A campaign can be narrower than the studio. data-hide-routes takes the
+     route names a page has no business offering -- an ad set aimed at women
+     should not open on a men's packages card -- and the widget does not build
+     them. Read here rather than inside paint(), which runs long after the
+     route list is built. Empty everywhere else: every other page offers all
+     four routes. */
+  var HIDDEN = (root.getAttribute('data-hide-routes') || '').split(/[,\s]+/);
+  var hidden = function (name) { return HIDDEN.indexOf(name) !== -1; };
+
   var LANG = document.documentElement.lang;
   var pick = function (t) { return t[LANG] || t.es; };
 
@@ -534,7 +543,7 @@
            sessions for three would be a lie about what is being bought. Single
            zones stay open to everybody, so nobody loses a booking by not
            coming through here. */
-        if (menCategory()) routes.push(['men', T.men, T.menNote]);
+        if (menCategory() && !hidden('men')) routes.push(['men', T.men, T.menNote]);
         routes.forEach(function (r) {
           var b = el('button', 'bk-opt');
           b.type = 'button';
