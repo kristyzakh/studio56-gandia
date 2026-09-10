@@ -710,6 +710,30 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
     btn.addEventListener('click', function () { open(btn, add); });
   });
 
+  /* A card is a photo with a price on it; the button under it is the decision.
+     Tapping the photo and finding the zone already in the basket is the kind of
+     surprise that makes somebody undo and stop trusting the page -- so the card
+     body opens what the zone actually includes, and only "Elegir" adds it.
+
+     Caught in the capture phase on the <li>, which runs before the listener
+     cart.js puts on the .row-add itself, so that listener never sees a click it
+     should not act on.
+
+     detail === 0 means the click came from the keyboard or from code, not from a
+     finger on the photo: the button's own accessible name says "a\u00f1adir", and the
+     sheet's "Elegir esta zona" works by clicking the card. Both must still add. */
+  [].slice.call(document.querySelectorAll('.zcard')).forEach(function (li) {
+    var add = li.querySelector('.row-add'), info = li.querySelector('.zcard-i');
+    if (!add || !info) return;
+    li.addEventListener('click', function (e) {
+      if (e.detail === 0) return;
+      if (e.target.closest('.zcard-i') || e.target.closest('.zcard-cta')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      open(info, add);
+    }, true);
+  });
+
   wire(sheet);
   go.addEventListener('click', function () { if (card) card.click(); close(); });
 })();
