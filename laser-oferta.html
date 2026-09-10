@@ -223,6 +223,7 @@
   /* three separate ideas -- today's price, the course, the small print -- so
      they get air instead of running together in one block */
   white-space:pre-line;}
+.zsheet-c b{color:var(--navy);}
 .zsheet-img{display:block;width:100%;height:auto;border-radius:var(--radius);
   margin-top:20px;}
 #bsheet .zsheet-panel{max-height:94vh;}
@@ -710,12 +711,17 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
        out loud in the same breath -- and the pack price is given per pack, so
        the total reads as "a typical course costs this", not as a quote. */
     var pack = course ? Math.round(Number(course) / 2) : 0;
-    elC.textContent = course
-      ? 'Reservas ahora solo tu primera sesi\u00f3n, con el \u221230\u00a0%: ' + first +
-        '\u00a0\u20ac en vez de ' + full + '\u00a0\u20ac.\n\n' +
+    /* Three bolds, no more. They mark the two things that make somebody book --
+       that this commits her to one session only, and what that session costs --
+       plus the one line that makes the pack worth having. The small print stays
+       flat, because bolding a caveat only makes the caveat louder. Every value
+       below is a number out of a data- attribute we wrote ourselves. */
+    elC.innerHTML = course
+      ? 'Reservas ahora <b>solo tu primera sesi\u00f3n</b>, con el \u221230\u00a0%: ' +
+        '<b>' + first + '\u00a0\u20ac en vez de ' + full + '\u00a0\u20ac</b>.\n\n' +
         'De media, un curso son unas 8 sesiones \u2014 hay quien necesita menos y ' +
         'quien necesita m\u00e1s. De la segunda en adelante se compran en ' +
-        'packs 3\u00a0+\u00a01: vienes cuatro veces y pagas tres, ' + pack +
+        'packs 3\u00a0+\u00a01: <b>vienes cuatro veces y pagas tres</b>, ' + pack +
         '\u00a0\u20ac el pack. Un curso medio son dos packs: ' + course +
         '\u00a0\u20ac en total, repartidos a lo largo de todo el tratamiento ' +
         '\u2014 unos ' + mes + '\u00a0\u20ac al mes de media.\n\n' +
