@@ -211,6 +211,14 @@
 }
 .zsheet-eyebrow{margin:0 0 6px;font-size:12px;font-weight:700;letter-spacing:.1em;
   text-transform:uppercase;color:var(--rose);}
+/* The sheet moves focus to its own title when it opens, so a screen reader
+   starts reading the dialog instead of staying behind it on the page. Safari
+   then draws its focus ring around the heading, which looks like a bug to
+   everybody who is not using a screen reader. The ring is dropped only for
+   that programmatic focus: :focus-visible still fires for anyone arriving by
+   keyboard, so tabbing keeps its outline. */
+.zsheet-t:focus{outline:none;}
+.zsheet-t:focus-visible{outline:2px solid var(--navy);outline-offset:3px;}
 .zsheet-t{font-family:var(--display);font-size:27px;font-weight:700;color:var(--navy);
   margin:0 40px 10px 0;line-height:1.15;}
 .zsheet-d{margin:0 0 18px;font-size:15.5px;line-height:1.55;color:var(--charcoal);}
