@@ -711,11 +711,10 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
        the total reads as "a typical course costs this", not as a quote. */
     var pack = course ? Math.round(Number(course) / 2) : 0;
     elC.textContent = course
-      ? 'Reservas ahora y pagas en el estudio \u2014 solo la primera sesi\u00f3n, ' +
-        'con el \u221230\u00a0%: ' + first + '\u00a0\u20ac en vez de ' + full +
-        '\u00a0\u20ac.\n\n' +
-        'De media, un curso son unas 8 sesiones \u2014 a unas personas les hacen ' +
-        'falta menos y a otras m\u00e1s. De la segunda en adelante se compran en ' +
+      ? 'Reservas ahora solo tu primera sesi\u00f3n, con el \u221230\u00a0%: ' + first +
+        '\u00a0\u20ac en vez de ' + full + '\u00a0\u20ac.\n\n' +
+        'De media, un curso son unas 8 sesiones \u2014 hay quien necesita menos y ' +
+        'quien necesita m\u00e1s. De la segunda en adelante se compran en ' +
         'packs 3\u00a0+\u00a01: vienes cuatro veces y pagas tres, ' + pack +
         '\u00a0\u20ac el pack. Un curso medio son dos: ' + course + '\u00a0\u20ac en unos ' +
         'once meses, unos ' + mes + '\u00a0\u20ac al mes de media.\n\n' +
