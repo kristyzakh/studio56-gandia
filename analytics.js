@@ -44,8 +44,14 @@
      and by then the referrer is our own domain -- the origin has to be caught
      on the first page, whichever page that is.
 
-     No identifier is stored, only the channel: "instagram / bio", "google",
-     "direct".
+     No identifier is stored, only the channel and, when an ad supplies it,
+     which creative was clicked: "instagram / bio", "google", "direct",
+     "ig / paid / Laser oferta / Stat_Cuerpo completo-48mes-v1".
+
+     utm_content carries the ad name. It is the only way the journal can show
+     which of several creatives produced a booking -- the pixel knows, but the
+     pixel only sees the visitors who accepted cookies, and this label is
+     written whether they did or not.
      ------------------------------------------------------------------ */
   var captureSource = function () {
     try {
@@ -59,7 +65,9 @@
       if (src) {
         var med = q.get('utm_medium');
         var camp = q.get('utm_campaign');
-        label = src + (med ? ' / ' + med : '') + (camp ? ' / ' + camp : '');
+        var cont = q.get('utm_content');
+        label = src + (med ? ' / ' + med : '') + (camp ? ' / ' + camp : '') +
+                (cont ? ' / ' + cont : '');
       } else if (document.referrer) {
         var host = new URL(document.referrer).hostname.replace(/^www\./, '');
         if (host && host !== window.location.hostname) label = host;
