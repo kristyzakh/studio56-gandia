@@ -70,6 +70,33 @@
   };
   captureSource();
 
+  /* The address the visitor landed on, kept whole for the tags below. */
+  var LANDED_ON = window.location.href;
+
+  /* ---------- tidy the address bar ----------
+     An ad link carries its campaign in the query string, which is right for us
+     and meaningless to the person reading it -- four parameters of internal
+     bookkeeping across the top of her screen the moment she arrives.
+
+     The parameters have already done their work by this point: captureSource()
+     above holds the first touch, and GA4 is handed the full URL explicitly. So
+     the utm_* are dropped from what she sees. Nothing is reloaded and no entry
+     is added to her history, so Back still leaves the site.
+
+     fbclid and gclid stay: Meta and Google match a click to an ad by those, not
+     by utm_*, and the Meta pixel only loads once consent is given -- long after
+     this runs. Removing them would break the attribution the ads are billed on.
+     Anything else the visitor arrived with is left alone too. */
+  try {
+    var url = new URL(window.location.href);
+    var dropped = 0;
+    ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'utm_id']
+      .forEach(function (k) { if (url.searchParams.has(k)) { url.searchParams['delete'](k); dropped++; } });
+    if (dropped && window.history && window.history.replaceState) {
+      window.history.replaceState(null, '', url.pathname + (url.search || '') + url.hash);
+    }
+  } catch (e) {}
+
 
   window.dataLayer = window.dataLayer || [];
   window.s56Events = window.s56Events || [];   // readable in the console while testing
@@ -110,7 +137,11 @@
     document.head.appendChild(tag);
 
     window.gtag('js', new Date());
-    window.gtag('config', GA4_ID, { anonymize_ip: true });
+    /* page_location is pinned to the URL we actually landed on. gtag.js reads
+       document.location when it processes this call, not when we queue it --
+       so without this, tidying the address bar below could beat the tag to it
+       and the campaign would arrive as (not set). */
+    window.gtag('config', GA4_ID, { anonymize_ip: true, page_location: LANDED_ON });
   }
 
   /* ---------- Meta Pixel ----------
