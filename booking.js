@@ -901,7 +901,11 @@
             busy(true);
             api.staffAt(t.datetime, state.services).then(function (list) {
               var free = (list || []).filter(function (s) { return s.bookable !== false; });
-              state.assigned = free[0] || null;
+              /* Altegio's "free" ignores the room; the slot carries who the
+                 room rule actually cleared, so that person comes first. */
+              var ok = (t.staff_ids || []).map(Number);
+              var pick = free.filter(function (s) { return ok.indexOf(Number(s.id)) !== -1; });
+              state.assigned = pick[0] || free[0] || null;
             })['catch'](function () { state.assigned = null; })
               .then(function () { busy(false); render(); });
           });
@@ -1307,11 +1311,31 @@
      same 10:00. The resource only bites in the admin journal, so the block
      has to be built here.
 
-     book_times cannot tell "off shift" apart from "booked" — both come back
-     simply as a time that is not offered. So the only sound rule is to offer a
-     slot when EVERY cabinet specialist offers it. That is deliberately
-     conservative: it also drops hours when just one of them is on, which is
-     why the real fix is disjoint schedules in Altegio and this is the stopgap.
+     book_times cannot tell "off shift" apart from "booked" -- both come back
+     simply as a time that is not offered. The first version of this block
+     therefore offered a slot only when EVERY cabinet specialist offered it.
+     Safe, and it threw away most of the week: a day where one of them works
+     mornings and the other afternoons produced almost nothing.
+
+     The rule now (Kristina, 2026-09-10): "a booking for one of them blocks
+     that time for the other -- and nothing else does". A specialist's slot is
+     offered unless another cabinet specialist is judged to be BOOKED then.
+
+     "Booked" is inferred from that other person's own free list: she is on
+     shift (the time lies between her first and last offered start), the time
+     sits on her own booking grid, and she does not offer it. The grid matters:
+     Anna's online step is 120 minutes, so her not offering 16:30 says nothing
+     about 16:30. Off-grid times are treated as unknown and allowed, because the
+     alternative is the old rule.
+
+     Same service, same length -- so if she offers a start, her calendar is
+     empty for exactly the interval the visitor would take. That is why testing
+     the start alone is enough.
+
+     Two blind spots, both closed only by disjoint schedules in Altegio:
+       - a booking at the very edge of her day (first or last slot) looks the
+         same as a shorter shift;
+       - a booking placed by hand at an off-grid time is invisible to her list.
 
      Elena is not in this list. She is a hairdresser and works somewhere else
      entirely, so her calendar has nothing to do with this room. */
@@ -1326,25 +1350,72 @@
       .filter(function (id) { return CABINET.indexOf(id) !== -1; });
   };
 
-  /* Keep the first list's entries — they carry the datetime and seance_length
-     the rest of the flow needs — and drop every time the others do not also
-     offer. */
-  var sharedTimes = function (lists) {
-    var rest = lists.slice(1).map(function (l) {
-      return (l || []).reduce(function (m, t) { m[t.time] = 1; return m; }, {});
-    });
-    return (lists[0] || []).filter(function (t) {
-      return rest.every(function (m) { return m[t.time]; });
-    });
+  var minutes = function (hhmm) {
+    var p = String(hhmm).split(':');
+    return Number(p[0]) * 60 + Number(p[1] || 0);
   };
 
-  var sharedDates = function (lists) {
-    var rest = lists.slice(1).map(function (d) {
-      return ((d && d.booking_dates) || []).reduce(function (m, x) { m[x] = 1; return m; }, {});
+  /* What one specialist's free list says about her day: first and last start,
+     her grid step (the smallest gap between two offered starts), and a lookup
+     of what she offers. */
+  var dayShape = function (list) {
+    var ts = (list || []).map(function (t) { return minutes(t.time); }).sort(function (a, b) { return a - b; });
+    if (!ts.length) return null;
+    var step = 0;
+    for (var i = 1; i < ts.length; i++) {
+      var gap = ts[i] - ts[i - 1];
+      if (gap > 0 && (!step || gap < step)) step = gap;
+    }
+    var offered = {};
+    (list || []).forEach(function (t) { offered[t.time] = true; });
+    return { first: ts[0], last: ts[ts.length - 1], step: step || 30, offered: offered };
+  };
+
+  /* Is this specialist judged booked at that time? */
+  var bookedAt = function (shape, time) {
+    if (!shape || shape.offered[time]) return false;
+    var m = minutes(time);
+    if (m <= shape.first || m >= shape.last) return false;      /* off shift, as far as we can tell */
+    if ((m - shape.first) % shape.step !== 0) return false;      /* off her grid: unknown, allow */
+    return true;
+  };
+
+  /* lists[i] is the free list of ids[i]. wantId narrows to one specialist;
+     otherwise every cabinet specialist's allowed slots are merged. Each entry
+     keeps the datetime and seance_length the rest of the flow needs, plus
+     staff_ids -- who may actually take it. */
+  var cabinetTimes = function (ids, lists, wantId) {
+    var shapes = lists.map(dayShape), out = {}, keys = [];
+    ids.forEach(function (id, i) {
+      if (wantId && Number(wantId) !== id) return;
+      (lists[i] || []).forEach(function (t) {
+        var blocked = ids.some(function (other, j) { return j !== i && bookedAt(shapes[j], t.time); });
+        if (blocked) return;
+        if (!out[t.time]) {
+          var copy = {};
+          for (var k in t) if (Object.prototype.hasOwnProperty.call(t, k)) copy[k] = t[k];
+          copy.staff_ids = [];
+          out[t.time] = copy; keys.push(t.time);
+        }
+        out[t.time].staff_ids.push(id);
+      });
     });
-    return { booking_dates: (((lists[0] || {}).booking_dates) || []).filter(function (x) {
-      return rest.every(function (m) { return m[x]; });
-    }) };
+    keys.sort(function (a, b) { return minutes(a) - minutes(b); });
+    return keys.map(function (k) { return out[k]; });
+  };
+
+  /* Days: hers when one specialist is named, otherwise any day either of them
+     has something. A day can still come up empty once the room rule is applied
+     to its times, and the widget already says so. */
+  var cabinetDates = function (ids, lists, wantId) {
+    var seen = {}, days = [];
+    ids.forEach(function (id, i) {
+      if (wantId && Number(wantId) !== id) return;
+      (((lists[i] || {}).booking_dates) || []).forEach(function (d) {
+        if (!seen[d]) { seen[d] = true; days.push(d); }
+      });
+    });
+    return { booking_dates: days.sort() };
   };
 
   /* ---------- loaders ---------- */
@@ -1371,9 +1442,10 @@
     to.setDate(to.getDate() + state.weeks * 7);
     var share = cabinetStaff();
     var forStaff = function (id) { return api.dates(from, ymd(to), state.services, id); };
+    var want = state.staff && state.staff.id;
     return (share.length < 2
-      ? forStaff(state.staff && state.staff.id)
-      : Promise.all(share.map(forStaff)).then(sharedDates))
+      ? forStaff(want)
+      : Promise.all(share.map(forStaff)).then(function (lists) { return cabinetDates(share, lists, want); }))
       .then(function (d) { cache.dates = (d && d.booking_dates) || []; })
       ['catch'](function () { cache.dates = []; })
       .then(function () { busy(false); render(); });
@@ -1383,9 +1455,10 @@
     busy(true);
     var share = cabinetStaff();
     var forStaff = function (id) { return api.times(id, state.date, state.services); };
+    var want = state.staff && state.staff.id;
     (share.length < 2
-      ? forStaff(state.staff && state.staff.id)
-      : Promise.all(share.map(forStaff)).then(sharedTimes))
+      ? forStaff(want)
+      : Promise.all(share.map(forStaff)).then(function (lists) { return cabinetTimes(share, lists, want); }))
       .then(function (t) { cache.times = t || []; })
       ['catch'](function () { cache.times = []; })
       .then(function () { busy(false); render(); });
