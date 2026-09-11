@@ -405,10 +405,15 @@
        what to scroll to, and every line needs an Altegio id to travel with.
        Pages without it keep the WhatsApp button exactly as it was.
 
-       The cart is emptied on a successful handoff on purpose. The selection
-       now lives in the booking form, and two places holding the same basket
-       is the problem this is here to solve — a stale bar floating over the
-       form would just re-open it. */
+       The cart is NOT emptied here. It used to be, to stop two places holding
+       the same basket -- but the sheet is a .zsheet at z-index 120 and the bar
+       sits at 75, so the bar is covered, not floating over the form. Clearing
+       on handoff cost more than it saved: anybody who opened the form and
+       backed out to add a zone found her selection gone from the page while
+       the widget still held it, so the page and the form disagreed.
+
+       booking.js empties it instead, at the one moment that means anything --
+       when Altegio has answered with a record id. */
     var book = document.getElementById('cart-book');
     var bookTarget = bar.getAttribute('data-book');
 
@@ -421,8 +426,7 @@
           if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
         };
         if (!window.s56Booking || ids.length !== items.length) { scroll(); return; }
-        window.s56Booking.open(ids).then(function (ok) {
-          if (ok) write([]);
+        window.s56Booking.open(ids).then(function () {
           scroll();
         });
       });

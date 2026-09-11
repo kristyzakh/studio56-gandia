@@ -1248,6 +1248,18 @@
         }
 
         track('booking_success', { record: rec.record_id });
+
+        /* The basket has done its job the moment Altegio hands back a record
+           id, and not one step earlier. cart.js used to empty it when the form
+           opened, which lost the selection of anyone who backed out to add a
+           zone. Wrapped because localStorage throws outright in some privacy
+           modes, and a booking that is already made must still reach its
+           confirmation page. */
+        try {
+          window.localStorage.removeItem('s56-cart');
+          document.dispatchEvent(new CustomEvent('s56cartchange'));
+        } catch (e) {}
+
         /* A booking deserves a page, not a swapped-out panel: the person gets
            something that looks like a confirmation and can be kept, and the
            studio gets a page view it can actually count. */
