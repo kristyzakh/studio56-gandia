@@ -39,6 +39,7 @@ clave sin configuración extra: **Administrar → Eventos → marcar como evento
 | `file_download` | Descarga de la lista de precios | No |
 | `directions_click` | Clic en «Cómo llegar» | Opcional |
 | `sticky_cta_click` | Clic en la barra fija «Pedir cita» | No |
+| `offer_banner_click` | Clic en el banner de la oferta láser (`label`: `home` o `laser`) | No |
 
 `generate_lead` lleva `method` (`whatsapp` o `formulario_reserva`) y, en el
 formulario, `value` en euros — así Ads optimiza por valor y no por volumen.

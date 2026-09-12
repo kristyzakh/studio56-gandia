@@ -2141,3 +2141,43 @@ body.has-bk #booking-widget{padding-bottom:calc(var(--bk-h,0px) + 16px);}
   border-right:2px solid var(--navy);border-bottom:2px solid var(--navy);
   transform:rotate(45deg);
 }
+
+/* ============ OFFER BANNER ============
+   One link into laser-oferta.html. It sits under the hero on the home page and
+   under the facts line on the laser page, and nowhere else: the other
+   treatment pages have nothing to do with the offer and a banner there would
+   only pull people away from what they came to read.
+
+   A rounded box, not a full-bleed band, so the same markup works in both
+   places -- inside .wrap on the laser page, inside .wrap.promo-home under the
+   hero. The number is the one display-face element in it; everything else is
+   body text, and rose stays a line down the left edge, never a fill.
+
+   The click is counted by data-track on the link (analytics.js) with a label
+   naming the placement, so the two spots can be read apart in GA4. */
+.promo{
+  display:flex;align-items:center;gap:16px;
+  padding:14px 18px 14px 16px;
+  background:var(--cream-deep);
+  border:1px solid var(--hairline);
+  border-left:3px solid var(--rose);
+  border-radius:var(--radius-sm);
+  color:var(--charcoal);
+  text-decoration:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.promo:hover{border-color:var(--navy);border-left-color:var(--rose);}
+.promo:focus-visible{outline:2px solid var(--navy);outline-offset:3px;}
+.promo-num{
+  flex:0 0 auto;
+  font-family:var(--display);font-weight:700;
+  font-size:30px;line-height:1;letter-spacing:-0.02em;
+  color:var(--navy);
+  white-space:nowrap;
+}
+.promo-text{display:block;min-width:0;font-size:14px;line-height:1.4;}
+.promo-text > strong{display:block;color:var(--navy);font-size:15px;margin-bottom:2px;}
+.promo-text > span{display:block;opacity:.8;}
+.promo-go{white-space:nowrap;font-weight:700;color:var(--navy);}
+.promo-home{padding-top:18px;}
+.page-head .promo{margin-top:20px;}
