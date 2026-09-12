@@ -1838,8 +1838,9 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 .bk-step{
   padding:0;margin:0;
   /* when booking.js scrolls the active step into view, clear the sticky
-     header (63px) plus a little air, so the label is not tucked under it */
-  scroll-margin-top:79px;
+     header plus a little air, so the label is not tucked under it. The
+     header is 63px, or more with the offer banner in it -- app.js measures. */
+  scroll-margin-top:calc(var(--header-h,63px) + 16px);
 }
 .bk-step-head{display:flex;align-items:baseline;gap:7px;}
 .bk-step-n,.bk-step-t{
@@ -2143,21 +2144,31 @@ body.has-bk #booking-widget{padding-bottom:calc(var(--bk-h,0px) + 16px);}
 }
 
 /* ============ OFFER BANNER ============
-   One link into laser-oferta.html. It sits under the hero on the home page and
-   under the facts line on the laser page, and nowhere else: the other
-   treatment pages have nothing to do with the offer and a banner there would
-   only pull people away from what they came to read.
+   One link into laser-oferta.html, on the home page and the laser page and
+   nowhere else: the other treatment pages have nothing to do with the offer
+   and a banner there would only pull people away from what they came to read.
 
-   A rounded box, not a full-bleed band, so the same markup works in both
-   places -- inside .wrap on the laser page, inside .wrap.promo-home under the
-   hero. The number is the one display-face element in it; everything else is
-   body text, and rose stays a line down the left edge, never a fill.
+   It sits inside <header>, under the brand bar, so it is pinned to the top
+   the whole way down like the offer page's own bar. Two actions only: open
+   the offer, or close it. A close is remembered for the session (app.js), so
+   the banner does not come back on the next page; it starts hidden and app.js
+   reveals it, so a closed banner never flashes on a page load.
 
-   The click is counted by data-track on the link (analytics.js) with a label
-   naming the placement, so the two spots can be read apart in GA4. */
+   The number is the one display-face element in it; everything else is body
+   text, and rose stays a line down the left edge, never a fill. Both actions
+   are counted by data-track (offer_banner_click / offer_banner_close) with a
+   label naming the page, so home and laser read apart in GA4. */
+.promo-bar{
+  position:relative;
+  max-width:var(--maxw);
+  margin:0 auto;
+  padding:8px var(--gutter) 10px;
+  border-top:1px solid var(--hairline);
+}
+.promo-bar[hidden]{display:none;}
 .promo{
-  display:flex;align-items:center;gap:16px;
-  padding:14px 18px 14px 16px;
+  display:flex;align-items:center;gap:12px;
+  padding:9px 40px 9px 12px;
   background:var(--cream-deep);
   border:1px solid var(--hairline);
   border-left:3px solid var(--rose);
@@ -2171,13 +2182,24 @@ body.has-bk #booking-widget{padding-bottom:calc(var(--bk-h,0px) + 16px);}
 .promo-num{
   flex:0 0 auto;
   font-family:var(--display);font-weight:700;
-  font-size:30px;line-height:1;letter-spacing:-0.02em;
+  font-size:24px;line-height:1;letter-spacing:-0.02em;
   color:var(--navy);
   white-space:nowrap;
 }
-.promo-text{display:block;min-width:0;font-size:14px;line-height:1.4;}
-.promo-text > strong{display:block;color:var(--navy);font-size:15px;margin-bottom:2px;}
+.promo-text{display:block;min-width:0;font-size:12.5px;line-height:1.35;}
+.promo-text > strong{display:block;color:var(--navy);font-size:13.5px;margin-bottom:1px;}
 .promo-text > span{display:block;opacity:.8;}
 .promo-go{white-space:nowrap;font-weight:700;color:var(--navy);}
-.promo-home{padding-top:18px;}
-.page-head .promo{margin-top:20px;}
+/* The close sits in the card's top-right corner with a 44px tap target that
+   extends past the visible cross. */
+.promo-close{
+  position:absolute;top:8px;right:var(--gutter);
+  width:44px;height:44px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:0;padding:0;
+  color:var(--navy);opacity:.6;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.promo-close:hover{opacity:1;}
+.promo-close:focus-visible{outline:2px solid var(--navy);outline-offset:-6px;opacity:1;}
+.promo-close svg{display:block;}

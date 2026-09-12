@@ -404,4 +404,33 @@
       cta.hidden = entries[0].isIntersecting;
     }, { threshold: 0.12 }).observe(booking);
   }
+
+  /* ---------- offer banner in the header ----------
+     Two actions only: open the offer, or close it. A close is kept for the
+     session so the banner does not return on the next page; a new visit
+     starts clean. The header's height goes to CSS, so anything that scrolls
+     under it (the booking steps) can clear it whether the banner is up or not. */
+  var PROMO_KEY = 's56-promo-closed';
+  var promo = document.querySelector('.promo-bar');
+  var header = document.querySelector('header');
+  var measureHeader = function () {
+    if (header) document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
+  };
+  if (promo) {
+    var closed = false;
+    try { closed = !!window.sessionStorage.getItem(PROMO_KEY); } catch (e) {}
+    if (closed) {
+      promo.remove();
+    } else {
+      promo.hidden = false;
+      var x = promo.querySelector('.promo-close');
+      if (x) x.addEventListener('click', function () {
+        try { window.sessionStorage.setItem(PROMO_KEY, '1'); } catch (e) {}
+        promo.remove();
+        measureHeader();
+      });
+    }
+  }
+  measureHeader();
+  window.addEventListener('resize', measureHeader);
 })();
