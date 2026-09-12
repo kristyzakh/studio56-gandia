@@ -597,7 +597,7 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
 <script src="app.js?v=d511c2f9c8" defer></script>
 
 <script src="cart.js?v=55227a9951" defer></script>
-<script src="analytics.js?v=80b95ce9d5" defer></script>
+<script src="analytics.js?v=d0952a8244" defer></script>
 <script src="booking.js?v=68a39f0752" defer></script>
 
 <script>
@@ -687,6 +687,10 @@ try { window.localStorage.removeItem('s56-course'); } catch (e) {}
     wire(bsheet);
     var openBooking = function (from) {
       show(bsheet, document.getElementById('bsheet-t'), from);
+      /* The first moment on this page that means somebody wants to book.
+         booking_open cannot say it: that fires when the form finishes loading
+         hidden in the background, a second after the page opens. */
+      if (window.s56Track) window.s56Track('booking_sheet_open', { from: from && from.id || '' });
     };
     ['go-cita', 'cart-book'].forEach(function (id) {
       var btn = document.getElementById(id);

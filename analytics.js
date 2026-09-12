@@ -23,6 +23,17 @@
      ------------------------------------------------------------------ */
   var GA4_ID = 'G-ZKPRWV7WQ8';     // Studio 56 GA4 property
   var META_PIXEL_ID = '802801639552754';   // Studio 56 Meta Pixel
+
+  /* Events that happen before the cookie question is answered, waiting for
+     the answer. The pixel cannot load without consent, so anything fired in
+     the first seconds of a visit -- booking_open among them, which fires the
+     moment the booking form finishes loading in the background -- used to hit
+     an fbq that did not exist yet and was dropped. Held in memory only, never
+     written anywhere: sent if she accepts, discarded if she declines, gone if
+     she leaves without answering. Capped so a long undecided visit cannot
+     grow it without limit. */
+  var metaQueue = [];
+  var META_QUEUE_MAX = 40;
   var CONSENT_KEY = 's56-consent';
   var SOURCE_KEY = 's56-source';
 
@@ -178,6 +189,12 @@
 
     window.fbq('init', META_PIXEL_ID);
     window.fbq('track', 'PageView');
+
+    /* Replay what happened before she said yes, in order. Only reachable
+       through consent: at page load this runs solely for a returning visitor
+       who already accepted, and then the queue is still empty. */
+    var waiting = metaQueue.splice(0, metaQueue.length);
+    waiting.forEach(function (ev) { toMeta(ev[0], ev[1]); });
   };
 
   if (readConsent() === 'granted') loadPixel();
@@ -196,6 +213,7 @@
     }
 
     if (value === 'granted') loadPixel();
+    else metaQueue.length = 0;   // declined: nothing held may ever leave
 
     var banner = document.getElementById('consent-banner');
     if (banner) banner.remove();
@@ -350,9 +368,44 @@
      events, which still work for reporting and audiences. */
   var META_EVENTS = {
     generate_lead: 'Lead',
-    booking_success: 'Schedule',
+    /* Schedule is sent from the confirmation page, not from the form. The
+       form fires booking_success and navigates away in the same tick, so
+       Meta's request raced the redirect -- and for anyone who had not yet
+       accepted cookies it had nothing to send through at all, which is most
+       people arriving from an ad. The confirmation page loads with the
+       record id in its URL, shows the cookie banner again if needed, and can
+       send it whenever consent arrives. booking_success still reaches GA4
+       and still goes to Meta as a plain custom event. */
+    booking_confirmed: 'Schedule',
     cart_updated: 'AddToCart',
     begin_checkout: 'InitiateCheckout'
+  };
+
+  var SENT_KEY = 's56-schedule-sent';
+
+  /* The one place anything reaches Meta. Only ever called with the pixel
+     loaded, which only happens after consent -- so the reload guard below
+     writes to storage strictly after she agreed, never before. */
+  var toMeta = function (name, payload) {
+    if (typeof window.fbq !== 'function') return;
+    var std = META_EVENTS[name];
+
+    if (name === 'booking_confirmed') {
+      var id = String(payload.record || '');
+      if (!id) return;
+      var sent = [];
+      try { sent = JSON.parse(window.localStorage.getItem(SENT_KEY)) || []; } catch (e) {}
+      if (sent.indexOf(id) !== -1) return;     // a reload of the same confirmation
+      sent.push(id);
+      try { window.localStorage.setItem(SENT_KEY, JSON.stringify(sent.slice(-20))); } catch (e) {}
+      /* eventID lets Meta pair this with a server-side copy later, if the
+         Conversions API is ever added, instead of counting it twice. */
+      window.fbq('track', std, payload, { eventID: 's56-rec-' + id });
+      return;
+    }
+
+    if (std) window.fbq('track', std, payload);
+    else window.fbq('trackCustom', name, payload);
   };
 
   /* Fan out to whichever tool is present. All are optional. */
@@ -365,12 +418,25 @@
     if (typeof window.gtag === 'function') window.gtag('event', name, payload);
     if (typeof window.plausible === 'function') window.plausible(name, { props: payload });
     if (typeof window.fbq === 'function') {
-      if (META_EVENTS[name]) window.fbq('track', META_EVENTS[name], payload);
-      else window.fbq('trackCustom', name, payload);
+      toMeta(name, payload);
+    } else if (META_PIXEL_ID && readConsent() === null && metaQueue.length < META_QUEUE_MAX) {
+      metaQueue.push([name, payload]);        // undecided: hold it, see metaQueue
     }
   };
 
   window.s56Track = send;
+
+  /* ---------- a confirmed booking ----------
+     Every language's confirmation page shares the filename, and booking.js
+     only sends people here once Altegio has returned a record id, which rides
+     in the URL. That id is what makes a reload harmless: toMeta sends each one
+     once. */
+  (function () {
+    if (!/cita-confirmada(\.html)?$/.test(window.location.pathname)) return;
+    var id = '';
+    try { id = new URL(LANDED_ON).searchParams.get('id') || ''; } catch (e) {}
+    if (id) send('booking_confirmed', { record: id });
+  })();
 
   /* ---------- declarative: anything carrying data-track ---------- */
   document.addEventListener('click', function (e) {
