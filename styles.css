@@ -2166,6 +2166,12 @@ body.has-bk #booking-widget{padding-bottom:calc(var(--bk-h,0px) + 16px);}
   border-top:1px solid var(--hairline);
 }
 .promo-bar[hidden]{display:none;}
+/* It arrives, it does not pop: a short settle from a few px up. */
+.promo-bar{opacity:0;transform:translateY(-6px);transition:opacity .28s ease,transform .28s ease;}
+.promo-bar.is-in{opacity:1;transform:none;}
+@media (prefers-reduced-motion:reduce){
+  .promo-bar{transition:none;transform:none;}
+}
 .promo{
   display:flex;align-items:center;gap:12px;
   padding:9px 40px 9px 12px;

@@ -200,6 +200,9 @@
     var banner = document.getElementById('consent-banner');
     if (banner) banner.remove();
     document.body.classList.remove('consent-open');
+    /* anything waiting for the cookie question to be answered (the offer
+       banner in app.js) listens for this rather than polling the DOM */
+    try { document.dispatchEvent(new CustomEvent('s56:consent')); } catch (e) {}
   };
 
   /* One string table per language. document.documentElement.lang is "uk" on the

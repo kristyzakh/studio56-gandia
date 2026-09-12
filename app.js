@@ -409,9 +409,17 @@
      Two actions only: open the offer, or close it. A close is kept for the
      session, per placement: closing it on the home page does not close it on
      the laser page, where the person has just shown they are interested in
-     exactly this. A new visit starts clean. The header's height goes to CSS,
-     so anything that scrolls under it (the booking steps) can clear it
-     whether the banner is up or not. */
+     exactly this. A new visit starts clean.
+
+     When it appears is gated twice. Cookies first: while the consent banner
+     is up the offer waits, so the person answers one question before being
+     asked another and the screen never carries three bars at once. Then, on
+     the home page only, the hero has to be scrolled past -- the hero is the
+     first impression and a banner over it is noise; someone who scrolls is
+     reading. The laser page has no such wait: arriving there is the interest.
+
+     The header's height goes to CSS, so anything that scrolls under it (the
+     booking steps) can clear it whether the banner is up or not. */
   var promo = document.querySelector('.promo-bar');
   var header = document.querySelector('header');
   var measureHeader = function () {
@@ -425,13 +433,37 @@
     if (closed) {
       promo.remove();
     } else {
-      promo.hidden = false;
       var x = promo.querySelector('.promo-close');
       if (x) x.addEventListener('click', function () {
         try { window.sessionStorage.setItem(PROMO_KEY, '1'); } catch (e) {}
         promo.remove();
         measureHeader();
       });
+
+      var hero = document.querySelector('.hero');
+      var consentAnswered = function () {
+        try { return !!window.localStorage.getItem('s56-consent'); } catch (e) { return true; }
+      };
+      var heroPassed = function () {
+        return !hero || hero.getBoundingClientRect().bottom <= (header ? header.offsetHeight : 0);
+      };
+      var reveal = function () {
+        if (promo.hidden === false) return;
+        if (!consentAnswered() || !heroPassed()) return;
+        promo.hidden = false;
+        requestAnimationFrame(function () {
+          promo.classList.add('is-in');
+          measureHeader();
+        });
+        window.removeEventListener('scroll', reveal);
+        document.removeEventListener('s56:consent', reveal);
+      };
+      window.addEventListener('scroll', reveal, { passive: true });
+      document.addEventListener('s56:consent', reveal);
+      /* analytics.js may not have run yet; look once it has, and again after
+         a moment for a page that opens already scrolled */
+      window.addEventListener('load', function () { setTimeout(reveal, 400); });
+      reveal();
     }
   }
   measureHeader();
