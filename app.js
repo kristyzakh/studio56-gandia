@@ -407,16 +407,19 @@
 
   /* ---------- offer banner in the header ----------
      Two actions only: open the offer, or close it. A close is kept for the
-     session so the banner does not return on the next page; a new visit
-     starts clean. The header's height goes to CSS, so anything that scrolls
-     under it (the booking steps) can clear it whether the banner is up or not. */
-  var PROMO_KEY = 's56-promo-closed';
+     session, per placement: closing it on the home page does not close it on
+     the laser page, where the person has just shown they are interested in
+     exactly this. A new visit starts clean. The header's height goes to CSS,
+     so anything that scrolls under it (the booking steps) can clear it
+     whether the banner is up or not. */
   var promo = document.querySelector('.promo-bar');
   var header = document.querySelector('header');
   var measureHeader = function () {
     if (header) document.documentElement.style.setProperty('--header-h', header.offsetHeight + 'px');
   };
   if (promo) {
+    var PROMO_KEY = 's56-promo-closed-' +
+      ((promo.querySelector('.promo-close') || {}).dataset || {}).trackLabel;
     var closed = false;
     try { closed = !!window.sessionStorage.getItem(PROMO_KEY); } catch (e) {}
     if (closed) {
