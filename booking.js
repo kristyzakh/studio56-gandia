@@ -39,16 +39,27 @@
      this is a lookup into the one the page already renders. Empty everywhere
      else, and empty leaves every price exactly as Altegio sent it. */
   var OFFER = {};
+  /* Altegio also holds each zone's -30 % first session as a service of its
+     own, priced at the offer ("Oferta -30% · primera sesión"). The page keeps
+     the regular id for display and the cart, and names the twin in
+     data-altegio-offer; availability and the booking itself go to the twin,
+     so the appointment and its confirmation carry the price actually charged. */
+  var OFFER_ID = {};
   if (root.hasAttribute('data-offer-prices')) {
     [].slice.call(document.querySelectorAll('.row-add[data-altegio][data-price-first]'))
       .forEach(function (b) {
         var id = b.getAttribute('data-altegio'), v = Number(b.getAttribute('data-price-first'));
         if (id && v > 0) OFFER[id] = v;
+        var twin = b.getAttribute('data-altegio-offer');
+        if (id && twin) OFFER_ID[id] = twin;
       });
   }
   var offerOf = function (sv) {
     var v = OFFER[String(sv && sv.id)];
     return v > 0 ? v : 0;
+  };
+  var bookId = function (sv) {
+    return Number(OFFER_ID[String(sv.id)]) || sv.id;
   };
 
   var LANG = document.documentElement.lang;
@@ -350,7 +361,7 @@
      as 80. So the whole chain carries the set, not a single id. */
   var ids = function (list) {
     return (list || []).map(function (sv) {
-      return '&service_ids[]=' + (sv.id != null ? sv.id : sv);
+      return '&service_ids[]=' + (sv.id != null ? bookId(sv) : sv);
     }).join('');
   };
 
@@ -445,10 +456,9 @@
      guide and the people at the till are Russian whatever language the site
      was read in.
 
-     It exists because the price differs. Altegio holds the normal price list
-     and always will: a -30 % first session is applied in the studio, not sold
-     as a service. So without this the appointment would arrive quoting a
-     number nobody is going to charge. No flag gates it -- if nothing chosen
+     It says what was saved: zones booked from the offer page go to their -30 %
+     twin services (see OFFER_ID), and this line keeps the regular price beside
+     it for the person at the till. No flag gates it -- if nothing chosen
      carries an offer price there is nothing to say, and it says nothing. */
   var offerNote = function () {
     var off = state.services.filter(function (sv) { return wasOf(sv); });
@@ -1227,7 +1237,7 @@
         comment: source() + offerNote() + packNote(),
         appointments: [{
           id: 1,
-          services: state.services.map(function (sv) { return sv.id; }),
+          services: state.services.map(bookId),
           staff_id: (state.assigned && state.assigned.id) || state.staff.id || 0,
           datetime: state.time.datetime
         }]
