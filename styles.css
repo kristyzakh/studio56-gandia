@@ -2143,6 +2143,36 @@ body.has-bk #booking-widget{padding-bottom:calc(var(--bk-h,0px) + 16px);}
   transform:rotate(45deg);
 }
 
+/* ============ WHO THE PAGE IS FOR ============
+   Laser is the one treatment with two price lists, on two pages. A man who
+   lands on the women's page -- from the home card, or straight from Google --
+   needs to see in the first screen that the other one exists, and get there
+   in one tap. Asking "man or woman?" before the content would charge every
+   visitor a click to spare a minority one; this charges nobody and also
+   reaches the people who never pass through the home page at all.
+
+   Built like the language switcher, which is the same idea and already on
+   every page: two options, the current one filled in. */
+.audience{
+  display:inline-flex;gap:2px;
+  margin:0 0 20px;
+  padding:3px;
+  background:var(--cream-deep);
+  border-radius:999px;
+}
+.audience a{
+  font-size:13px;font-weight:700;
+  text-decoration:none;
+  color:var(--navy);
+  padding:7px 15px;
+  border-radius:999px;
+  opacity:.55;
+  white-space:nowrap;
+}
+.audience a:hover{opacity:.85;}
+.audience a[aria-current="page"]{background:var(--cream);opacity:1;}
+.audience a:focus-visible{outline:2px solid var(--navy);outline-offset:2px;opacity:1;}
+
 /* ============ OFFER BANNER ============
    One link into laser-oferta.html, on the home page and the laser page and
    nowhere else: the other treatment pages have nothing to do with the offer
