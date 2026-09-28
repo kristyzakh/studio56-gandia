@@ -125,6 +125,7 @@
     packSave: 'Заощадите ', packTake: 'Взяти пакет', packDrop: 'Один сеанс',
     packOn: 'Пакет 3 + 1 · 4 сеанси',
     men: 'Для чоловіків', menNote: 'Пакети зон, ціна за сеанс',
+    zonePacks: 'Готові пакети', zonePacksNote: 'Кілька зон, ціна за сеанс',
     free: 'Безкоштовно',
     packApart: 'окремо ',
     days: ['Нд', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
@@ -190,6 +191,7 @@
     packSave: 'Сэкономите ', packTake: 'Взять пакет', packDrop: 'Один сеанс',
     packOn: 'Пакет 3 + 1 · 4 сеанса',
     men: 'Для мужчин', menNote: 'Пакеты зон, цена за сеанс',
+    zonePacks: 'Готовые пакеты', zonePacksNote: 'Несколько зон, цена за сеанс',
     free: 'Бесплатно',
     packApart: 'отдельно ',
     days: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],
@@ -245,6 +247,7 @@
     packSave: 'Ahorras ', packTake: 'Coger el pack', packDrop: 'Una sesión',
     packOn: 'Pack 3 + 1 · 4 sesiones',
     men: 'Para hombres', menNote: 'Paquetes de zonas, precio por sesión',
+    zonePacks: 'Packs de zonas', zonePacksNote: 'Varias zonas, precio por sesión',
     free: 'Gratis',
     packApart: 'por separado ',
     days: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
@@ -415,6 +418,7 @@
      there is no route back to the full list, because on this page there is no
      full list. */
   var locked = false;
+  var modeLocked = false;   /* the route was taken for them: only one was offered */
 
   var state = { category: null, mode: null, pack: false, basket: [], services: [], staff: null, assigned: null, date: null, time: null, weeks: 2 };
   var cache = { services: [], categories: [], staff: [], dates: [], times: [] };
@@ -587,8 +591,24 @@
 
       /* 1b · one zone, several, or a pack */
       if (!state.mode) {
-        var routes = [['one', T.one, T.oneNote], ['many', T.many, T.manyNote]];
-        if (packs.length && !hidden('packs')) routes.push(['packs', T.packs, T.packsNote]);
+        /* Every route is opt-out. A men's page must not offer "one zone" or
+           "several zones": those list the women's price under the same name --
+           Pecho 28 against the 35 printed a screen above -- and the visitor
+           would be reading two prices for one thing on one page. Hiding
+           everything is a markup mistake, and an empty step is a dead end, so
+           that falls back to the full list. */
+        var routes = [];
+        if (!hidden('one')) routes.push(['one', T.one, T.oneNote]);
+        if (!hidden('many')) routes.push(['many', T.many, T.manyNote]);
+        /* Men's packages are several zones at one session's price, not four
+           sessions for three, so inside the men's category this route is not
+           "Packs 3 + 1". Nor is it "For men": every route on that page is for
+           men, and the label would say nothing. */
+        var inMen = !!(state.category && MEN.test(String(state.category.title || '')));
+        if (packs.length && !hidden('packs')) {
+          routes.push(['packs', inMen ? T.zonePacks : T.packs,
+                                inMen ? T.zonePacksNote : T.packsNote]);
+        }
         /* Men's packages are their own route rather than a block inside
            "Packs 3 + 1", because they are not 3 + 1: they are several zones at
            one session's price. Filing them under a heading promising four
@@ -596,6 +616,18 @@
            zones stay open to everybody, so nobody loses a booking by not
            coming through here. */
         if (menCategory() && !hidden('men')) routes.push(['men', T.men, T.menNote]);
+        if (!routes.length) routes = [['one', T.one, T.oneNote], ['many', T.many, T.manyNote]];
+
+        /* One route left is not a choice: picking from a list of one is a step
+           that costs a tap and gives nothing. It is taken for them, and the
+           next step drops its "change" button -- there is nothing to change
+           back to. */
+        if (routes.length === 1) {
+          state.mode = routes[0][0]; state.basket = []; modeLocked = true;
+          return paint();
+        }
+        modeLocked = false;
+
         routes.forEach(function (r) {
           var b = el('button', 'bk-opt');
           b.type = 'button';
@@ -612,7 +644,7 @@
         return;
       }
 
-      var backToMode = function () { state.mode = null; state.basket = []; render(); };
+      var backToMode = modeLocked ? null : function () { state.mode = null; state.basket = []; render(); };
 
       /* All four routes go through the same basket: whatever was tapped is
          shown with its price, and nothing moves the visitor forward until they
@@ -624,11 +656,19 @@
          one men's package at a time, so picking another replaces the first.
          Only "several zones" accumulates. */
       var men = menCategory();
-      var menServices = cache.services.filter(function (sv) { return men && sv.category_id === men.id; });
+      /* The men's category holds the packages AND the men's zones, at men's
+         prices. This route -- reached from the women's page -- has always
+         offered the packages, so it still does; the zones are the men's own
+         page, where "one zone / several" can price them properly. */
+      var menServices = cache.services.filter(function (sv) {
+        return men && sv.category_id === men.id && isPack(sv);
+      });
       var items = state.mode === 'packs' ? packs
                 : state.mode === 'men'   ? menServices
                 : zones;
-      var modeLabel = { one: T.one, many: T.many, packs: T.packs, men: T.men }[state.mode];
+      var inMenCat = !!(state.category && MEN.test(String(state.category.title || '')));
+      var modeLabel = { one: T.one, many: T.many,
+                        packs: inMenCat ? T.zonePacks : T.packs, men: T.men }[state.mode];
       var single = state.mode !== 'many';
 
       var basketBox = el('div', 'bk-basket');
