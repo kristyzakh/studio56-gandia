@@ -1058,7 +1058,13 @@
      -> "Depilación Láser Hombre" -- so the relationship is read from the
      title rather than an id, and a rename quietly ends it instead of
      pointing somewhere wrong. Returns the parent, or null when this is an
-     ordinary category. */
+     ordinary category.
+
+     Laser is now two equal categories, "Depilación láser · Mujer" and
+     "Depilación láser · Hombre": neither title starts with the other, so this
+     returns null and both are listed side by side -- which is the point of
+     the split. The nesting only still applies to a title that really is
+     "<parent> Hombre". */
   var menParent = function (c) {
     var t = String(c.title || '').toLowerCase();
     if (!MEN.test(t) || !countIn(c.id)) return null;
@@ -1070,12 +1076,31 @@
     return hit;
   };
 
-  /* The men's category as seen from its parent -- the "for men" route. */
+  /* The men's category as seen from its parent -- the "for men" route.
+
+     With laser split into "· Mujer" and "· Hombre" the two are siblings, not
+     parent and child, so menParent no longer links them. The route inside the
+     women's laser -- and on the offer page, which opens there and books the
+     men's packages at −30 % through it -- is still wanted, so a men's category
+     whose title matches this one once "Mujer"/"Hombre" is taken off counts as
+     its men's side too. Only this route reads it: the category list keeps the
+     two apart. */
+  var WOMEN = /mujer|жіноч|женск/i;
+  var bare = function (s) {
+    return String(s || '').toLowerCase()
+      .replace(new RegExp(MEN.source + '|' + WOMEN.source, 'gi'), ' ')
+      .replace(/[·\-–—|]/g, ' ').replace(/\s+/g, ' ').trim();
+  };
   var menCategory = function () {
     if (!state.category) return null;
+    var own = String(state.category.title || '');
     var hit = null;
     cache.categories.forEach(function (c) {
-      if (!hit && menParent(c) === state.category) hit = c;
+      if (hit) return;
+      if (menParent(c) === state.category) { hit = c; return; }
+      var t = String(c.title || '');
+      if (c !== state.category && MEN.test(t) && !MEN.test(own) && countIn(c.id) &&
+          bare(t) === bare(own)) hit = c;
     });
     return hit;
   };
@@ -1557,12 +1582,23 @@
     /* A treatment page has already answered the first question. Opening on
        "choose a category" there would make somebody who is reading about laser
        tell us it is laser. Matched on the category title, and if the title
-       ever changes in Altegio the widget simply opens on the full list. */
+       ever changes in Altegio the widget simply opens on the full list.
+
+       Matched word by word rather than as one phrase: laser is split into
+       "Depilación láser · Mujer" and "Depilación láser · Hombre", and the
+       men's pages ask for "depilación láser hombre", which is every word of the
+       new title but not a substring of it. A page that does not ask for men
+       never lands on the men's category -- both laser titles now contain
+       "depilación láser", and the women's page must open on the women's. */
     var want = (root.getAttribute('data-preselect') || '').toLowerCase();
     if (want) {
+      var words = want.split(/\s+/).filter(Boolean);
+      var wantsMen = MEN.test(want);
       var hit = null;
       cache.categories.forEach(function (c) {
-        if (!hit && String(c.title || '').toLowerCase().indexOf(want) !== -1) hit = c;
+        var t = String(c.title || '').toLowerCase();
+        if (hit || (!wantsMen && MEN.test(t))) return;
+        if (words.every(function (w) { return t.indexOf(w) !== -1; })) hit = c;
       });
       if (hit) { state.category = hit; locked = true; }
     }
