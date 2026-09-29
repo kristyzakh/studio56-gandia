@@ -1315,13 +1315,12 @@
            actually sees. Absent (storage blocked, or nothing recorded) it is
            simply left out rather than sent empty or guessed at. */
         comment: source() + offerNote() + packNote(),
-        /* The visit reminder, 24 hours before -- the same as every booking the
-           studio enters by hand. Leave it out and Altegio stores 0, which means
-           "never remind": that is how the first site bookings went unreminded
-           (found 27 Sep 2026). The name says SMS, but it is the reminder slot
-           itself; Altegio sends it through whatever channel the reminder
-           notification is set to (WhatsApp). Email stays off on purpose. */
-        notify_by_sms: 24,
+        /* No notify_by_sms: it is the per-booking SMS reminder only, and SMS is
+           not connected. The WhatsApp reminder comes from Altegio's global
+           "Напоминание о визите" rule (24 h before) for every booking. Sending
+           24 here only ticked a dead "SMS" box in the visit window and confused
+           the team (removed 29 Sep 2026). Email reminder stays off on purpose;
+           the email booking confirmation is a separate notification. */
         notify_by_email: 0,
         appointments: [{
           id: 1,
