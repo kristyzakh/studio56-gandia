@@ -1260,12 +1260,19 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
   line-height:1.45;
   opacity:.75;
 }
+/* An "i", not an empty ring: a bare circle in front of a line of text reads as
+   a checkbox waiting to be ticked, and this is a note, not a control. */
 .pick-hint::before{
-  content:"";
+  content:"i";
   flex:0 0 auto;
-  width:16px;height:16px;
+  width:17px;height:17px;
   border:1.5px solid var(--rose);
   border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;
+  font-weight:700;
+  line-height:1;
+  color:var(--rose);
 }
 .optional{font-weight:400;text-transform:none;letter-spacing:0;opacity:.6;}
 
@@ -1498,6 +1505,55 @@ body.consent-open .sticky-cta{bottom:var(--consent-h,0px);}
 .price-section .rows{margin-bottom:18px;}
 .price-section .btn{margin-top:20px;}
 .price-lead{font-size:15px;margin:20px 0 10px;}
+
+/* ---- price groups: each list folds away behind its own heading ----
+   The price page is ninety rows long. Read end to end it is a wall; what a
+   visitor actually wants is one number. So every list sits behind its own
+   heading and opens on a tap -- the same <details> the treatment pages use,
+   so the gesture is already learned, with the heading carrying the plus.
+
+   Closed is the default: the page then reads as a short menu of what the
+   studio sells, and nothing is hidden from search -- the rows stay in the
+   document either way. */
+.price-group{border-bottom:1px solid var(--hairline);}
+.price-group:first-of-type{border-top:1px solid var(--hairline);}
+.price-group > summary{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  padding:17px 0;
+  cursor:pointer;
+  font-size:15.5px;
+  font-weight:700;
+  color:var(--navy);
+  list-style:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.price-group > summary::-webkit-details-marker{display:none;}
+.price-group > summary:focus-visible{outline:2px solid var(--rose);outline-offset:3px;}
+.price-group .plus{
+  flex:0 0 auto;
+  width:26px;height:26px;
+  border:1px solid var(--hairline);
+  border-radius:50%;
+  position:relative;
+  transition:border-color .18s ease;
+}
+.price-group > summary:hover .plus{border-color:var(--navy);}
+.price-group .plus::before,.price-group .plus::after{
+  content:"";
+  position:absolute;
+  top:50%;left:50%;
+  background:var(--navy);
+  transform:translate(-50%,-50%);
+}
+.price-group .plus::before{width:10px;height:1.4px;}
+.price-group .plus::after{width:1.4px;height:10px;transition:opacity .18s ease;}
+.price-group[open] .plus::after{opacity:0;}
+.price-group .rows{padding-bottom:18px;}
+/* the section's own button sits under the last group, not against it */
+.price-section .btn-block{margin-top:22px;}
 
 .pdf-download{
   padding:34px 0 48px;
