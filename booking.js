@@ -483,6 +483,17 @@
     return String(s || '').replace(/\bl([áa])ser\b/g, function (m, a) { return 'L' + a + 'ser'; });
   };
 
+  /* What the visitor reads. On the men's own page every service is a man's,
+     so "(Hombre)" after each of twenty zones is noise -- "Pecho", not "Pecho
+     (Hombre)". Only the display drops it: the journal notes (offerNote,
+     packNote) and the analytics events keep the full Altegio title, where it
+     is what tells a man's Pecho from a woman's. */
+  var shown = function (s) {
+    var t = pretty(s);
+    var inMen = !!(state.category && MEN.test(String(state.category.title || '')));
+    return inMen ? t.replace(/\s*\(hombres?\)/gi, '') : t;
+  };
+
   var cascade = function (node, i) {
     node.style.animationDelay = (Math.min(i, 8) * 55) + 'ms';
     return node;
@@ -687,14 +698,14 @@
         basketBox.appendChild(lines);
         state.basket.forEach(function (sv) {
           var line = el('div', 'bk-line');
-          var name = el('span', 'bk-line-t', pretty(sv.title));
+          var name = el('span', 'bk-line-t', shown(sv.title));
           /* A 3 + 1 pack is priced for four sessions, so "per session" would
              be wrong on it. The men's packages really are per session. */
           var cost = el('span', 'bk-line-p', struck(sv) + priceOf(sv) + ' € ' +
                         (state.mode === 'packs' ? '' : '<small>' + T.perSession + '</small>'));
           var x = el('button', 'bk-line-x', '×');
           x.type = 'button';
-          x.setAttribute('aria-label', T.removeIt + ' ' + pretty(sv.title));
+          x.setAttribute('aria-label', T.removeIt + ' ' + shown(sv.title));
           x.addEventListener('click', function () {
             state.basket.splice(state.basket.indexOf(sv), 1);
             state.pack = false;
@@ -820,7 +831,7 @@
       refresh();
       return;
     }
-    mount.appendChild(step(n, T.steps[0], chosenTitle(), function () {
+    mount.appendChild(step(n, T.steps[0], chosenShown(), function () {
       /* back into the same list, ticks intact — going all the way out to the
          categories threw away a choice the visitor had just made */
       state.services = [];
@@ -988,7 +999,7 @@
   var optionFor = function (sv, quiet) {
     var b = el('button', 'bk-opt');
     b.type = 'button';
-    b.innerHTML = '<span class="bk-opt-t">' + pretty(sv.title) + '</span>' +
+    b.innerHTML = '<span class="bk-opt-t">' + shown(sv.title) + '</span>' +
                   '<span class="bk-opt-m">' + struck(sv) +
                   money(offerOf(sv) || sv.price_min, offerOf(sv) ? 0 : sv.price_max) + '</span>';
     if (!quiet) b.addEventListener('click', function () {
@@ -1131,6 +1142,10 @@
      summary, the analytics event, the confirmation page and the journal. */
   var chosenTitle = function () {
     return state.services.map(function (sv) { return pretty(sv.title); }).join(' + ');
+  };
+  /* the same line as the visitor should read it -- see shown() */
+  var chosenShown = function () {
+    return state.services.map(function (sv) { return shown(sv.title); }).join(' + ');
   };
 
   var render = function () {
@@ -1323,7 +1338,7 @@
            studio gets a page view it can actually count. */
         var q = new URLSearchParams({
           when: human(state.date) + ', ' + state.time.time,
-          what: chosenTitle(),
+          what: chosenShown(),
           who: (state.assigned && state.assigned.name) || state.staff.name,
           id: rec.record_id || ''
         });
@@ -1356,7 +1371,7 @@
       '<p class="bk-done-l">' + T.okLead + '</p>' +
       '<dl class="bk-done-d">' +
       '<dt>' + T.okWhen + '</dt><dd>' + human(state.date) + ', ' + state.time.time + '</dd>' +
-      '<dt>' + T.okWhat + '</dt><dd>' + chosenTitle() + '</dd>' +
+      '<dt>' + T.okWhat + '</dt><dd>' + chosenShown() + '</dd>' +
       '<dt>' + T.okWho + '</dt><dd>' + state.staff.name + '</dd>' +
       (rec.record_id ? '<dt>' + T.okNumber + '</dt><dd>' + rec.record_id + '</dd>' : '') +
       '</dl>';
