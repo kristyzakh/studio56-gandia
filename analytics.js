@@ -64,10 +64,16 @@
      pixel only sees the visitors who accepted cookies, and this label is
      written whether they did or not.
      ------------------------------------------------------------------ */
+  /* Also kept in memory, on window.s56Source, for the length of the page.
+     Telegram's in-app browser let three visitors from the paid post (2-3 Nov)
+     book on the offer page with no source at all: whatever it does to storage,
+     the label never reached the booking. Somebody who books on the page they
+     landed on -- which is what an ad link is for -- now keeps the label even
+     when storage throws or forgets. */
   var captureSource = function () {
-    try {
-      if (window.localStorage.getItem(SOURCE_KEY)) return;   // first touch already held
-    } catch (e) { return; }                                  // storage blocked: skip quietly
+    var held = null;
+    try { held = window.localStorage.getItem(SOURCE_KEY); } catch (e) {}
+    if (held) { window.s56Source = held; return; }            // first touch already held
 
     var label = '';
     try {
@@ -85,7 +91,8 @@
       }
     } catch (e) {}
 
-    try { window.localStorage.setItem(SOURCE_KEY, label || 'direct'); } catch (e) {}
+    window.s56Source = label || 'direct';
+    try { window.localStorage.setItem(SOURCE_KEY, window.s56Source); } catch (e) {}
   };
   captureSource();
 

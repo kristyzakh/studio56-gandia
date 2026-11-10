@@ -442,6 +442,7 @@
   var source = function () {
     var v = '';
     try { v = window.localStorage.getItem('s56-source') || ''; } catch (e) {}
+    v = v || window.s56Source || '';   // the in-memory copy, when storage let it down
     return v ? 'Сайт · ' + v : 'Сайт';
   };
 
