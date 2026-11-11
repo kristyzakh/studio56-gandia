@@ -489,8 +489,17 @@
      (Hombre)". Only the display drops it: the journal notes (offerNote,
      packNote) and the analytics events keep the full Altegio title, where it
      is what tells a man's Pecho from a woman's. */
+  /* Altegio names say what the service is -- "Depilación láser · Axilas",
+     "Cera/Sugaring · Axilas" -- because WhatsApp confirmations and the
+     studio journal show the bare name with no category around it (Kristina,
+     2026-11-11: clients kept asking "is this laser?"). Inside the form the
+     category is already on screen, so the lead word is dropped for display
+     and for matching zones to combos; journal notes keep the full name. */
+  var KIND = /^\s*(depilaci[oó]n\s+l[aá]ser|cera\s*\/\s*sugaring|лазер)\s*·\s*/i;
+  var core = function (s) { return String(s || '').replace(KIND, ''); };
+
   var shown = function (s) {
-    var t = pretty(s);
+    var t = pretty(core(s));
     var inMen = !!(state.category && MEN.test(String(state.category.title || '')));
     return inMen ? t.replace(/\s*\(hombres?\)/gi, '') : t;
   };
@@ -1143,7 +1152,7 @@
      the title gives us: "Axilas + Ingles Completas" against the two zones
      named Axilas and Ingles Completas. */
   var norm = function (t) {
-    return String(t).toLowerCase().replace(/\|.*$/, '')
+    return core(t).toLowerCase().replace(/\|.*$/, '')
       .replace(/[áàä]/g,'a').replace(/[éèë]/g,'e').replace(/[íìï]/g,'i')
       .replace(/[óòö]/g,'o').replace(/[úùü]/g,'u').replace(/[^a-z0-9 ]/g,' ')
       .replace(/\s+/g,' ').trim();
